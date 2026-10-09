@@ -459,7 +459,7 @@
 | [S1] CAA | main หรือ Findings |
 | [T2] Gemma Scope | ชื่อเต็ม + ID + สถานะ Gemma Scope 2 (ธ.ค. 2025) |
 | [C10][C11][C12] (งาน 2026) | ชื่อโมเดลที่ใช้จริงจากฉบับเต็ม (abstract ไม่ระบุ) — สำคัญต่อการเทียบกับ SLMs ของเรา |
-| CounterFact dataset | URL ดาวน์โหลดปัจจุบัน (repo ROME หรือ mirror บน HF) + license |
+| CounterFact dataset | ✅ แก้แล้ว (ต.ค. 2026): ใช้ mirror `wangzn2001/counteract` (counterfact.json ดิบจาก ROME) — สำรอง: `azhx/counterfact`, `NeelNanda/counterfact-tracing` · เหลือเช็คแค่ license ตอนเขียน paper |
 | TransformerLens × Gemma 3 | สถานะ issue #898 — เช็คว่ารุ่นที่ติดตั้งรองรับ gemma-3 แล้วหรือยัง ก่อนตัดสินใจใช้ |
 | [T1c] Gemma 4 | ยืนยัน arXiv ID (2607.02770) + ชื่อเต็ม report + เช็คว่า E2B เป็น dense หรือ edge-architecture แบบไหนจริง (มีผลต่อ future work ที่เขียน) |
 | [T9] pyvene | citation ที่แน่นอน (ICLR 2025 vs เวอร์ชัน NAACL/Findings 2024) + รายชื่อผู้แต่งเต็ม |

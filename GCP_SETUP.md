@@ -142,6 +142,20 @@ pip install transformer_lens circuitsvis plotly pandas lm-eval datasets accelera
 python -c "import torch; print(torch.cuda.is_available(), torch.cuda.get_device_name(0))"
 ```
 
+4. **Environment**
+   ```bash
+   source .venv/bin/activate   # ทุกหน้าต่าง shell/tmux ใหม่ต้องเปิดใหม่ทุกครั้ง
+   pip install -r requirements.txt
+   python -c "import torch; print(torch.cuda.is_available(), torch.cuda.get_device_name(0))"
+   ```
+5. **เพิ่ม swap 24GB (สำคัญ — RAM ของ g2-standard-4 มีแค่ 16GB):** การโหลดโมเดล fp32 (เช่น `--dtype float32` ของ E0) ต้องถือ weight สองชุดพร้อมกันช่วงแปลง (~21GB สำหรับ 2B) → ถ้าไม่มี swap จะโดน OOM "Killed" แบบไม่มี traceback
+   ```bash
+   sudo fallocate -l 24G /swapfile && sudo chmod 600 /swapfile
+   sudo mkswap /swapfile && sudo swapon /swapfile
+   echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab   # คงที่หลัง restart
+   free -h   # ต้องเห็น Swap 24Gi
+   ```
+
 จากนั้น clone repo ของโปรเจกต์แล้วรัน **E0 parity check ทันที** ก่อนทำอย่างอื่น (gate แรกของทั้งโปรเจกต์ — เกณฑ์ KL < 1e-3 และ argmax ตรง ≥ 99% ตามแผนหลัก)
 
 ---
@@ -188,6 +202,13 @@ git clone git@github.com:<user>/mech-interp-hallucination.git   # URL แบบ 
 - ห้าม push: `HF_TOKEN` ทุกรูปแบบ, `hf_cache/` (โมเดล 5–18GB), ผล raw ใหญ่ (`*.pt`, `results/raw/` — อันนั้นไป GCS ชั้นที่ 3), `.venv/`, `__pycache__/`
 - `.gitignore` ขั้นต่ำ: `.venv/`, `__pycache__/`, `*.pyc`, `hf_cache/`, `.env`, `results/raw/`, `*.pt`, `*.bin`
 - ทางเลือก: ติดตั้ง GitHub CLI (`gh auth login` — เปิด browser บน Mac ใส่โค้ด) แล้ว push ผ่าน HTTPS ได้ ไม่ต้องจัดการ key เอง
+- **push ผลสรุปจาก VM ด้วย (ทุกครั้งที่จบ experiment):** ผลสรุปขนาดเล็ก (`results/**/*.json`/`.jsonl` ยกเว้น `results/raw/` ที่ถูก .gitignore กันไว้) ออกแบบให้เข้า git — VM push ขึ้นได้เองเพราะมี SSH key ของตัวเอง:
+  ```bash
+  git add results/
+  git commit -m "<ชื่อ experiment + ผลสรุปหนึ่งบรรทัด>"
+  git push
+  ```
+- **กฎสองเครื่อง:** Mac (แก้โค้ด/เอกสาร) กับ VM (รันการทดลอง) push ลง repo เดียวกัน — เปิดงานที่เครื่องไหนให้ `git pull` ก่อนทุกครั้ง และ push ฝั่งโค้ดก่อนฝั่งผลลัพธ์เสมอ เพื่อให้ทุก report เกิดจากโค้ดรุ่นล่าสุด
 
 **ชั้นที่ 2 — Snapshot รายสัปดาห์** (รวม environment ทั้งเครื่อง, incremental ถูกมาก):
 ```bash

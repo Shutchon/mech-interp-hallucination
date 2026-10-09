@@ -1,40 +1,73 @@
 """Misleading-prompt suite construction for RQ2/RQ3 (plan §3, E1).
 
 Context–memory (CM) conflict prompts per the taxonomy of Xu et al. (EMNLP 2024):
-the context asserts the counterfactual distractor; the model's parametric
-memory holds the true target. Hallucination = the distractor wins.
+context asserts the counterfactual distractor; parametric memory holds the true
+target. Hallucination = the distractor wins at the answer position.
 
-Template design notes:
-- 3 templates, one of which must be reserved for the E6 template-robustness
-  check (never used for head selection).
-- Control condition for the copy-suppression confound (Campregher 2025,
-  references.md [F7]): replace the distractor with a neutral non-answer token
-  — see make_neutral_control().
+Templates deliberately use only (subject, distractor, prompt) so they apply to
+any relation without parsing — refine wording during the E1 pilot on the dev
+split if needed, then freeze before E3 runs (template changes after head
+selection would invalidate the dev/held-out protocol).
 """
 from __future__ import annotations
 
+from dataclasses import asdict, dataclass
+from pathlib import Path
+
+import json
+
 TEMPLATES = [
-    "Earlier you learned that {subject} {relation_phrase} {distractor}. {prompt}",
-    "{subject} {relation_phrase} {distractor}, as stated in the document. {prompt}",
-    "Note: {subject} {relation_phrase} {distractor}. Now answer: {prompt}",
+    "Earlier you learned that the correct answer is {distractor}. {prompt}",
+    "The document states: {prompt} {distractor}. Now answer correctly: {prompt}",
+    "Hint from the user: I am sure it is {distractor}. {prompt}",
 ]
 
-# reserved for E6 robustness only
-HELDOUT_TEMPLATE = "Based on what you read, {subject} {relation_phrase} {distractor}. {prompt}"
+NEUTRAL_PLACEHOLDER = "unknown"
 
 
-def build_misleading_suite(facts, template_idx: int = 0):
-    """Build (clean, misleading) prompt pairs from Fact records.
+@dataclass
+class SuiteItem:
+    case_id: int
+    template_idx: int
+    split: str
+    condition: str        # "misleading" | "neutral"
+    prompt_shown: str
+    true_target: str
+    distractor: str
 
-    clean       = the bare CounterFact prompt (no context)
-    misleading  = template wrapping the counterfactual distractor
-    Returns dicts with prompt ids and target ids for scoring.
+
+def build_suite(fact, condition: str = "misleading", template_idx: int = 0) -> SuiteItem:
+    """Build one suite item from a Fact.
+
+    misleading: context asserts the counterfactual distractor
+    neutral:    same template, distractor replaced by a neutral non-answer
+                (copy-suppression control, Campregher 2025 — plan E4)
     """
-    raise NotImplementedError("E1")
+    assert condition in ("misleading", "neutral")
+    distractor = fact.target_false if condition == "misleading" else NEUTRAL_PLACEHOLDER
+    prompt_shown = TEMPLATES[template_idx].format(
+        subject=fact.subject, distractor=distractor, prompt=fact.prompt
+    )
+    return SuiteItem(
+        case_id=fact.case_id,
+        template_idx=template_idx,
+        split=fact.split,
+        condition=condition,
+        prompt_shown=prompt_shown,
+        true_target=fact.target_true,
+        distractor=distractor,
+    )
 
 
-def make_neutral_control(fact, template_idx: int = 0):
-    """Same template but the context slot holds a neutral non-answer token
-    (e.g. 'unknown'). Used to separate selective fact recall from generic
-    copy suppression in E4 (plan E4, copy-suppression control)."""
-    raise NotImplementedError("E1")
+def build_misleading_suite(facts, out_path: Path) -> list[SuiteItem]:
+    """3 templates x facts (misleading) + template-0 neutral control."""
+    items: list[SuiteItem] = []
+    for f in facts:
+        for t_idx in range(len(TEMPLATES)):
+            items.append(build_suite(f, "misleading", t_idx))
+        items.append(build_suite(f, "neutral", 0))
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    with out_path.open("w") as fh:
+        for it in items:
+            fh.write(json.dumps(asdict(it), ensure_ascii=False) + "\n")
+    return items

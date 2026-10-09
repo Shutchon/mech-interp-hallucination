@@ -59,6 +59,7 @@ E0 Setup+Parity → E1 Data → E2 Baselines → E3 Patching sweeps → E4 Circu
 | สิ่งที่ทำ | ติดตั้ง TransformerLens + circuitsvis + lm-eval-harness บน VM L4; ดาวน์โหลดโมเดล (Gemma เป็น gated model — ต้อง accept license ที่ HF และตั้ง `HF_TOKEN`); รันสคริปต์ patching 1 head แบบ smoke test |
 | **Parity check** | เทียบ logit จาก TransformerLens กับ HuggingFace forward pass ตรงๆ บน 100 prompts (รายงาน max abs diff / KL) — **ยืนยันแล้วว่า Gemma-2 softcapping ทำให้ค่าเพี้ยนได้จริง** (มี bug report ว่า HF กับ HookedTransformer ให้ output ต่างกันเล็กน้อย) สาเหตุหลัก: LayerNorm folding/`center_unembed` ทำลาย invariance ของ tanh softcap + dtype ผสม float32/bfloat16 · **แนวปฏิบัติ:** ใช้ TransformerLens รุ่นใหม่ (default อนุรักษ์ raw HF weights), ตั้ง `center_unembed=False`, คุม dtype คงที่, เทียบ post-softcap logits · **Fallback อันดับแรกถ้าไม่ผ่าน: `pyvene`** (Stanford, ICLR 2025 — ทำ interchange intervention บน HF model ตรงๆ แบบ declarative ไม่ต้องแปลง weight) แล้วจึงเป็น `nnsight` หรือ PyTorch hooks เขียนเอง |
 | เกณฑ์ผ่าน | ค่า KL(TL ‖ HF) บน 100 prompt ต่ำกว่า 1e-3 และ argmax ตรงกัน ≥ 99% |
+| **ผลลัพธ์ (ผ่านแล้ว — ต.ค. 2026)** | **PASS (มีเงื่อนไข):** fp32 → mean KL **1.32e-05**, median 6.1e-06, argmax **100%** · bf16 → 1.21e-3 (เกินเกณฑ์เล็กน้อย = rounding noise) · **คำตัดสิน: ใช้ TransformerLens 2.x + bf16 สำหรับทุก sweep**, ระบุ noise floor ~1e-3 ใน Methodology, ตรวจซ้ำ top-k heads ด้วย fp32 ตอนจบ E3 · report: `results/e0_parity/report{,_fp32}.json` |
 | ต้นทุน | ~2 GPU-h |
 
 ### E1 — Dataset Preparation (สัปดาห์ 1–2)
@@ -171,7 +172,7 @@ E0 Setup+Parity → E1 Data → E2 Baselines → E3 Patching sweeps → E4 Circu
 
 | ความเสี่ยง | โอกาส | แผนสำรอง |
 |---|---|---|
-| TransformerLens ค่าเพี้ยนเพราะ Gemma-2 softcapping | กลาง | Parity check E0; fallback เป็น raw PyTorch hooks บน HF หรือ `nnsight` |
+| TransformerLens ค่าเพี้ยนเพราะ Gemma-2 softcapping | กลาง | Parity check E0; fallback เป็น raw PyTorch hooks บน HF หรือ `nnsight` · **→ ปิดจบแล้ว (ต.ค. 2026): fp32 parity KL 1.3e-5, argmax 100% — ความเพี้ยนของ bf16 เป็น noise ล้วนๆ** |
 | ผล head-level diffuse ไม่คม | กลาง | รายงานที่ระดับ layer/MLP (ยังตอบ RQ1 ได้) + ย้ำ contribution เชิง empirical |
 | Intervention ไม่ลด hallucination อย่างมีนัยสำคัญ | กลาง | **Reframe เป็นบทความ characterization:** "When does context beat memory? Competition dynamics in SLMs" — ยังส่ง Q4 ได้สบาย (กำหนด success gate ไว้ล่วงหน้าที่สัปดาห์ 9) |
 | TruthfulQA ติด contamination ในโมเดลใหม่ | สูง | ใช้เป็น secondary metric เท่านั้น; ตัวชี้วัดหลักคือ misleading suite ที่สร้างเอง (ตรวจซ้ำไม่ได้จาก pretrain) |
