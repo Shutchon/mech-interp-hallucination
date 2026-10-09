@@ -54,12 +54,12 @@ def load_prompts(path: Path, n: int) -> list[str]:
 
 
 @torch.no_grad()
-def hf_last_token_logits(hf_id: str, prompts: list[str], device: str) -> torch.Tensor:
+def hf_last_token_logits(hf_id: str, prompts: list[str], device: str, dtype=torch.bfloat16) -> torch.Tensor:
     from transformers import AutoModelForCausalLM, AutoTokenizer
 
     tok = AutoTokenizer.from_pretrained(hf_id)
     model = AutoModelForCausalLM.from_pretrained(
-        hf_id, torch_dtype=torch.bfloat16
+        hf_id, torch_dtype=dtype
     ).to(device).eval()
     out = []
     for i, p in enumerate(prompts, 1):
@@ -74,7 +74,17 @@ def hf_last_token_logits(hf_id: str, prompts: list[str], device: str) -> torch.T
 
 
 @torch.no_grad()
-def tl_last_token_logits(tl_name: str, prompts: list[str], device: str) -> torch.Tensor:
+def tl_last_token_logits(tl_name: str, prompts: list[str], device: str, dtype=torch.bfloat16) -> torch.Tensor:
+    from importlib.metadata import version as pkg_version
+
+    major = pkg_version("transformer-lens").split(".")[0]
+    if major != "2":
+        raise SystemExit(
+            f"[abort] TransformerLens {major}.x detected — this project targets TL 2.x "
+            f"(HookedTransformer API; TL 4.x replaced it with TransformerBridge).\n"
+            f"        Fix:  pip install 'transformer_lens>=2.4,<3.0'"
+        )
+
     from transformer_lens import HookedTransformer
 
     def _load():
@@ -84,7 +94,7 @@ def tl_last_token_logits(tl_name: str, prompts: list[str], device: str) -> torch
         try:
             return HookedTransformer.from_pretrained(
                 tl_name,
-                dtype=torch.bfloat16,
+                dtype=dtype,
                 device=device,
                 center_unembed=False,
                 center_writing_weights=False,
@@ -92,7 +102,7 @@ def tl_last_token_logits(tl_name: str, prompts: list[str], device: str) -> torch
             )
         except TypeError:
             print("[warn] TransformerLens rejected raw-weight flags; loading with defaults")
-            return HookedTransformer.from_pretrained(tl_name, dtype=torch.bfloat16, device=device)
+            return HookedTransformer.from_pretrained(tl_name, dtype=dtype, device=device)
 
     model = _load().eval()
     out = []
@@ -126,14 +136,23 @@ def main() -> int:
     ap.add_argument("--prompts", type=Path, default=DEFAULT_PROMPTS)
     ap.add_argument("--n", type=int, default=100)
     ap.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
+    ap.add_argument(
+        "--dtype",
+        choices=["bfloat16", "float32"],
+        default="bfloat16",
+        help="load dtype for both frameworks; float32 diagnoses whether a marginal bf16 KL is rounding noise",
+    )
     ap.add_argument("--out", type=Path, default=DEFAULT_OUT)
     args = ap.parse_args()
+    dtype = torch.float32 if args.dtype == "float32" else torch.bfloat16
+    if args.dtype == "float32":
+        args.out = args.out.with_name(args.out.name.replace("report", "report_fp32"))
 
     prompts = load_prompts(args.prompts, args.n)
     print(f"[E0] parity check — {len(prompts)} prompts, device={args.device}")
 
-    hf_logits = hf_last_token_logits(args.hf_id, prompts, args.device)
-    tl_logits = tl_last_token_logits(args.tl_name, prompts, args.device)
+    hf_logits = hf_last_token_logits(args.hf_id, prompts, args.device, dtype)
+    tl_logits = tl_last_token_logits(args.tl_name, prompts, args.device, dtype)
 
     cmp = compare(hf_logits, tl_logits)
     kl = torch.tensor(cmp["per_prompt_kl"])
@@ -149,8 +168,10 @@ def main() -> int:
         "hf_id": args.hf_id,
         "tl_name": args.tl_name,
         "n_prompts": len(prompts),
-        "dtype": "bfloat16",
+        "dtype": args.dtype,
         "mean_kl_hf_tl": mean_kl,
+        "median_kl": float(kl.median()),
+        "p90_kl": float(kl.quantile(0.9)),
         "kl_ci95": [kl_lo, kl_hi],
         "max_kl": float(kl.max()),
         "kl_reverse_mean": cmp["kl_reverse_mean"],
@@ -165,6 +186,7 @@ def main() -> int:
 
     print("\n" + "=" * 60)
     print(f"mean KL(HF‖TL) : {mean_kl:.2e}   (gate < {KL_THRESHOLD:.0e})")
+    print(f"median / p90   : {report['median_kl']:.2e} / {report['p90_kl']:.2e}")
     print(f"max  KL        : {report['max_kl']:.2e}")
     print(f"argmax agree   : {agree_mean:.1%}  (gate ≥ {ARGMAX_THRESHOLD:.0%})")
     print(f"RESULT         : {'PASS ✅' if passed else 'FAIL ❌ — use pyvene fallback'}")
@@ -173,12 +195,24 @@ def main() -> int:
     return 0 if passed else 2
 
 
+def _git_rev() -> str:
+    import subprocess
+
+    try:
+        return subprocess.check_output(
+            ["git", "rev-parse", "--short", "HEAD"], stderr=subprocess.DEVNULL
+        ).decode().strip()
+    except Exception:
+        return "unknown"
+
+
 def _versions() -> dict:
     import transformers
 
     v = {
         "torch": torch.__version__,
         "transformers": transformers.__version__,
+        "git_rev": _git_rev(),
     }
     try:
         import transformer_lens

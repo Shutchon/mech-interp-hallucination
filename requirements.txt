@@ -1,7 +1,9 @@
 # torch comes preinstalled on the GCP Deep Learning VM image (CUDA build).
 # For a local install instead: pip install torch --index-url https://download.pytorch.org/whl/cu124
 torch>=2.4
-transformer_lens>=2.0
+transformer_lens>=2.4,<3.0   # pin to TL2: HookedTransformer API. TL 4.x (2026) replaced it with TransformerBridge — revisit for Gemma-3/4 support later
+numpy>=1.26,<2.0             # TL2 pins numpy<2 — keep the whole env on numpy 1.x
+scipy>=1.11,<1.14            # scipy>=1.14 is built for numpy>=2; 1.13.x matches numpy 1.26
 pyvene>=0.1.3
 transformers>=4.44
 datasets>=2.19
@@ -11,5 +13,3 @@ lm-eval>=0.4.4
 circuitsvis>=1.0
 plotly>=5.22
 pandas>=2.2
-numpy>=1.26
-scipy>=1.11
