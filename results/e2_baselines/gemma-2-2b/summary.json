@@ -1,0 +1,98 @@
+{
+  "experiment": "E2_baselines",
+  "timestamp": "2026-10-09T14:59:04.845552+00:00",
+  "git_rev": "2d47228",
+  "model": "gemma-2-2b",
+  "clean": {
+    "n": 2000,
+    "truth_rate": 1.0,
+    "follow_rate": 0.0,
+    "follow_ci95": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "neither_rate": 0.0
+  },
+  "misleading": {
+    "overall": {
+      "n": 6000,
+      "truth_rate": 0.462,
+      "follow_rate": 0.473,
+      "follow_ci95": [
+        0.473,
+        0.46016666666666667,
+        0.4855
+      ],
+      "neither_rate": 0.06500000000000006
+    },
+    "template_0": {
+      "n": 2000,
+      "truth_rate": 0.664,
+      "follow_rate": 0.2425,
+      "follow_ci95": [
+        0.2425,
+        0.224,
+        0.2615
+      ],
+      "neither_rate": 0.09349999999999997
+    },
+    "template_1": {
+      "n": 2000,
+      "truth_rate": 0.0115,
+      "follow_rate": 0.984,
+      "follow_ci95": [
+        0.984,
+        0.9785,
+        0.989
+      ],
+      "neither_rate": 0.0045000000000000595
+    },
+    "template_2": {
+      "n": 2000,
+      "truth_rate": 0.7105,
+      "follow_rate": 0.1925,
+      "follow_ci95": [
+        0.1925,
+        0.1755,
+        0.21
+      ],
+      "neither_rate": 0.09699999999999998
+    },
+    "by_split": {
+      "dev": {
+        "n": 2421,
+        "truth_rate": 0.38868236266005785,
+        "follow_rate": 0.5105328376703842,
+        "follow_ci95": [
+          0.5105328376703842,
+          0.4902932672449401,
+          0.529946303180504
+        ],
+        "neither_rate": 0.100784799669558
+      },
+      "heldout": {
+        "n": 3579,
+        "truth_rate": 0.5115954177144454,
+        "follow_rate": 0.44761106454316846,
+        "follow_ci95": [
+          0.44761106454316846,
+          0.43140542050852193,
+          0.46381670857781504
+        ],
+        "neither_rate": 0.040793517742386154
+      }
+    }
+  },
+  "neutral": {
+    "n": 2000,
+    "truth_rate": 0.874,
+    "follow_rate": 0.0125,
+    "follow_ci95": [
+      0.0125,
+      0.008,
+      0.0175
+    ],
+    "neither_rate": 0.1135
+  }
+}
