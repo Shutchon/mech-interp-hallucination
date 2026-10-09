@@ -1,0 +1,27 @@
+{
+  "experiment": "E0_parity",
+  "timestamp": "2026-10-09T05:50:12.836361+00:00",
+  "hf_id": "google/gemma-2-2b",
+  "tl_name": "gemma-2-2b",
+  "n_prompts": 100,
+  "dtype": "bfloat16",
+  "mean_kl_hf_tl": 0.001214595977216959,
+  "kl_ci95": [
+    0.0009926090511726215,
+    0.001480741161503829
+  ],
+  "max_kl": 0.01068827509880066,
+  "kl_reverse_mean": 0.0012150694383308291,
+  "argmax_agreement": 1.0,
+  "gate": {
+    "mean_kl_below": 0.001,
+    "argmax_agreement_at_least": 0.99
+  },
+  "pass": false,
+  "versions": {
+    "torch": "2.14.1+cu130",
+    "transformers": "4.57.6",
+    "transformer_lens": "unknown"
+  },
+  "note_on_fail": "If FAIL: fall back to pyvene (declarative interventions on raw HF weights) \u2014 plan \u00a73 E0 / GCP_SETUP.md \u00a74."
+}
