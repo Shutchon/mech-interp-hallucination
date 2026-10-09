@@ -33,7 +33,10 @@ PY
 cat <<'EOF'
 
 Next steps:
-  1) export HF_TOKEN=hf_...        # gated models (see GCP_SETUP.md §9)
-  2) echo 'export HF_HOME=$HOME/hf_cache' >> ~/.bashrc && source ~/.bashrc
-  3) python scripts/e0_parity_check.py --n 100
+  1) source .venv/bin/activate     # activate the venv (this script ran in a subshell!)
+  2) export HF_TOKEN=hf_...        # gated models (see GCP_SETUP.md §9)
+     echo 'export HF_TOKEN=hf_...' >> ~/.bashrc   # to make it permanent
+  3) echo 'export HF_HOME=$HOME/hf_cache' >> ~/.bashrc && source ~/.bashrc
+  4) tmux new -s e0                # run experiments inside tmux (SSH-drop safe)
+     python scripts/e0_parity_check.py --n 100
 EOF

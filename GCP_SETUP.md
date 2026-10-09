@@ -184,7 +184,7 @@ git clone git@github.com:<user>/mech-interp-hallucination.git   # URL แบบ 
 ```
 
 - วงจรประจำวัน: `git add -A && git commit -m "..." && git push` — **ทำทุกครั้งที่จบ experiment** เพราะ spot ถูกดับได้เตือนล่วงหน้าแค่ 30 วินาที
-- ⚠️ ถ้า `git clone` เจอ `Repository not found` = ยังไม่ได้สร้าง repo บน GitHub (เช็ค username ที่ถูกต้องด้วย `ssh -T git@github.com` แล้วดูว่าทักว่า "Hi ใคร") — สร้างได้ที่ [github.com/new](https://github.com/new) ชื่อ `mech-interp-hallucination` แบบ Private
+- ⚠️ ถ้า `git clone` เจอ `Repository not found` = ยังไม่ได้สร้าง repo บน GitHub (เช็ค username ที่ถูกต้องด้วย `ssh -T git@github.com` แล้วดูว่าทักว่า "Hi ใคร") — สร้างได้ที่ [github.com/new](https://github.com/new) ชื่อ `mech-interp-hallucination` แบบ Private · ถ้าเจอ `Permission denied (publickey)` = เครื่องนั้นยังไม่มี key ที่ลงทะเบียนกับ GitHub — **key ต้องทำแยกต่อเครื่อง** (VM หนึ่งอัน, Mac หนึ่งอัน, เพิ่มได้หลายอันในบัญชีเดียว) · ทางลัดบน Mac: `brew install gh && gh auth login` แล้วเลือก SSH — สร้างและอัป key ให้อัตโนมัติ
 - ห้าม push: `HF_TOKEN` ทุกรูปแบบ, `hf_cache/` (โมเดล 5–18GB), ผล raw ใหญ่ (`*.pt`, `results/raw/` — อันนั้นไป GCS ชั้นที่ 3), `.venv/`, `__pycache__/`
 - `.gitignore` ขั้นต่ำ: `.venv/`, `__pycache__/`, `*.pyc`, `hf_cache/`, `.env`, `results/raw/`, `*.pt`, `*.bin`
 - ทางเลือก: ติดตั้ง GitHub CLI (`gh auth login` — เปิด browser บน Mac ใส่โค้ด) แล้ว push ผ่าน HTTPS ได้ ไม่ต้องจัดการ key เอง

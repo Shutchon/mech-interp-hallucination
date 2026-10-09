@@ -22,6 +22,15 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
+# Fail fast with a clear message when run outside the project venv (the DLVM
+# system Python has torch preinstalled but not our deps — a classic trap).
+if ".venv" not in sys.prefix:
+    print(
+        "[warn] ดูเหมือนยังไม่ได้ activate venv (sys.prefix = %s)\n"
+        "       รัน:  source .venv/bin/activate   แล้วรันสคริปต์ใหม่\n"
+        "       (ทุกหน้าต่าง tmux ใหม่ต้อง activate ใหม่ทุกครั้ง)" % sys.prefix
+    )
+
 import torch
 import torch.nn.functional as F
 
