@@ -5,6 +5,15 @@ set -euo pipefail
 echo "== GPU check =="
 nvidia-smi || { echo "nvidia-smi failed — check drivers/image"; exit 1; }
 
+echo "== Ensure python venv support =="
+# Slim Ubuntu images ship without python3-venv; install it if missing (needs sudo).
+if ! python3 -c "import ensurepip" >/dev/null 2>&1; then
+    echo "python3-venv missing — installing (sudo required)"
+    sudo apt-get update -qq && sudo apt-get install -y python3-venv
+fi
+# Remove a partially-created venv left behind by a failed previous run
+[ -d .venv ] && [ ! -x .venv/bin/python ] && rm -rf .venv
+
 echo "== Python venv =="
 python3 -m venv .venv
 # shellcheck disable=SC1091
