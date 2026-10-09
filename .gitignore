@@ -1,0 +1,19 @@
+# environments
+.venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# secrets — NEVER commit (see GCP_SETUP.md §9)
+.env
+*_token*
+
+# model caches & heavy artifacts (models live on VM disk / HF cache, results raw → GCS)
+hf_cache/
+*.pt
+*.bin
+*.safetensors
+results/raw/
+
+# misc
+.DS_Store

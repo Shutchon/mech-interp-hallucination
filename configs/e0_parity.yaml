@@ -1,0 +1,11 @@
+# E0 — TransformerLens vs HuggingFace parity gate (plan §3, E0)
+hf_id: google/gemma-2-2b
+tl_name: gemma-2-2b
+dtype: bfloat16
+n_prompts: 100
+gate:
+  mean_kl_below: 1.0e-3     # KL(HF ‖ TransformerLens), final-token logits, fp32
+  argmax_agreement_at_least: 0.99
+# On FAIL: fall back to pyvene (declarative interventions on raw HF weights).
+# Gemma-2 caveats handled by the script: center_unembed=False, no LayerNorm
+# folding, consistent dtype, compare post-softcap logits (references.md [T5]).

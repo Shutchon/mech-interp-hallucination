@@ -1,0 +1,68 @@
+# Factual continuation prompts for the E0 parity check.
+# One prompt per line. Lines starting with # are ignored.
+# Short, base-model friendly, verifiable facts across domains.
+The Eiffel Tower is located in the city of
+The capital of France is
+The capital of Japan is
+The capital of Australia is
+The capital of Canada is
+The capital of Italy is
+The capital of Spain is
+The capital of Egypt is
+The capital of Brazil is
+The capital of Thailand is
+The Great Wall is located in
+The Nile River flows into the
+The Amazon River is the longest river in
+Mount Everest is located in the
+The Pacific Ocean is the largest ocean on
+The largest desert in the world is the
+The currency of Japan is the
+The currency of the United Kingdom is the
+The currency of the United States is the
+The currency of Switzerland is the
+Water boils at a temperature of
+Water freezes at a temperature of
+The speed of light in vacuum is approximately
+The chemical symbol for gold is
+The chemical symbol for iron is
+The chemical symbol for oxygen is
+The chemical formula of water is
+The chemical formula of table salt is
+The powerhouse of the cell is the
+The force that keeps planets in orbit is called
+The first president of the United States was
+The president of the United States during World War II was
+The first person to walk on the moon was
+The theory of general relativity was proposed by
+The theory of evolution by natural selection was proposed by
+The inventor of the telephone is widely credited as
+The inventor of the light bulb is widely credited as
+World War II ended in the year
+World War I began in the year
+The Berlin Wall fell in the year
+The Titanic sank in the year
+The French Revolution began in the year
+The Great Pyramid of Giza was built by the ancient
+The study of ancient artifacts is called
+The study of living organisms is called
+The study of the stars and planets is called
+The largest planet in our solar system is
+The smallest planet in our solar system is
+The planet known as the red planet is
+The closest star to Earth is
+The human body has
+The largest organ of the human body is the
+The normal human body temperature is
+Blood is pumped through the body by the
+The largest mammal on Earth is the
+The fastest land animal is the
+The largest reptile in the world is the
+A group of lions is called a
+The author of Romeo and Juliet is
+The author of Pride and Prejudice is
+The author of the Sherlock Holmes stories is
+The author of the Harry Potter books is
+The Mona Lisa was painted by
+The Starry Night was painted by
+The Sistine Chapel ceiling was painted by

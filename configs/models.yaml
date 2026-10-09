@@ -1,0 +1,32 @@
+# Model registry (plan §1). `tl_name` = TransformerLens model name — verify exact
+# spelling against your installed version with:
+#   python -c "from transformer_lens import HookedTransformer; print([k for k in HookedTransformer.get_pretrained_models() if 'gemma' in k or 'qwen' in k or 'llama' in k])"
+
+primary:
+  hf_id: google/gemma-2-2b        # base model — main subject of the study
+  tl_name: gemma-2-2b
+  dtype: bfloat16
+  vram_gb: 5
+
+cross_model:                        # RQ1 cross-architecture replication (E6)
+  - hf_id: meta-llama/Llama-3.2-1B
+    tl_name: llama-3.2-1b
+    dtype: bfloat16
+  - hf_id: Qwen/Qwen2.5-1.5B
+    tl_name: null                   # verify TransformerLens Qwen2.5 support; else pyvene
+    dtype: bfloat16
+
+scale_up:                           # coarse sweep only (plan E3)
+  hf_id: google/gemma-2-9b
+  tl_name: gemma-2-9b
+  dtype: bfloat16
+  vram_gb: 18
+  n_facts: 500
+
+optional_modern:                    # "freshness" test, decide at E0
+  hf_id: google/gemma-3-1b-it
+  tl_name: null                     # TransformerLens gemma-3 support: check issue #898
+  note: >
+    Instruction-tuned only (no base 1B on HF). If used: apply chat template
+    consistently and state it in the paper. Gemma 4 (Apache 2.0, 2026) is
+    future work — see references.md [T1c].
