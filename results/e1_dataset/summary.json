@@ -1,0 +1,26 @@
+{
+  "experiment": "E1_dataset",
+  "timestamp": "2026-10-09T14:37:40.454521+00:00",
+  "git_rev": "04794da",
+  "source": "hf:wangzn2001/counteract:counterfact.json",
+  "model": "gemma-2-2b",
+  "params": {
+    "gap": 0.5,
+    "n_target": 2000,
+    "relax_argmax": false,
+    "limit": 12000
+  },
+  "n_loaded": 12000,
+  "n_pass_argmax": 2141,
+  "n_pass_gap": 10132,
+  "n_survivors": 2000,
+  "n_selected": 2000,
+  "split_counts": {
+    "dev": 807,
+    "heldout": 1193
+  },
+  "suite_items": {
+    "misleading": 6000,
+    "neutral": 2000
+  }
+}
