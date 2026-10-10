@@ -1,0 +1,99 @@
+{
+  "experiment": "E5_dose_response_round1",
+  "timestamp": "2026-10-10T16:51:22.593154+00:00",
+  "git_rev": "06cea8c",
+  "model": "gemma-2-2b",
+  "template": 0,
+  "dev_head_ranking": [
+    "L25_H4",
+    "L22_H4",
+    "L22_H0",
+    "L20_H3",
+    "L23_H7",
+    "L23_H4",
+    "L20_H7",
+    "L22_H3",
+    "L25_H2",
+    "L21_H1",
+    "L24_H5",
+    "L24_H3",
+    "L25_H6",
+    "L23_H6",
+    "L24_H7",
+    "L20_H0",
+    "L23_H0",
+    "L24_H6",
+    "L24_H1",
+    "L22_H6"
+  ],
+  "topnorm_heads": [
+    "L12_H6",
+    "L6_H0",
+    "L2_H5",
+    "L16_H3",
+    "L12_H7"
+  ],
+  "results": [
+    {
+      "config": "none",
+      "n_misleading": 1193,
+      "n_neutral": 1193,
+      "follow_rate": 0.19279128248113997,
+      "truth_rate": 0.7443419949706622,
+      "neutral_truth_rate": 0.9354568315171836
+    },
+    {
+      "config": "top-1",
+      "n_misleading": 1193,
+      "n_neutral": 1193,
+      "follow_rate": 0.1584241408214585,
+      "truth_rate": 0.6680637049455155,
+      "neutral_truth_rate": 0.8256496227996647
+    },
+    {
+      "config": "top-2",
+      "n_misleading": 1193,
+      "n_neutral": 1193,
+      "follow_rate": 0.1165129924559933,
+      "truth_rate": 0.6990779547359598,
+      "neutral_truth_rate": 0.8013411567476949
+    },
+    {
+      "config": "top-5",
+      "n_misleading": 1193,
+      "n_neutral": 1193,
+      "follow_rate": 0.08549874266554904,
+      "truth_rate": 0.44677284157585917,
+      "neutral_truth_rate": 0.5088013411567477
+    },
+    {
+      "config": "top-10",
+      "n_misleading": 1193,
+      "n_neutral": 1193,
+      "follow_rate": 0.04526404023470243,
+      "truth_rate": 0.3202011735121542,
+      "neutral_truth_rate": 0.3956412405699916
+    },
+    {
+      "config": "top-20",
+      "n_misleading": 1193,
+      "n_neutral": 1193,
+      "follow_rate": 0.01592623637887678,
+      "truth_rate": 0.1944677284157586,
+      "neutral_truth_rate": 0.25901089689857504
+    },
+    {
+      "config": "random5-mean",
+      "follow_rate": 0.1889354568315172,
+      "follow_rate_sd": 0.036489570120134894
+    },
+    {
+      "config": "topnorm-5",
+      "n_misleading": 1193,
+      "n_neutral": 1193,
+      "follow_rate": 0.3302598491198659,
+      "truth_rate": 0.5909471919530596,
+      "neutral_truth_rate": 0.8591785414920369
+    }
+  ]
+}
