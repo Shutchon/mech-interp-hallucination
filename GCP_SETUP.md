@@ -301,6 +301,29 @@ for repo in google/gemma-2-2b google/gemma-2-2b-it google/gemma-2-9b google/gemm
 done
 ```
 
+---
+
+## 10. ภาคผนวก — เหตุการณ์จริงที่เจอและวิธีแก้ (Incident Log)
+
+### 10.1 Spot preemption + kernel อัปเดตเอง ทำให้ GPU ใช้ไม่ได้ (10 ต.ค. 2026)
+
+**อาการ:** VM ถูก preemption (สถานะ TERMINATED) → start ใหม่แล้ว `nvidia-smi` ขึ้น "couldn't communicate with the NVIDIA driver" + `modprobe nvidia` บอก `Module nvidia not found in directory /lib/modules/7.0.0-1014-gcp`
+
+**สาเหตุ:** unattended-upgrades ติดตั้ง kernel ใหม่ (7.0.0-1014) ตอนเครื่องรันอยู่ แต่โมดูล driver ของ image นี้เป็นแบบ precompile ผูกกับ kernel เดิม (7.0.0-1011) พอ reboot เข้า kernel ใหม่จึงไม่มี driver
+
+**วิธีแก้ (ใช้ได้จริง):**
+1. เช็คว่า kernel เก่ายังอยู่: `ls /lib/modules/` (ต้องเห็น 7.0.0-1011-gcp ที่มีโมดูล nvidia ข้างใน)
+2. `sudo sed -i 's|^   set default="0"|   set default="1>2"|' /boot/grub/grub.cfg` — ฝังตำแหน่ง kernel เก่าตรงๆ (ตำแหน่ง = entry หลัก 1 คือ Advanced options, ตัวที่ 2 ข้างใน) ⚠️ ใช้วิธีนี้เพราะทั้ง `GRUB_DEFAULT=saved` + `grub-set-default` และ literal path ล้วนถูก grub-mkconfig ของ image นี้เมิน
+3. `sudo reboot` แล้วตรวจ: `uname -r` (ต้องเป็น kernel เก่า) + `nvidia-smi`
+4. **กันซ้ำ:** `sudo apt-mark hold linux-image-gcp linux-headers-gcp linux-gcp linux-image-7.0.0-1014-gcp linux-headers-7.0.0-1014-gcp linux-modules-7.0.0-1014-gcp`
+5. ห้ามรัน `sudo update-grub` หลังจากนี้ (มันจะล้างการแก้ในข้อ 2 — ถ้าจำเป็นต้องรัน ให้แก้ default กลับด้วย sed อีกครั้ง)
+
+**บทเรียน:** ทุกสคริปต์ experiment ต้องมี resume ระดับ config/record (E3, E5 ทำแล้ว) — preemption ครั้งนี้ E5 ตายตั้งแต่ config แรกเพราะเพิ่งจะเติม resume ไม่ทัน
+
+### 10.2 SSH key มี passphrase (30 ก.ย. 2026)
+
+อาการ `Server accepts key` แล้ว `Permission denied` — key ถูก passphrase ป้องและ agent ไม่มี identity · แก้ด้วย `ssh-add --apple-use-keychain ~/.ssh/google_compute_engine` (ครั้งเดียว) · ถ้า Mac รีสตาร์ตแล้ว `ssh-add -l` ว่าง — รันคำสั่งเดิมซ้ำได้เลย ไม่ต้องพิมพ์รหัส (Keychain จำให้)
+
 **ถ้าเจอ error ตอนโหลดโมเดล:**
 - `401 Unauthorized` → token ผิด/หมดอายุ หรือ env var ไม่ถูก set (`echo $HF_TOKEN` เช็ค)
 - `403` / ข้อความเรื่อง gated repo → **license ของ repo นั้นยังไม่ได้ accept** (เป็นราย repo!) หรือ accept ด้วยบัญชีอื่นกับเจ้าของ token
