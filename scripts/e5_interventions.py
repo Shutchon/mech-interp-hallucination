@@ -47,6 +47,16 @@ def load_jsonl(path: Path) -> list[dict]:
     return [json.loads(l) for l in path.read_text().splitlines() if l.strip()]
 
 
+def aggregate(recs: list[dict], config_name: str) -> dict:
+    """Recompute a config summary from per-item records (resume path)."""
+    m = [r for r in recs if r["condition"] == "misleading"]
+    n = [r for r in recs if r["condition"] == "neutral"]
+    return {"config": config_name, "n_misleading": len(m), "n_neutral": len(n),
+            "follow_rate": sum(r["is_distractor"] for r in m) / max(len(m), 1),
+            "truth_rate": sum(r["is_true"] for r in m) / max(len(m), 1),
+            "neutral_truth_rate": sum(r["is_true"] for r in n) / max(len(n), 1)}
+
+
 def zero_hooks(heads: list[tuple[int, int]]) -> list:
     fwd = []
     for l, h in heads:
@@ -148,20 +158,43 @@ def main() -> int:
 
     out_dir = args.out / args.model
     out_dir.mkdir(parents=True, exist_ok=True)
+    per_item_path = out_dir / "per_item.jsonl"
+    # Resume support: a config is complete when it has one record per item.
+    existing = load_jsonl(per_item_path) if per_item_path.exists() else []
+    counts: dict[str, int] = {}
+    for r in existing:
+        counts[r["config"]] = counts.get(r["config"], 0) + 1
+    n_expected = len(items)
+    done_cfgs = {c for c, n in counts.items() if n >= n_expected}
+    if counts:
+        keep = [r for r in existing if counts[r["config"]] >= n_expected]
+        if len(keep) != len(existing):  # drop partial configs (e.g. preemption)
+            per_item_path.write_text("".join(json.dumps(r) + "\n" for r in keep))
+        print(f"[E5] resume: skipping completed configs: {sorted(done_cfgs)}")
+    existing_by_cfg: dict[str, list[dict]] = {}
+    for r in existing:
+        if r["config"] in done_cfgs:
+            existing_by_cfg.setdefault(r["config"], []).append(r)
+
     results = []
-    with (out_dir / "per_item.jsonl").open("a") as fh:
-        results.append(eval_config(model, items, ids_by_case, [], "none", fh))
+    with per_item_path.open("a") as fh:
+
+        def run_or_load(name, hooks):
+            if name in done_cfgs:
+                return aggregate(existing_by_cfg[name], name)
+            return eval_config(model, items, ids_by_case, hooks, name, fh)
+
+        results.append(run_or_load("none", []))
 
         for k in [int(x) for x in args.ks.split(",")]:
-            heads = dev_heads[:k]
-            results.append(eval_config(model, items, ids_by_case, zero_hooks(heads), f"top-{k}", fh))
+            results.append(run_or_load(f"top-{k}", zero_hooks(dev_heads[:k])))
 
         rng = random.Random(0)
         all_heads = [(l, h) for l in range(model.cfg.n_layers) for h in range(model.cfg.n_heads)]
         rand_rates = []
         for s in range(args.n_random_seeds):
             heads = rng.sample(all_heads, 5)
-            r = eval_config(model, items, ids_by_case, zero_hooks(heads), f"random5-s{s}", fh)
+            r = run_or_load(f"random5-s{s}", zero_hooks(heads))
             rand_rates.append(r["follow_rate"])
         results.append({"config": "random5-mean", "follow_rate": sum(rand_rates) / len(rand_rates),
                         "follow_rate_sd": (sum((x - sum(rand_rates) / len(rand_rates)) ** 2
@@ -172,8 +205,7 @@ def main() -> int:
         top_norm_heads = sorted(
             [(l, h) for l in range(model.cfg.n_layers) for h in range(model.cfg.n_heads)],
             key=lambda lh: norms[lh[0], lh[1]], reverse=True)[:5]
-        results.append(eval_config(model, items, ids_by_case, zero_hooks(top_norm_heads),
-                                   "topnorm-5", fh))
+        results.append(run_or_load("topnorm-5", zero_hooks(top_norm_heads)))
 
     del model
     torch.cuda.empty_cache()
