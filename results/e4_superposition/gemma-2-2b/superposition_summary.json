@@ -1,0 +1,231 @@
+{
+  "experiment": "E4_superposition",
+  "timestamp": "2026-10-10T14:22:14.615911+00:00",
+  "git_rev": "6e771e8",
+  "model": "gemma-2-2b",
+  "n_facts": 150,
+  "top_heads": [
+    "L25_H4",
+    "L22_H4",
+    "L22_H0",
+    "L20_H3",
+    "L23_H7",
+    "L23_H4",
+    "L20_H7",
+    "L22_H3",
+    "L25_H2",
+    "L21_H1",
+    "L24_H5",
+    "L24_H3",
+    "L25_H6",
+    "L23_H6",
+    "L24_H7",
+    "L20_H0",
+    "L23_H0",
+    "L24_H6",
+    "L24_H1",
+    "L22_H6"
+  ],
+  "table": [
+    {
+      "head": "L25_H4",
+      "layer": 25,
+      "head_idx": 4,
+      "effect_A_restore": 0.08149853456619013,
+      "effect_B_context_push": 0.13411673910535513,
+      "effect_N_neutral": 0.061822414505783754,
+      "superposition_idx": 0.24403745246241565,
+      "neutral_ratio": 0.7585708728980133
+    },
+    {
+      "head": "L22_H4",
+      "layer": 22,
+      "head_idx": 4,
+      "effect_A_restore": 0.07073559596940246,
+      "effect_B_context_push": 0.14277482234690908,
+      "effect_N_neutral": -0.006059801207412122,
+      "superposition_idx": 0.33740378371955637,
+      "neutral_ratio": -0.08566834172194383
+    },
+    {
+      "head": "L22_H0",
+      "layer": 22,
+      "head_idx": 0,
+      "effect_A_restore": 0.047741843493642654,
+      "effect_B_context_push": 0.09491645560224286,
+      "effect_N_neutral": 0.002188376662388262,
+      "superposition_idx": 0.330682540733695,
+      "neutral_ratio": 0.045837707600873606
+    },
+    {
+      "head": "L20_H3",
+      "layer": 20,
+      "head_idx": 3,
+      "effect_A_restore": 0.03845940867500078,
+      "effect_B_context_push": 0.09595219713863934,
+      "effect_N_neutral": -0.0037827625196941404,
+      "superposition_idx": 0.42773675560415503,
+      "neutral_ratio": -0.09835727199188571
+    },
+    {
+      "head": "L23_H7",
+      "layer": 23,
+      "head_idx": 7,
+      "effect_A_restore": 0.016233024702374456,
+      "effect_B_context_push": 0.03843886209049761,
+      "effect_N_neutral": -0.011704929821905184,
+      "superposition_idx": 0.4061654833789903,
+      "neutral_ratio": -0.7210566136940004
+    },
+    {
+      "head": "L23_H4",
+      "layer": 23,
+      "head_idx": 4,
+      "effect_A_restore": 0.012418343231837044,
+      "effect_B_context_push": 0.02236062743344563,
+      "effect_N_neutral": -0.01265354805890812,
+      "superposition_idx": 0.28587048876717785,
+      "neutral_ratio": -1.0189401132405551
+    },
+    {
+      "head": "L20_H7",
+      "layer": 20,
+      "head_idx": 7,
+      "effect_A_restore": 0.010077373559404936,
+      "effect_B_context_push": 0.04236459947818967,
+      "effect_N_neutral": -0.009174348861313887,
+      "superposition_idx": 0.6156751527805244,
+      "neutral_ratio": -0.9103908679411531
+    },
+    {
+      "head": "L22_H3",
+      "layer": 22,
+      "head_idx": 3,
+      "effect_A_restore": 0.00977071553966034,
+      "effect_B_context_push": 0.029647743223037554,
+      "effect_N_neutral": -0.012966076508221609,
+      "superposition_idx": 0.5042567179115555,
+      "neutral_ratio": -1.3270344894998702
+    },
+    {
+      "head": "L25_H2",
+      "layer": 25,
+      "head_idx": 2,
+      "effect_A_restore": 0.009719388075753559,
+      "effect_B_context_push": 0.02407471065286733,
+      "effect_N_neutral": 0.0036644223556591294,
+      "superposition_idx": 0.42478772535154824,
+      "neutral_ratio": 0.37702192021744346
+    },
+    {
+      "head": "L21_H1",
+      "layer": 21,
+      "head_idx": 1,
+      "effect_A_restore": 0.009448636489191567,
+      "effect_B_context_push": 0.01913998944072384,
+      "effect_N_neutral": 0.0005693264927386883,
+      "superposition_idx": 0.33899319209529516,
+      "neutral_ratio": 0.060254883695647424
+    },
+    {
+      "head": "L24_H5",
+      "layer": 24,
+      "head_idx": 5,
+      "effect_A_restore": 0.008846081191916573,
+      "effect_B_context_push": 0.013665048499315637,
+      "effect_N_neutral": -0.01247211378702253,
+      "superposition_idx": 0.21407033910753026,
+      "neutral_ratio": -1.4099027034049127
+    },
+    {
+      "head": "L24_H3",
+      "layer": 24,
+      "head_idx": 3,
+      "effect_A_restore": 0.008500793781208051,
+      "effect_B_context_push": 0.029537904498184973,
+      "effect_N_neutral": -0.018819270482473886,
+      "superposition_idx": 0.5530448237742474,
+      "neutral_ratio": -2.2138250811443014
+    },
+    {
+      "head": "L25_H6",
+      "layer": 25,
+      "head_idx": 6,
+      "effect_A_restore": 0.005669015079664383,
+      "effect_B_context_push": 0.011473640794633784,
+      "effect_N_neutral": 0.0057394193984308855,
+      "superposition_idx": 0.3386069446568529,
+      "neutral_ratio": 1.0124191447327515
+    },
+    {
+      "head": "L23_H6",
+      "layer": 23,
+      "head_idx": 6,
+      "effect_A_restore": 0.005212460508013644,
+      "effect_B_context_push": 0.011731335101408785,
+      "effect_N_neutral": -0.012126575642020417,
+      "superposition_idx": 0.38473497298446363,
+      "neutral_ratio": -2.326458996356328
+    },
+    {
+      "head": "L24_H7",
+      "layer": 24,
+      "head_idx": 7,
+      "effect_A_restore": 0.00415089608150835,
+      "effect_B_context_push": 0.00891948798358678,
+      "effect_N_neutral": -0.006010025193628177,
+      "superposition_idx": 0.364839183755989,
+      "neutral_ratio": -1.4478862095348477
+    },
+    {
+      "head": "L20_H0",
+      "layer": 20,
+      "head_idx": 0,
+      "effect_A_restore": 0.004055629181081227,
+      "effect_B_context_push": 0.0042178167874831205,
+      "effect_N_neutral": -0.0009919571719929144,
+      "superposition_idx": 0.01960336853403681,
+      "neutral_ratio": -0.24458773909119066
+    },
+    {
+      "head": "L23_H0",
+      "layer": 23,
+      "head_idx": 0,
+      "effect_A_restore": 0.00297731300759237,
+      "effect_B_context_push": 0.010899468431618011,
+      "effect_N_neutral": -0.001988228712068701,
+      "superposition_idx": 0.5708924472007795,
+      "neutral_ratio": -0.6677929754105698
+    },
+    {
+      "head": "L24_H6",
+      "layer": 24,
+      "head_idx": 6,
+      "effect_A_restore": 0.0029145722725940513,
+      "effect_B_context_push": 0.005491493684617022,
+      "effect_N_neutral": -0.006480501329727612,
+      "superposition_idx": 0.3065546189613458,
+      "neutral_ratio": -2.2234828042057035
+    },
+    {
+      "head": "L24_H1",
+      "layer": 24,
+      "head_idx": 1,
+      "effect_A_restore": 0.002365627975935862,
+      "effect_B_context_push": 0.004841524655340237,
+      "effect_N_neutral": 0.0034462454397724655,
+      "superposition_idx": 0.34353278898689055,
+      "neutral_ratio": 1.4567994100632422
+    },
+    {
+      "head": "L22_H6",
+      "layer": 22,
+      "head_idx": 6,
+      "effect_A_restore": 0.001849228627237125,
+      "effect_B_context_push": 0.012162215301975638,
+      "effect_N_neutral": -0.017601628035386566,
+      "superposition_idx": 0.7360397234177646,
+      "neutral_ratio": -9.518362292327591
+    }
+  ]
+}
