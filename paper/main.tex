@@ -134,6 +134,18 @@ patching rather than probes, with explicit capability trade-off curves.
 \section{Experimental Setup}
 \label{sec:setup}
 
+Fig.~\ref{fig:pipeline} summarizes the protocol.
+
+\begin{figure}[t]
+ \begin{center}
+  \includegraphics[width=\columnwidth]{figs/fig1_pipeline.pdf}
+ \end{center}
+ \caption{Protocol overview. Data construction (top), causal localization on
+ the dev split (middle), and interventions evaluated exclusively on
+ held-out relations (bottom).}
+ \label{fig:pipeline}
+\end{figure}
+
 \textbf{Models.} Primary: \emodel{} (26 layers, 8 heads). Cross-model:
 Llama-3.2-1B (16L/32H), Qwen2.5-1.5B (28L/12H). All experiments use
 bfloat16 on a single 24GB GPU; a parity check between our hooking framework
@@ -212,7 +224,25 @@ head-level superposition~\cite{li2025juice} in this regime. The neutral
 control separates two populations: L25.H4 retains 76\% of its effect
 without a conflict (generic memory role), whereas \spec{}, L22.H0 and
 L20.H3 vanish ($N\!\approx\!0$)---\emph{conflict specialists} that are
-causally inert in normal operation.
+causally inert in normal operation. Fig.~\ref{fig:attention} adds a
+mechanistic signature: on the misleading prompt, the specialists
+concentrate their attention on the beginning-of-sequence token
+(0.92--1.00)---attention-sink heads that contribute to the conflict
+through the value pathway rather than by reading the distractor
+directly---whereas the dual-role heads L25.H4/L25.H6 attend to the
+template tokens asserting the distractor (0.67--0.78).
+
+\begin{figure}[t]
+ \begin{center}
+  \includegraphics[width=\columnwidth]{figs/fig3_attention.pdf}
+ \end{center}
+ \caption{Attention patterns of the five top heads on a representative
+ misleading prompt (``Eli Maor is originally from''; true: Israel,
+ distractor: Portsmouth). Conflict specialists (left three) attend almost
+ exclusively to $\langle$bos$\rangle$; dual-role heads attend to the
+ template tokens asserting the distractor.}
+ \label{fig:attention}
+\end{figure}
 
 \begin{figure}[t]
  \begin{center}
@@ -347,7 +377,7 @@ subsets.
 
 We mapped, validated, and exploited the CM-conflict circuit of SLMs:
 late-layer attention heads with measurable superposition, among which
-conflict specialists can be switched off individually---halucination falls
+conflict specialists can be switched off individually---hallucination falls
 by 30--50\% relative, accuracy rises, and knowledge-task capability is
 retained---while norm-based selection backfires. All selection was
 performed on dev relations with results reported on held-out relations,
