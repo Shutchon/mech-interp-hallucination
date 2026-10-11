@@ -213,11 +213,11 @@ E0 Setup+Parity → E1 Data → E2 Baselines → E3 Patching sweeps → E4 Circu
 
 | ลำดับ | วารสาร | เหตุผล | ข้อควรระวัง |
 |---|---|---|---|
-| 1 (เร็วสุด) | **ECTI Transactions on Computer and Information Technology** (ไทย) | Scopus indexed, รอบรีวิวไว, ค่าใช้จ่ายต่ำ, ธีรเมตต้องกับคนไทย | ประวัติมักอยู่ **Q3–Q4** ตาม SJR (ยังไม่ได้ verify สด — เช็ค scimagojr.com ก่อนส่ง) |
-| 2 | **Journal of Advances in Information Technology (JAIT)** | Q4, สาย AI รับกว้าง, APC ปานกลาง | เช็ค APC |
-| 3 | **International Journal of Computers and Applications** (Taylor & Francis) | Q3–Q4, no-APC แบบ hybrid ถ้ามีสิทธิ์ผ่านสถาบัน | เวลารอรีวิวนานกว่า |
-| 4 (ยกระดับขึ้นถ้าผลแข็งแรง) | **Natural Language Engineering** (Cambridge) หรือ **Journal of Experimental & Theoretical Artificial Intelligence** (T&F) | ~Q3, น่าเชื่อถือดีในวงการ | แข่งสูงกว่า; ผล cross-model ต้องครบ |
-| ทางเลือก | IEEE Access | เปิดกว้าง รีวิวไว | **APC ~$1,900 เกินงบ 5,000 บาท** (งบนี้เป็นคนละก้อนกับ compute) — หลีกเลี่ยงถ้าไม่มีทุน APC |
+| **1 (หลัก — ตัดสินใจแล้ว ต.ค. 2026)** | **IEICE Transactions on Information and Systems** (D-series, ญี่ปุ่น) | **Q3 ยืนยันแล้ว** (SJR 2025 = 0.237, H-index 59) · วารสารนานาชาติเก่าแก่ น่าเชื่อถือ · scope รับงานวิเคราะห์/ประยุกต์ AI — framing เป็น "trustworthy SLM deployment: diagnosis & mitigation" · regular paper ~8 หน้า (ฟอร์แมตแน่น เพียงพอ) | **Page charge มี** — เช็คตัวเลขล่าสุดที่ [ieice.org/eng/shiori](https://www.ieice.org/eng/shiori/) + คุยกับ advisor เรื่องทุน · Review ~3–6 เดือน · ต้องใช้ LaTeX template เฉพาะของ IEICE |
+| 2 (สำรอง ถ้า reject) | **ECTI Transactions on Computer and Information Technology** (ไทย) | Scopus indexed, รอบรีวิวไว, ค่าใช้จ่ายต่ำ | ประวัติมัก Q3–Q4 ตาม SJR (ยังไม่ verify สด — เช็ค scimagojr.com) |
+| 3 | **Journal of Advances in Information Technology (JAIT)** | Q4, สาย AI รับกว้าง, APC ปานกลาง | เช็ค APC |
+| 4 (ยกระดับถ้าผลแข็งแรง) | **Natural Language Engineering** (Cambridge) หรือ **Journal of Experimental & Theoretical Artificial Intelligence** (T&F) | ~Q3, น่าเชื่อถือดีในวงการ | แข่งสูงกว่า; ผล cross-model ต้องครบ (ตอนนี้ครบแล้ว ✓) |
+| ทางเลือก | IEEE Access | เปิดกว้าง รีวิวไว | **APC ~$1,900 เกินงบ** (งบนี้เป็นคนละก้อนกับ compute) — หลีกเลี่ยงถ้าไม่มีทุน APC |
 
 **กลยุทธ์:** ส่ง ECTI ก่อนเพื่อการันตีผลงานเร็ว ถ้า reviewer บอก under-scope ค่อยยกระดับขึ้นลำดับ 3–4; **ห้ามส่งวารสารที่ email ชวนเสนอให้ตีพิมพ์โดยตรง (เสี่ยง predatory)**
 

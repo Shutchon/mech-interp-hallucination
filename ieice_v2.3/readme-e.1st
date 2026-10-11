@@ -1,0 +1,52 @@
+/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+     LaTeX2e Class File for the IEICE Transactions (ieice.cls)
+/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+
+                                                        April 1 2024
+
+This package contains some documents for formatting your manuscript 
+for submission to the IEICE Transactions. 
+
+Included files:
+  ieice.cls:         class file
+  ieicetr.bst:       style file for BibTeX
+  readme-e.1st:      this file
+  readme-e.pdf:      how to use the class file (pdf)
+  readme-e.tex:      how to use the class file
+  readme-j.1st:      Japanese version of this file
+  readme-j.pdf:      Japanese version of readme-e.tex (pdf)
+  readme-j.tex:      Japanese version of readme-e.tex
+  template.tex:      template file
+
+  * ieicetr.bst is contributed by Ryutaroh Matsumoto. 
+
+Installation: 
+  1. Copy ieice.cls, readme-e.tex and template.tex to your working directory. 
+  2. You may rename template.tex to paper.tex for example, and edit it. 
+
+Notes: 
+  1. The current version of ieice.cls is v2.3 (2024/04/01). 
+  2. The ieice.cls is based on LaTeX2e. 
+     Use the LaTeX2e formats, LaTeX 2.09 has been obsolete for many years now. 
+  3. readme-e.tex itself is an example of the Transactions in action. 
+  4. These files are tested by the following compilers: 
+       pdflatex and uplatex on TeX Live from 2015 to 2022
+  5. The new txfonts package should be loaded after loading
+     the amsmath package. 
+       \usepackage[fleqn]{amsmath}
+       \usepackage{newtxtext}
+       \usepackage[varg]{newtxmath}
+
+Printing: 
+  If you print a manuscript on A4 paper by using 
+  dvips printer driver, the following parameter might be set. 
+    dvips -Pprintername -t a4 -O 0mm,8mm file.dvi
+  "printername" is a name of your printer
+
+To Authors: 
+  General questions about the TeX and LaTeX should be referred 
+  to manuals or books. 
+  Send any bug reports of the class file to the below e-mail address. 
+
+				 E-mail: teppei@uls.co.jp (Motoaki Sato)
+				 ULS & Company, Tokyo, Japan
