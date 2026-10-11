@@ -1,0 +1,143 @@
+#!/usr/bin/env python
+"""Generate paper figures from results JSONs (no GPU needed).
+
+Fig 2: (a) gemma layer profiles, both corruption regimes; (b) cross-model
+       layer profiles at normalised depth.
+Fig 4: intervention trade-offs — (a) suite space (follow vs truth);
+       (b) capability space (follow vs MMLU retention, PPL annotated).
+Fig 5: superposition scatter — context-push (B) vs restore (A) per head,
+       coloured by neutral ratio, top heads annotated.
+
+Usage: .venv-mac/bin/python scripts/make_figures.py
+"""
+from __future__ import annotations
+
+import json
+from pathlib import Path
+
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+import numpy as np
+
+ROOT = Path(__file__).resolve().parents[1]
+R = ROOT / "results"
+F = ROOT / "figures"
+F.mkdir(exist_ok=True)
+plt.rcParams.update({"figure.dpi": 150, "font.size": 10, "axes.grid": True,
+                     "grid.alpha": 0.3, "axes.spines.top": False, "axes.spines.right": False})
+
+
+def load_jsonl(path: Path) -> list[dict]:
+    return [json.loads(l) for l in path.read_text().splitlines() if l.strip()]
+
+
+def layer_profile(coarse_path: Path, n_layers: int) -> np.ndarray:
+    agg = {}
+    for r in load_jsonl(coarse_path):
+        agg.setdefault(r["layer"], []).append(r["effect"])
+    return np.array([np.mean(agg.get(l, [0.0])) for l in range(n_layers)])
+
+
+def fig2():
+    gemma_mis = layer_profile(R / "e3_sweep/gemma-2-2b/misleading_coarse.jsonl", 26)
+    gemma_noise = layer_profile(R / "e3_sweep/gemma-2-2b/noise_coarse.jsonl", 26)
+    llama = layer_profile(R / "e6_cross/meta-llama/Llama-3.2-1B/coarse.jsonl", 16)
+    qwen = layer_profile(R / "e6_cross/Qwen/Qwen2.5-1.5B/coarse.jsonl", 28)
+
+    fig, axes = plt.subplots(1, 2, figsize=(10, 3.6))
+    ax = axes[0]
+    ax.plot(gemma_noise, "-o", ms=3, label="noise (ROME-style)", color="#1f77b4")
+    ax.plot(gemma_mis, "-s", ms=3, label="misleading context", color="#d62728")
+    ax.set(xlabel="layer", ylabel="restoration effect", title="Gemma-2-2B — coarse sweep")
+    ax.legend(frameon=False)
+    ax = axes[1]
+    for prof, name, c in ((gemma_mis, "Gemma-2-2B (26L)", "#d62728"),
+                          (llama, "Llama-3.2-1B (16L)", "#1f77b4"),
+                          (qwen, "Qwen2.5-1.5B (28L)", "#2ca02c")):
+        x = np.linspace(0, 1, len(prof))
+        ax.plot(x, prof, "-o", ms=3, label=name, color=c)
+    ax.set(xlabel="normalised depth", ylabel="restoration effect",
+           title="Cross-model layer profiles (misleading regime)")
+    ax.legend(frameon=False)
+    fig.tight_layout()
+    fig.savefig(F / "fig2_layer_profiles.png", bbox_inches="tight")
+    fig.savefig(F / "fig2_layer_profiles.pdf", bbox_inches="tight")
+    plt.close(fig)
+
+
+def fig4():
+    r1 = {r["config"]: r for r in json.load(open(R / "e5_interventions/gemma-2-2b/dose_response.json"))["results"]}
+    r2 = {r["config"]: r for r in json.load(open(R / "e5_interventions/gemma-2-2b/round2.json"))["results"]}
+    cap = json.load(open(R / "e5_interventions/gemma-2-2b/capability.json"))["results"]
+
+    fig, axes = plt.subplots(1, 2, figsize=(10.5, 4.2))
+    ax = axes[0]
+    base = r1["none"]
+    ax.scatter(base["follow_rate"], base["truth_rate"], marker="*", s=220, c="k", label="none", zorder=5)
+    for k, c in zip(("1", "2", "5", "10", "20"), plt.cm.Blues(np.linspace(0.45, 0.95, 5))):
+        r = r1[f"top-{k}"]
+        ax.scatter(r["follow_rate"], r["truth_rate"], color=c, s=60)
+        ax.annotate(f"k={k}", (r["follow_rate"], r["truth_rate"]), fontsize=8,
+                    xytext=(4, 3), textcoords="offset points", color=c)
+    for name, m, col in (("spec1", "P", "#d62728"), ("spec3", "X", "#ff7f0e"),
+                         ("mean2", "^", "#2ca02c"), ("mean5", "v", "#9467bd"),
+                         ("meanspec3", "<", "#8c564b")):
+        r = r2[name]
+        ax.scatter(r["follow_rate"], r["truth_rate"], marker=m, c=col, s=70, label=name)
+    tn = r1["topnorm-5"]
+    ax.scatter(tn["follow_rate"], tn["truth_rate"], marker="D", c="#7f7f7f", s=70, label="topnorm-5 (norm-selected)")
+    ax.set(xlabel="context-following rate ↓ (hallucination)", ylabel="truth rate ↑",
+           title="(a) Suite trade-off (held-out)")
+    ax.legend(frameon=False, fontsize=8, loc="lower right")
+
+    ax = axes[1]
+    xs, ys, labels = [], [], []
+    for name, c in (("none", "k"), ("top-2", "#1f77b4"), ("top-5", "#1f77b4"),
+                    ("spec3", "#d62728"), ("mean5", "#9467bd")):
+        rate = r1.get(name) or r2.get(name)
+        xs.append(rate["follow_rate"])
+        ys.append(cap[name]["mmlu_retention"])
+        labels.append(f"{name}\nPPL×{cap[name]['ppl_ratio']:.2f}")
+    ax.scatter(xs, ys, s=80)
+    for x, y, t in zip(xs, ys, labels):
+        ax.annotate(t, (x, y), fontsize=8, xytext=(6, 4), textcoords="offset points")
+    ax.axhline(1.0, ls="--", c="gray", lw=0.8)
+    ax.set(xlabel="context-following rate ↓ (hallucination)", ylabel="MMLU retention",
+           title="(b) Capability cost", xlim=(0, 0.36), ylim=(0.97, 1.03))
+    fig.tight_layout()
+    fig.savefig(F / "fig4_tradeoff.png", bbox_inches="tight")
+    fig.savefig(F / "fig4_tradeoff.pdf", bbox_inches="tight")
+    plt.close(fig)
+
+
+def fig5():
+    table = json.load(open(R / "e4_superposition/gemma-2-2b/superposition_summary.json"))["table"]
+    A = np.array([r["effect_A_restore"] for r in table])
+    B = np.array([r["effect_B_context_push"] for r in table])
+    na = np.array([r["neutral_ratio"] if r["neutral_ratio"] is not None else 0 for r in table])
+
+    fig, ax = plt.subplots(figsize=(5.4, 4.4))
+    sc = ax.scatter(B, A, c=na, cmap="coolwarm", vmin=-0.5, vmax=1.0, s=70, edgecolors="k", lw=0.4)
+    lim = max(A.max(), B.max()) * 1.15
+    ax.plot([0, lim], [0, lim], "--", c="gray", lw=0.8, label="A = B (fully superposed)")
+    for r in table[:6]:
+        ax.annotate(r["head"], (r["effect_B_context_push"], r["effect_A_restore"]),
+                    fontsize=8, xytext=(5, 4), textcoords="offset points")
+    cb = fig.colorbar(sc, ax=ax)
+    cb.set_label("neutral ratio N/A (red = generic memory role)")
+    ax.set(xlabel="context-push effect B (misleading → clean)", ylabel="restore effect A (clean → misleading)",
+           title="Dual roles of influential heads (Gemma-2-2B)")
+    ax.legend(frameon=False, fontsize=8, loc="lower right")
+    fig.tight_layout()
+    fig.savefig(F / "fig5_superposition.png", bbox_inches="tight")
+    fig.savefig(F / "fig5_superposition.pdf", bbox_inches="tight")
+    plt.close(fig)
+
+
+if __name__ == "__main__":
+    fig2()
+    fig4()
+    fig5()
+    for f in sorted(F.glob("*.png")):
+        print("created:", f.name)
