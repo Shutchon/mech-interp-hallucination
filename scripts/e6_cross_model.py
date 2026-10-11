@@ -140,7 +140,8 @@ def sweep(model, facts, suite_by_case, stage: str, layers, heads, out_path: Path
                 key = f"{f['case_id']}:{stage}:{l}:{spec}:{k}"
                 if key in done:
                     continue
-                cv = cache[hook_name][0, cpos]
+                cv = (cache[hook_name][0, cpos] if spec == "resid"
+                      else cache[hook_name][0, cpos, spec])
 
                 def patch(act, hook, v=cv, p=mpos, sp=spec):
                     if sp == "resid":
