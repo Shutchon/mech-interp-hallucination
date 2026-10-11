@@ -119,8 +119,8 @@ def sweep(model, facts, suite_by_case, stage: str, layers, heads, out_path: Path
     done, fh = append_cache(out_path)
     for fi, f in enumerate(facts, 1):
         mis_item = suite_by_case[(f["case_id"], "misleading")]
-        true_id = first_token_id(model, f["true"])
-        d_id = first_token_id(model, f["false"])
+        true_id = first_token_id(model, f["target_true"])
+        d_id = first_token_id(model, f["target_false"])
         clean_toks = model.to_tokens(f["prompt"])
         mis_toks = model.to_tokens(mis_item["prompt_shown"])
 
@@ -196,8 +196,8 @@ def stage_e5(model, out_dir: Path, facts, suite, fine_recs, device):
             agg.setdefault((r["layer"], r["head"]), []).append(r["effect"])
     ranked = sorted(((sum(v) / len(v), l, h) for (l, h), v in agg.items()), reverse=True)
     top = [(l, h) for _, l, h in ranked]
-    ids = {f["case_id"]: {"true_id": first_token_id(model, f["true"]),
-                          "distractor_id": first_token_id(model, f["false"])} for f in facts}
+    ids = {f["case_id"]: {"true_id": first_token_id(model, f["target_true"]),
+                          "distractor_id": first_token_id(model, f["target_false"])} for f in facts}
 
     results = []
     for name, heads in [("none", []), ("top-1", top[:1]), ("top-5", top[:5])]:
