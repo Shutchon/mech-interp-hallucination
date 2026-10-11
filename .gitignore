@@ -17,3 +17,10 @@ results/raw/
 
 # misc
 .DS_Store
+
+# LaTeX build artifacts
+paper/*.aux
+paper/*.log
+paper/*.out
+paper/*.dvi
+paper/*.synctex*
