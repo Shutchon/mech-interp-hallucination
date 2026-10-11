@@ -1,0 +1,43 @@
+{
+  "experiment": "E5_round2",
+  "timestamp": "2026-10-11T12:14:45.622880+00:00",
+  "git_rev": "4b64aa8",
+  "model": "gemma-2-2b",
+  "specialists": [
+    "L22_H4",
+    "L22_H0",
+    "L20_H3"
+  ],
+  "results": [
+    {
+      "config": "spec1",
+      "follow_rate": 0.12573344509639564,
+      "truth_rate": 0.7971500419111484,
+      "neutral_truth_rate": 0.9203688181056161
+    },
+    {
+      "config": "spec3",
+      "follow_rate": 0.10896898575020955,
+      "truth_rate": 0.6328583403185247,
+      "neutral_truth_rate": 0.680637049455155
+    },
+    {
+      "config": "mean2",
+      "follow_rate": 0.11232187761944677,
+      "truth_rate": 0.7032690695725062,
+      "neutral_truth_rate": 0.7937971500419112
+    },
+    {
+      "config": "mean5",
+      "follow_rate": 0.08801341156747695,
+      "truth_rate": 0.46437552388935455,
+      "neutral_truth_rate": 0.5381391450125733
+    },
+    {
+      "config": "meanspec3",
+      "follow_rate": 0.11399832355406538,
+      "truth_rate": 0.636211232187762,
+      "neutral_truth_rate": 0.702430846605197
+    }
+  ]
+}

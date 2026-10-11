@@ -1,0 +1,40 @@
+{
+  "experiment": "E5_capability",
+  "timestamp": "2026-10-11T12:30:30.477908+00:00",
+  "git_rev": "4b64aa8",
+  "model": "gemma-2-2b",
+  "n_mmlu": 2000,
+  "n_windows": 7,
+  "results": {
+    "none": {
+      "mmlu_acc": 0.4995,
+      "wiki_ppl": 68.24114990234375,
+      "mmlu_retention": 1.0,
+      "ppl_ratio": 1.0
+    },
+    "top-2": {
+      "mmlu_acc": 0.497,
+      "wiki_ppl": 75.8702621459961,
+      "mmlu_retention": 0.994994994994995,
+      "ppl_ratio": 1.1117963612068371
+    },
+    "top-5": {
+      "mmlu_acc": 0.505,
+      "wiki_ppl": 82.03221893310547,
+      "mmlu_retention": 1.011011011011011,
+      "ppl_ratio": 1.202093151280384
+    },
+    "spec3": {
+      "mmlu_acc": 0.504,
+      "wiki_ppl": 79.39575958251953,
+      "mmlu_retention": 1.009009009009009,
+      "ppl_ratio": 1.1634587004489014
+    },
+    "mean5": {
+      "mmlu_acc": 0.5,
+      "wiki_ppl": 76.85139465332031,
+      "mmlu_retention": 1.001001001001001,
+      "ppl_ratio": 1.1261737934266673
+    }
+  }
+}
