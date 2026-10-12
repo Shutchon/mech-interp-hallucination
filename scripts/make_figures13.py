@@ -57,16 +57,18 @@ def fig1_pipeline():
 
 
 def fig3_attention():
-    """Two contrasting heads side-by-side, column-sized (~3.4 × 3.2 in)."""
+    """All 5 top heads side-by-side, full-width for figure* (~7in × 3in)."""
     d = json.load(open(ROOT / "results/analysis/fig3_attention.json"))
     tokens = d["tokens"]
-    show = [("L22_H4", "specialist"), ("L25_H4", "dual-role")]
+    show = [("L22_H4", "specialist"), ("L22_H0", "specialist"), ("L20_H3", "specialist"),
+            ("L25_H4", "dual-role"), ("L25_H6", "dual-role")]
+    labels = [("⟨bos⟩" if t == "<bos>" else t.replace("▁", " ")) for t in tokens]
 
-    fig, axes = plt.subplots(1, 2, figsize=(3.4, 3.0))
+    n = len(show)
+    fig, axes = plt.subplots(1, n, figsize=(7.0, 3.2))
     import matplotlib.colors as mcolors
     cmap = mcolors.LinearSegmentedColormap.from_list("m", ["#ffffff", "#1f77b4"])
     cmap.set_bad("#f0f0f0")
-    labels = [("⟨bos⟩" if t == "<bos>" else t.replace("▁", " ")) for t in tokens]
     for i, (ax, (h, kind)) in enumerate(zip(np.atleast_1d(axes), show)):
         pat = np.array(d["patterns"][h])
         pat = np.where(np.tril(np.ones_like(pat), k=-1) > 0, np.nan, pat)
@@ -76,12 +78,13 @@ def fig3_attention():
         else:
             ax.set_yticks([])
         ax.set_xticks(range(len(labels)), labels, rotation=90, fontsize=4.5)
-        ax.set_title(f"{h}\n({kind})", fontsize=7)
+        color = "#d62728" if kind == "specialist" else "#1f77b4"
+        ax.set_title(f"{h}\n({kind})", fontsize=7.5, color=color)
         ax.grid(False)
-    fig.suptitle("Attention on misleading prompt\n(true: Israel / distractor: Portsmouth)",
-                 fontsize=7.5)
-    fig.tight_layout(rect=(0, 0, 1, 0.91))
-    fig.savefig(F / "fig3_attention.png", bbox_inches="tight")
+    fig.suptitle("Attention patterns of the five top heads on a misleading prompt "
+                 "(true: Israel / distractor: Portsmouth)", fontsize=8.5)
+    fig.tight_layout(rect=(0, 0, 1, 0.93))
+    fig.savefig(F / "fig3_attention.png", bbox_inches="tight", dpi=200)
     fig.savefig(F / "fig3_attention.pdf", bbox_inches="tight")
     plt.close(fig)
 
