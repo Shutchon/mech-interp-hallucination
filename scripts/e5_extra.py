@@ -77,8 +77,8 @@ def eval_capability(model, questions, windows, hooks, name):
     letter_ids = [int(model.to_tokens(" " + L)[0, -1]) for L in LETTERS]
     correct = 0
     for q in questions:
-        logits = (model.run_with_hooks(q, fwd_hooks=hooks)[0, -1].float()
-                  if hooks else model(q)[0, -1].float())
+        logits = (model.run_with_hooks(q[0], fwd_hooks=hooks)[0, -1].float()
+                  if hooks else model(q[0])[0, -1].float())
         correct += int(torch.tensor([logits[i] for i in letter_ids]).argmax()) == q[1]
     losses, ntok = 0.0, 0
     for w in windows:
