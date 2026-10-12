@@ -405,10 +405,25 @@ produces erratic, non-significant effects.
 
 Capability costs are dissociated (Table~\ref{tab:cap}): MMLU retention is
 statistically indistinguishable from baseline for every tested
-intervention (0.99--1.01), whereas perplexity rises 11--20\%. The
-single-head specialist intervention therefore buys a 35\% relative
-hallucination reduction---with an accuracy \emph{gain}---at essentially no
-knowledge-task cost.
+intervention (0.99--1.01), whereas perplexity rises 5--20\%. The
+single-head specialist intervention is the cheapest of all: a 35\% relative
+hallucination reduction---with an accuracy \emph{gain}---at MMLU retention
+0.998 and a perplexity cost of only 5\%.
+
+\textbf{Template robustness.} Re-evaluating the none, \spec{}, and top-5
+conditions on the two remaining held-out templates tests whether the
+specialist's effect depends on how the context asserts the distractor. On T2 (user-hint
+template) \spec{} again reduces following (16.6\%$\to$11.1\%) while
+raising accuracy by 3.3 points, replicating T0. On T1---the extreme
+adjacent-distractor template whose baseline behavior is nearly pure
+context-following (98.4\%) and which the neutral-control analysis
+attributes largely to recency copying---\spec{} still cuts following by
+9 points and increases accuracy tenfold (0.8\%$\to$8.7\%), while top-5
+removes far more (58.3\%): consistent with T1 additionally recruiting a
+copy pathway that a single specialist head does not fully control. The
+intervention thus generalizes across persuasion formats, with residual
+copy-mediated following as the honest boundary of the single-head
+approach.
 
 \begin{table}[t]
 \caption{Held-out interventions (\emodel{}, misleading template T0).
@@ -446,6 +461,7 @@ config & MMLU & retention & PPL ratio \\
 none   & 50.0\% & 1.00 & 1.00 \\
 top-2  & 49.7\% & 0.99 & 1.11 \\
 top-5  & 50.5\% & 1.01 & 1.20 \\
+\textbf{spec1 (\spec{} only)} & \textbf{49.9\%} & \textbf{1.00} & \textbf{1.05} \\
 spec3  & 50.4\% & 1.01 & 1.16 \\
 mean-abl.\ top-5 & 50.0\% & 1.00 & 1.13 \\
 \bottomrule

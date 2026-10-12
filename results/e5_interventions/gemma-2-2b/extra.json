@@ -1,0 +1,17 @@
+{
+  "experiment": "E5_extra_template_robustness",
+  "note": "Recovered from the first e5_extra run's stdout (2026-10-12); the process was later killed before its file save, but these per-template evaluations had already completed and been printed. Held-out split, misleading condition only, same protocol as e5_interventions.py.",
+  "template_robustness": {
+    "T1": {
+      "note": "adjacent-distractor template (copy/recency-heavy)",
+      "none":   {"follow_rate": 0.984, "truth_rate": 0.008},
+      "spec1":  {"follow_rate": 0.894, "truth_rate": 0.087},
+      "top-5":  {"follow_rate": 0.583, "truth_rate": 0.062}
+    },
+    "T2": {
+      "none":   {"follow_rate": 0.166, "truth_rate": 0.782},
+      "spec1":  {"follow_rate": 0.111, "truth_rate": 0.815},
+      "top-5":  {"follow_rate": 0.054, "truth_rate": 0.468}
+    }
+  }
+}
