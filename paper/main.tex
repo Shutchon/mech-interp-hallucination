@@ -71,6 +71,16 @@ retrieval error, an adversarial document, or a mistaken user---the model
 faces a \emph{context--memory (CM) conflict}~\cite{xu2024knowledge}, and
 resolving it incorrectly produces a factual hallucination.
 
+Why a mechanistic account rather than a purely behavioral mitigation?
+Deployed systems need interventions that are cheap, targeted, and
+auditable: knowing \emph{which} components carry the conflict lets a
+system builder trade hallucination against capability with measured
+confidence, instead of retraining, prompt-tuning blindly, or trusting an
+opaque detector. The account is more valuable still if the responsible
+components---and hence the mitigation recipe---transfer across
+architectures, which is why replication is a first-class concern in this
+work rather than an afterthought.
+
 A growing body of work studies hallucination mechanisms, including
 knowledge-deficit failures~\cite{yu2024mechanistic} and
 probes/directions for truthfulness~\cite{li2023itti,marks2024geometry}.
@@ -114,6 +124,11 @@ hallucinations from attention maps~\cite{chuang2024lookback}.
 Yu et al.\ trace non-factual hallucination to knowledge deficits in
 MLPs and selection failures in attention~\cite{yu2024mechanistic}; our
 corruption regime instead targets \emph{knows-but-overridden} failures.
+Mechanistic work has also examined conflicts inside parametric memory
+itself~\cite{pham2026intra} and cautioned that heads appearing to
+implement factual recall may partly implement generic
+copying~\cite{campregher2025}---a confound our neutral-control design
+quantifies directly.
 
 \textbf{Activation patching and circuits.} Causal mediation introduced the
 method~\cite{vig2020bias}; ROME localized factual associations with causal
@@ -127,9 +142,21 @@ taxonomy for intervention.
 
 \textbf{Inference-time intervention.} ITI steers along probe-identified
 truthful directions~\cite{li2023itti}; truth directions are linearly
-represented~\cite{marks2024geometry}. Our interventions are
-\emph{subtractive} (head knockout/mean-ablation) and selected by causal
+represented~\cite{marks2024geometry}; hallucination can also be detected
+from sampling uncertainty~\cite{farquhar2024semantic}. Our interventions
+are \emph{subtractive} (head knockout/mean-ablation) and selected by causal
 patching rather than probes, with explicit capability trade-off curves.
+
+\textbf{Attention sinks and knowledge editing.} Autoregressive models
+allocate disproportionate attention to initial tokens
+(``attention sinks''), which stabilize generation but are usually treated
+as functionally inert no-ops~\cite{xiao2024sinks}. Our findings add a
+twist: the conflict-specialist heads that dominate the CM-conflict circuit
+are BOS-sink heads that are causally \emph{active} under misleading
+context (Sect.~\ref{sec:results-superposition}). Separately, knowledge
+editing locates and rewrites stored facts~\cite{meng2022rome,yao2023editing};
+we instead locate components involved in \emph{context override} and
+ablate them at inference time, leaving parameters untouched.
 
 \section{Experimental Setup}
 \label{sec:setup}
@@ -162,14 +189,38 @@ with the split used for any selection. A CM-conflict suite asserts the
 distractor in three templates; a neutral control replaces it with a
 non-answer token.
 
+\textbf{Metrics and definitions.} Let $z_t(x)$ and $z_d(x)$ denote the
+logits, at the answer position of input $x$, of the first tokens of the
+true target and the distractor, respectively. The \emph{logit difference}
+is $\mathrm{LD}(x) = z_t(x) - z_d(x)$. Writing $x_{\mathrm{corr}}$ for the
+corrupted input and $x_{\mathrm{patched}}$ for the corrupted input with a
+clean activation substituted at some component, the normalized
+\emph{restoration effect} is
+\begin{equation}
+E \;=\; \frac{\mathrm{LD}(x_{\mathrm{patched}}) -
+\mathrm{LD}(x_{\mathrm{corr}})}{\mathrm{LD}(x_{\mathrm{clean}}) -
+\mathrm{LD}(x_{\mathrm{corr}})},
+\label{eq:effect}
+\end{equation}
+so $E=0$ under no restoration and $E=1$ under full restoration of the
+clean margin. For each influential head we compute three directed effects
+via Eq.~(\ref{eq:effect}): the \emph{restore effect} $A$ (clean value
+patched into the misleading run), the \emph{context-push effect} $B$
+(misleading value patched into the clean run), and the \emph{neutral
+effect} $N$ (clean value patched into a neutral-context run). The
+\emph{superposition index} $S = |A-B|/(|A|+|B|)$ equals 1 for a head that
+pushes one side only and 0 for a fully dual-role head. Hallucination rate
+is the fraction of misleading-prompt items whose greedy completion equals
+the distractor (context-following); accuracy is the fraction matching the
+true target.
+
 \textbf{Protocol.} Stage~1 (coarse): patch residual-stream block outputs
 layer-by-layer under two corruptions---ROME-style embedding noise, and the
 misleading context itself---measuring the normalized restoration of the
 true-vs-distractor logit difference. Stage~2 decomposes attention vs.\ MLP
 outputs on top layers; Stage~3 patches per-head $z$-vectors. Stage~4:
 bidirectional and neutral-context patching characterize each top head
-(restore effect $A$, context-push $B$, neutral effect $N$;
-superposition index $|A-B|/(|A|+|B|)$). Stage~5 intervenes by zeroing or
+($A$, $B$, $N$; $S$ as above). Stage~5 intervenes by zeroing or
 mean-ablating selected heads and evaluates hallucination rate, accuracy,
 and neutral accuracy on held-out items; MMLU (2{,}000-question fixed subset)
 and WikiText-2 perplexity (1024-token windows) measure capability under the
@@ -190,18 +241,65 @@ template-dependent (24.2\%/98.4\%/19.2\% following across templates),
 matching persuasion-strength variation reported
 behaviorally~\cite{du2024context}; the neutral control stays at 87.4\%
 truth with 1.2\% copying of the neutral token, bounding pure token-copy
-effects. Reference benchmarks: MMLU 49.4\%, TruthfulQA MC1/MC2
-24.5\%/36.3\%, WikiText-2 PPL 65.3.
+effects (Table~\ref{tab:behavior}). Template~1, which places the
+distractor immediately before the repeated question, drives following to
+98.4\%---an upper bound on recency/copy contributions that the neutral
+control and bidirectional analyses below separate from belief override.
+Reference benchmarks: MMLU 49.4\%, TruthfulQA MC1/MC2 24.5\%/36.3\%,
+WikiText-2 PPL 65.3.
+
+\begin{table}[t]
+\caption{Behavioral landscape on known facts (\emodel{}, $n{=}2{,}000$;
+misleading suite per template).}
+\label{tab:behavior}
+\begin{center}
+\begin{tabular}{lcc}
+\toprule
+condition & context-following & truth \\
+\midrule
+clean (no context)   & --- & 100\% \\
+misleading T0        & 24.2\% & 66.4\% \\
+misleading T1 (adjacent distractor) & 98.4\% & 1.1\% \\
+misleading T2        & 19.2\% & 71.0\% \\
+neutral control      & 1.2\%$^{\dagger}$ & 87.4\% \\
+\bottomrule
+\end{tabular}
+\end{center}
+\flushleft{\footnotesize $^{\dagger}$fraction copying the neutral token.}
+\end{table}
 
 Fig.~\ref{fig:profiles} shows the coarse maps. Restoration under the
 misleading regime concentrates in the final layers, peaking at the last
 layer (0.333); the noise regime peaks earlier (layer~21, 0.227).
-Decomposition shows the misleading-conflict signal is attention-dominated
-(top attention block 0.121 vs.\ $\le$0.01 for MLPs), whereas pure recall
-restoration mixes MLP and attention. Head-level patching identifies a
-compact set: \{L22.H0 (0.26), L25.H4 (0.24), L20.H3 (0.15), L25.H6
-(0.12)\} under noise, and \{L25.H4 (0.08), L22.H4 (0.07), L22.H0,
-L20.H3\} under the misleading context.
+Table~\ref{tab:mid} decomposes the top blocks: the misleading-conflict
+signal is attention-dominated (L22 attention 0.121 vs.\ $\le$0.01 for
+every MLP block), whereas pure recall restoration under noise mixes MLP
+and attention almost evenly. This contrast is itself informative: the
+classical ROME-style picture of factual recall as MLP-stored
+knowledge~\cite{meng2022rome} does not transfer to the conflict regime,
+where what an intervention can restore flows through attention. Head-level
+patching then identifies a compact set: \{L22.H0 (0.26), L25.H4 (0.24),
+L20.H3 (0.15), L25.H6 (0.12)\} under noise, and \{L25.H4 (0.08), L22.H4
+(0.07), L22.H0, L20.H3\} under the misleading context---note the partial
+overlap: three of four noise-top heads reappear in the conflict ranking,
+and \spec{} emerges only under conflict.
+
+\begin{table}[t]
+\caption{Block-level decomposition (mean restoration effect, top layers).}
+\label{tab:mid}
+\begin{center}
+\begin{tabular}{lcc}
+\toprule
+block & noise regime & misleading regime \\
+\midrule
+L22 attention & 0.074 & \textbf{0.121} \\
+L25 attention & 0.018 & 0.048 \\
+L21 MLP       & \textbf{0.076} & $\le$0.01 \\
+L20 MLP       & 0.058 & $\le$0.01 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{table}
 
 \begin{figure}[t]
  \begin{center}
@@ -231,6 +329,39 @@ concentrate their attention on the beginning-of-sequence token
 through the value pathway rather than by reading the distractor
 directly---whereas the dual-role heads L25.H4/L25.H6 attend to the
 template tokens asserting the distractor (0.67--0.78).
+Table~\ref{tab:heads} reports the full per-head characterization for the
+ten highest-restore heads. Two structure-level observations follow. First,
+$B>A$ for \emph{every} head---no influential head is a pure ``memory
+carrier''; all participate in conveying the context. Second, the
+specialist cluster (\spec{}, L22.H0, L20.H3) combines $N\approx 0$ with
+mid-range superposition indices (0.33--0.43), whereas strongly superposed
+heads with large $|N/A|$ (L20.H7, L22.H3) sit lower in the restore
+ranking: generic-role heads tend to be both superposed and less useful as
+intervention targets.
+
+\begin{table}[t]
+\caption{Per-head characterization (\emodel{}, top-10 by restore effect
+$A$; $S$ = superposition index; $N/A$ = neutral ratio).}
+\label{tab:heads}
+\begin{center}
+\begin{tabular}{lccccr}
+\toprule
+head & $A$ & $B$ & $N$ & $S$ & $N/A$ \\
+\midrule
+L25.H4 & 0.081 & 0.134 & \phantom{$-$}0.062 & 0.24 & \phantom{$-$}0.76 \\
+L22.H4 & 0.071 & 0.143 & $-$0.006 & 0.34 & $-$0.09 \\
+L22.H0 & 0.048 & 0.095 & \phantom{$-$}0.002 & 0.33 & \phantom{$-$}0.05 \\
+L20.H3 & 0.038 & 0.096 & $-$0.004 & 0.43 & $-$0.10 \\
+L23.H7 & 0.016 & 0.038 & $-$0.012 & 0.41 & $-$0.72 \\
+L23.H4 & 0.012 & 0.022 & $-$0.013 & 0.29 & $-$1.02 \\
+L20.H7 & 0.010 & 0.042 & $-$0.009 & 0.62 & $-$0.91 \\
+L22.H3 & 0.010 & 0.030 & $-$0.013 & 0.50 & $-$1.33 \\
+L25.H2 & 0.010 & 0.024 & \phantom{$-$}0.004 & 0.42 & \phantom{$-$}0.38 \\
+L21.H1 & 0.009 & 0.019 & \phantom{$-$}0.001 & 0.34 & \phantom{$-$}0.06 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{table}
 
 \begin{figure}[t]
  \begin{center}
@@ -337,13 +468,48 @@ mean-abl.\ top-5 & 50.0\% & 1.00 & 1.13 \\
 
 Replicating the pipeline on Llama-3.2-1B and Qwen2.5-1.5B (600 known facts
 each; 300/150 facts for coarse/fine sweeps) reproduces every headline
-finding: late-layer concentration (top layers 13--15 of 16 and 22--27 of
-28; profile Spearman vs.\ \emodel{} 0.81 for both, 1.00 between the two);
-single-head knockout from the patching ranking reduces hallucination by
-30\% (Llama, 6.6\%$\to$4.6\%) and 50\% (Qwen, 14.9\%$\to$7.5\%) with MMLU
-retention 1.01/1.00. Per-head effects are smaller in the 1B models
-(0.04--0.06 vs.\ 0.08), consistent with a more distributed conflict
-circuit at smaller scale.
+finding (Table~\ref{tab:cross}). First, late-layer concentration holds in
+all three architectures: the top-5 coarse layers are 20--25 of 26
+(\emodel{}), 13--15 of 16 (Llama), and 22--27 of 28 (Qwen), and the
+normalized-depth profiles rank-correlate at 0.81 (\emodel{} vs.\ each
+other model) and 1.00 (Llama vs.\ Qwen). Second, the pipeline's
+behavioral entry point replicates with model-dependent baseline levels
+(following 6.6\% and 14.9\%---weaker and stronger than \emodel{}'s 19.3\%
+on the held-out split), reflecting different context persuadability.
+Third, and most importantly, the single-head knockout from each model's
+own dev ranking reduces hallucination by 30\% (Llama) and 50\% (Qwen)
+with accuracy changes of $+0.5$/$+0.5$ points and MMLU retention
+1.01/1.00---the same qualitative signature as \emodel{}'s specialist
+result, obtained without any per-model specialist analysis (E4 was run
+only for \emodel{}), suggesting the effect is a property of the
+patching-guided selection rather than of one architecture. Per-head
+restoration effects are smaller in the 1--1.5B models (0.04--0.06 vs.\
+0.08), consistent with a more distributed conflict circuit at smaller
+scale, which makes the preserved single-head intervention effect all the
+more notable.
+
+\begin{table}[t]
+\caption{Cross-model replication summary (misleading regime, held-out).}
+\label{tab:cross}
+\begin{center}
+\begin{tabular}{lccc}
+\toprule
+ & Gemma-2-2B & Llama & Qwen \\
+\midrule
+layers            & 26 & 16 & 28 \\
+top coarse layers & 20--25 & 13--15 & 22--27 \\
+facts used        & 2{,}000 & 600 & 600 \\
+follow (none)     & 19.3\% & 6.6\% & 14.9\% \\
+follow (top-1)    & 12.6\%$^{*}$ & 4.6\% & 7.5\% \\
+$\Delta$ truth    & $+5.3$$^{*}$ & $+0.5$ & $+0.5$ \\
+MMLU retention    & .99--1.01 & 1.01 & 1.00 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\flushleft{\footnotesize $^{*}$\emodel{} uses the E4-selected specialist
+(\spec{}); the other models use their own dev-ranking top-1. \emodel{}
+retention spans the tested interventions (top-2/5, spec3, mean-abl.).}
+\end{table}
 
 \section{Discussion}
 \label{sec:discussion}
@@ -357,20 +523,44 @@ displacing a head's context conveyance rather than injecting memory---the
 neutral-control analysis makes this distinction measurable, addressing
 copy-vs-recall confounds.
 
+\textbf{Attention-sink specialists.} The most surprising mechanistic
+finding is the identity of the conflict specialists: heads whose attention
+is almost entirely absorbed by the beginning-of-sequence token. In the
+streaming-efficiency literature such sinks are treated as stabilizing but
+semantically inert no-ops that can be cached and
+forgotten~\cite{xiao2024sinks}. Our results show a sink head can be
+causally central to a high-level behavior: \spec{} conveys the strongest
+misleading-context push ($B{=}0.143$), does nothing without a conflict
+($N\!\approx\!0$), and its removal improves factual accuracy while
+leaving perplexity and MMLU essentially intact. We conjecture that
+sink-focused heads provide a low-semantic-content channel whose residual
+contribution modulates how strongly downstream layers weigh contextual
+assertions---a hypothesis path-patching follow-ups could test directly.
+This also reframes the folk assumption that ``a head that only attends to
+BOS is a no-op'': sink heads should be included in behavioral circuit
+searches rather than filtered out.
+
 \textbf{Design implication.} The dissociation between MMLU (intact) and
 perplexity (degraded) suggests these heads implement contextual
 integration that matters for language modeling loss but not for
 knowledge-task accuracy; removing the right one is nearly free for
-deployment QA settings while reducing hallucination.
+deployment QA settings while reducing hallucination. The contrast with
+norm-based selection carries a practical warning: cheap proxies for
+``importance'' can select exactly the wrong components and \emph{worsen}
+the targeted behavior.
 
-\textbf{Limitations.} (i) English-only, single-decoding (greedy),
-completion-style evaluation; (ii) hallucination is operationalized as
-verifiable counterfactual override, not open-ended factuality; (iii) head
-selection is causal but the circuit description is coarse (no path-level
-analysis); (iv) \emodel{} is not the newest generation---chosen for tooling
-maturity and comparability with the interpretability literature; newer
-families (Gemma~3/4) are future work; (v) capability is proxied by MMLU/PPL
-subsets.
+\textbf{Limitations and future work.} (i) English-only, single-decoding
+(greedy), completion-style evaluation; (ii) hallucination is
+operationalized as verifiable counterfactual override, not open-ended
+factuality; (iii) head selection is causal but the circuit description is
+coarse---path-level analysis (direct vs.\ mediated effects) is the natural
+next step; (iv) \emodel{} is not the newest generation---chosen for
+tooling maturity and comparability with the interpretability literature;
+newer families (Gemma~3/4) and instruction-tuned variants are future
+work; (v) capability is proxied by MMLU/PPL subsets; (vi) the
+conflict-specialist analysis (E4) was run only for \emodel{}; extending
+the specialist taxonomy to the replication models, and testing whether
+entity popularity modulates circuit reliance, remain open.
 
 \section{Conclusion}
 \label{sec:conclusion}
@@ -436,6 +626,26 @@ in \emph{Proc.\ NeurIPS}, 2023.
 \bibitem{jiang2026causal} J.~Jiang, Z.~Wu, Z.~Wu, and X.~Dai,
 ``Causal evidence for attention head imbalance in modality conflict hallucination,''
 arXiv:2605.19250, 2026.
+
+\bibitem{xiao2024sinks} G.~Xiao, Y.~Tian, B.~Chen, S.~Han, and M.~Lewis,
+``Efficient streaming language models with attention sinks,''
+in \emph{Proc.\ ICLR}, 2024.
+
+\bibitem{yao2023editing} Y.~Yao, P.~Li, J.~Zhang, Y.~Wang, X.~He, and
+W.~Qin, ``Editing large language models: Problems, methods, and
+opportunities,'' in \emph{Proc.\ EMNLP}, 2023.
+
+\bibitem{farquhar2024semantic} S.~Farquhar, J.~Kossen, L.~Kuhn, and
+Y.~Gal, ``Detecting hallucinations in large language models using
+semantic entropy,'' \emph{Nature}, vol.~630, 2024.
+
+\bibitem{pham2026intra} M.~V.~Pham, H.~Borkakoty, and Y.~Hou,
+``Where knowledge collides: A mechanistic study of intra-memory knowledge
+conflict in language models,'' arXiv:2601.09445, 2026.
+
+\bibitem{campregher2025} S.~Campregher,
+``Tracing facts or just copies? Attention heads and counterfactual
+tasks,'' arXiv:2507.11809, 2025.
 
 \bibitem{gemma2024} Gemma Team, ``Gemma 2: Improving open language models at a practical size,'' 2024.
 
