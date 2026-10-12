@@ -1,0 +1,22 @@
+{
+  "experiment": "E5_capability",
+  "timestamp": "2026-10-12T04:24:31.140243+00:00",
+  "git_rev": "432bd78",
+  "model": "gemma-2-2b",
+  "n_mmlu": 2000,
+  "n_windows": 7,
+  "results": {
+    "none": {
+      "mmlu_acc": 0.4995,
+      "wiki_ppl": 68.24114990234375,
+      "mmlu_retention": 1.0,
+      "ppl_ratio": 1.0
+    },
+    "spec1": {
+      "mmlu_acc": 0.4985,
+      "wiki_ppl": 71.86085510253906,
+      "mmlu_retention": 0.997997997997998,
+      "ppl_ratio": 1.0530428517892105
+    }
+  }
+}
