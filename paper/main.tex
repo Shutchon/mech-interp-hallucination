@@ -195,8 +195,8 @@ Fig.~\ref{fig:pipeline} summarizes the protocol.
 Llama-3.2-1B (16L/32H)~\cite{llama32card,llama2024}, Qwen2.5-1.5B (28L/12H)~\cite{qwen2025}. All experiments use
 bfloat16 on a single 24GB GPU; a parity check between our hooking framework
 and reference HuggingFace logits passed in float32 (mean KL $1.3\times
-10^{-5}$, argmax agreement 100\%), bounding numerical noise two to three
-orders below measured effects.
+10^{-5}$, argmax agreement 100\%). Precision robustness of the metrics
+themselves is reported in Sect.~\ref{sec:results-localization}.
 
 \textbf{Data.} From CounterFact~\cite{meng2022rome} we retain facts each
 model demonstrably knows (greedy completion equals the true target and the
@@ -413,18 +413,21 @@ heads and keeps it under every denominator threshold we tested (0.5, 1,
 2 logits), whereas \spec{}, L22.H0, and L20.H3 remain at
 $N\!\approx\!0$ under every threshold---\emph{conflict specialists}
 whose minimal neutral-control effect is robust to the normalization
-choice. Fig.~\ref{fig:attention} shows that,
-on the misleading prompt, the specialists concentrate their attention on
-the beginning-of-sequence token (0.92--1.00; we note that BOS precedes
-the misleading context in the causal decoder, so this pattern limits
-\emph{what the head reads} rather than explaining \emph{how} it conveys
-context information---the mechanism may operate through the value
-vectors at BOS, through the removal of attention from other positions,
-or through downstream residual-stream effects). The dual-role heads
-L25.H4/L25.H6, by contrast, attend to the template tokens asserting the
-distractor (0.67--0.78). We note that Fig.~\ref{fig:attention} shows a
-single representative example; the pattern is qualitatively stable but
-should be quantified across the full dataset in future work.
+choice. Fig.~\ref{fig:attention} measures, from the answer position of
+32 misleading held-out prompts (mean$\pm$SD), where each head reads.
+The strongest specialist, \spec{}, concentrates $68\pm9\%$ of its
+answer-position attention on $\langle$bos$\rangle$ and a further
+$18\pm8\%$ on the token asserting the distractor ($86\%$ combined);
+the other specialists split $22$--$35\%$ BOS / $10$--$12\%$ distractor,
+whereas the dual-role heads L25.H4/L25.H6 read the distractor token
+only $3\%$/$0.5\%$. Reading-position attention to the distractor is
+modest for every head ($2$--$11\%$ averaged over positions following
+the distractor). We note that BOS precedes the misleading context in
+the causal decoder, so BOS attention limits \emph{what the head reads}
+rather than explaining \emph{how} it conveys context information---the
+mechanism may operate through the value vectors at BOS, through
+attention reallocation, or through downstream residual-stream effects;
+separating these hypotheses remains open.
 Table~\ref{tab:heads} reports the full per-head characterization for the
 ten highest-restore heads. Two structure-level observations follow. First,
 $B>A$ for \emph{every} head---no influential head is a pure ``memory
@@ -463,12 +466,14 @@ L21.H1 & 0.009 & 0.019 & \phantom{$-$}0.001 & 0.34 & \phantom{$-$}0.06 \\
  \begin{center}
   \includegraphics[width=\textwidth]{figs/fig3_attention.pdf}
  \end{center}
- \caption{Attention patterns of the five top heads on a representative
- misleading prompt (``Eli Maor is originally from''; true: Israel,
- distractor: Portsmouth). Conflict specialists (red, left three) attend
- almost exclusively to $\langle$bos$\rangle$; dual-role heads (blue,
- right two) spread attention over the template tokens asserting the
- distractor.}
+ \caption{Attention of the five top heads. (a) Patterns on a
+ representative misleading prompt (true: French, distractor: English;
+ D marks distractor columns, bottom row = answer query).
+ (b) Attention from the answer position to BOS / the distractor token /
+ other positions, mean$\pm$SD over 32 misleading held-out prompts.
+ \spec{} (red) combines the strongest BOS concentration with direct
+ distractor reading; dual-role heads (blue) read the distractor
+ negligibly.}
  \label{fig:attention}
 \end{figure*}
 
