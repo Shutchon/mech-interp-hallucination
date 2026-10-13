@@ -74,12 +74,12 @@ def fig3_attention():
         pat = np.where(np.tril(np.ones_like(pat), k=-1) > 0, np.nan, pat)
         ax.imshow(pat.T, cmap=cmap, vmin=0, vmax=1, aspect="auto")
         if i == 0:
-            ax.set_yticks(range(len(labels)), labels, fontsize=4.5)
+            ax.set_yticks(range(len(labels)), labels, fontsize=6)
         else:
             ax.set_yticks([])
-        ax.set_xticks(range(len(labels)), labels, rotation=90, fontsize=4.5)
+        ax.set_xticks(range(len(labels)), labels, rotation=90, fontsize=6)
         color = "#d62728" if kind == "specialist" else "#1f77b4"
-        ax.set_title(f"{h}\n({kind})", fontsize=7.5, color=color)
+        ax.set_title(f"{h}\n({kind})", fontsize=8, color=color)
         ax.grid(False)
     fig.suptitle("Attention patterns of the five top heads on a misleading prompt "
                  "(true: Israel / distractor: Portsmouth)", fontsize=8.5)
