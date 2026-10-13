@@ -1,14 +1,18 @@
 #!/usr/bin/env python
 """Generate paper figures from results JSONs (no GPU needed).
 
+Round-2 revision: every figure is created at the exact print size
+(single column = 3.39in) so that fonts stay >=7pt in print (IEICE rule).
+
 Fig 2: (a) gemma layer profiles, both corruption regimes; (b) cross-model
-       layer profiles at normalised depth.
+       layer profiles at normalised depth.   [stacked, single column]
 Fig 4: intervention trade-offs — (a) suite space (follow vs truth);
        (b) capability space (follow vs MMLU retention, PPL annotated).
+       [stacked, single column; includes spec1 capability]
 Fig 5: superposition scatter — context-push (B) vs restore (A) per head,
-       coloured by neutral ratio, top heads annotated.
+       coloured by neutral ratio, spec1 highlighted.
 
-Usage: .venv-mac/bin/python scripts/make_figures.py
+Usage: python3 scripts/make_figures.py
 """
 from __future__ import annotations
 
@@ -22,12 +26,13 @@ import numpy as np
 
 ROOT = Path(__file__).resolve().parents[1]
 R = ROOT / "results"
-F = ROOT / "figures"
-F.mkdir(exist_ok=True)
-plt.rcParams.update({"figure.dpi": 150, "font.size": 8, "axes.grid": True,
+F = ROOT / "paper" / "figs"
+F.mkdir(parents=True, exist_ok=True)
+COL = 3.39  # IEICE column width in inches
+plt.rcParams.update({"figure.dpi": 200, "font.size": 8, "axes.grid": True,
                      "grid.alpha": 0.3, "axes.spines.top": False, "axes.spines.right": False,
-                     "axes.labelsize": 8, "axes.titlesize": 9, "xtick.labelsize": 7,
-                     "ytick.labelsize": 7, "legend.fontsize": 7})
+                     "axes.labelsize": 8, "axes.titlesize": 8.5, "xtick.labelsize": 7.5,
+                     "ytick.labelsize": 7.5, "legend.fontsize": 7})
 
 
 def load_jsonl(path: Path) -> list[dict]:
@@ -47,69 +52,74 @@ def fig2():
     llama = layer_profile(R / "e6_cross/meta-llama/Llama-3.2-1B/coarse.jsonl", 16)
     qwen = layer_profile(R / "e6_cross/Qwen/Qwen2.5-1.5B/coarse.jsonl", 28)
 
-    fig, axes = plt.subplots(1, 2, figsize=(7.0, 3.0))
+    fig, axes = plt.subplots(2, 1, figsize=(COL, 4.7))
     ax = axes[0]
-    ax.plot(gemma_noise, "-o", ms=3, label="noise (ROME-style)", color="#1f77b4")
-    ax.plot(gemma_mis, "-s", ms=3, label="misleading context", color="#d62728")
-    ax.set(xlabel="layer", ylabel="restoration effect", title="Gemma-2-2B — coarse sweep")
+    ax.plot(gemma_noise, "-o", ms=2.5, lw=1.2, label="noise (ROME-style)", color="#1f77b4")
+    ax.plot(gemma_mis, "-s", ms=2.5, lw=1.2, label="misleading context", color="#d62728")
+    ax.set(xlabel="layer", ylabel="restoration\neffect", title="(a) Gemma-2-2B, coarse sweep")
     ax.legend(frameon=False)
     ax = axes[1]
     for prof, name, c in ((gemma_mis, "Gemma-2-2B (26L)", "#d62728"),
                           (llama, "Llama-3.2-1B (16L)", "#1f77b4"),
                           (qwen, "Qwen2.5-1.5B (28L)", "#2ca02c")):
         x = np.linspace(0, 1, len(prof))
-        ax.plot(x, prof, "-o", ms=3, label=name, color=c)
-    ax.set(xlabel="normalised depth", ylabel="restoration effect",
-           title="Cross-model layer profiles (misleading regime)")
+        ax.plot(x, prof, "-o", ms=2.5, lw=1.2, label=name, color=c)
+    ax.set(xlabel="normalised depth", ylabel="restoration\neffect",
+           title="(b) Cross-model layer profiles (misleading regime)")
     ax.legend(frameon=False)
-    fig.tight_layout()
-    fig.savefig(F / "fig2_layer_profiles.png", bbox_inches="tight")
+    fig.tight_layout(h_pad=1.4)
     fig.savefig(F / "fig2_layer_profiles.pdf", bbox_inches="tight")
+    fig.savefig(F / "fig2_layer_profiles.png", bbox_inches="tight")
     plt.close(fig)
 
 
 def fig4():
     r1 = {r["config"]: r for r in json.load(open(R / "e5_interventions/gemma-2-2b/dose_response.json"))["results"]}
     r2 = {r["config"]: r for r in json.load(open(R / "e5_interventions/gemma-2-2b/round2.json"))["results"]}
-    cap = json.load(open(R / "e5_interventions/gemma-2-2b/capability.json"))["results"]
+    cap = dict(json.load(open(R / "e5_interventions/gemma-2-2b/capability.json"))["results"])
+    cap.update(json.load(open(R / "e5_interventions/gemma-2-2b/capability_spec1.json"))["results"])
 
-    fig, axes = plt.subplots(1, 2, figsize=(7.0, 3.5))
+    fig, axes = plt.subplots(2, 1, figsize=(COL, 5.4))
     ax = axes[0]
     base = r1["none"]
-    ax.scatter(base["follow_rate"], base["truth_rate"], marker="*", s=220, c="k", label="none", zorder=5)
+    ax.scatter(base["follow_rate"], base["truth_rate"], marker="*", s=140, c="k", label="none", zorder=5)
     for k, c in zip(("1", "2", "5", "10", "20"), plt.cm.Blues(np.linspace(0.45, 0.95, 5))):
         r = r1[f"top-{k}"]
-        ax.scatter(r["follow_rate"], r["truth_rate"], color=c, s=60)
+        ax.scatter(r["follow_rate"], r["truth_rate"], color=c, s=34)
         ax.annotate(f"k={k}", (r["follow_rate"], r["truth_rate"]), fontsize=7,
-                    xytext=(4, 3), textcoords="offset points", color=c)
-    for name, m, col in (("spec1", "P", "#d62728"), ("spec3", "X", "#ff7f0e"),
-                         ("mean2", "^", "#2ca02c"), ("mean5", "v", "#9467bd"),
-                         ("meanspec3", "<", "#8c564b")):
+                    xytext=(3, 2), textcoords="offset points", color=c)
+    for name, m, col, lab in (("spec1", "P", "#d62728", "spec1 (L22.H4)"),
+                              ("spec3", "X", "#ff7f0e", "spec3"),
+                              ("mean2", "^", "#2ca02c", "mean2"),
+                              ("mean5", "v", "#9467bd", "mean5"),
+                              ("meanspec3", "<", "#8c564b", "meanspec3")):
         r = r2[name]
-        ax.scatter(r["follow_rate"], r["truth_rate"], marker=m, c=col, s=70, label=name)
+        ax.scatter(r["follow_rate"], r["truth_rate"], marker=m, c=col, s=44, label=lab)
     tn = r1["topnorm-5"]
-    ax.scatter(tn["follow_rate"], tn["truth_rate"], marker="D", c="#7f7f7f", s=70, label="topnorm-5 (norm-selected)")
-    ax.set(xlabel="context-following rate ↓ (hallucination)", ylabel="truth rate ↑",
+    ax.scatter(tn["follow_rate"], tn["truth_rate"], marker="D", c="#7f7f7f", s=40,
+               label="topnorm-5")
+    ax.set(xlabel="context-following rate (hallucination)", ylabel="truth rate",
            title="(a) Suite trade-off (held-out)")
-    ax.legend(frameon=False, fontsize=7, loc="lower right")
+    ax.legend(frameon=False, loc="lower right", ncol=2, columnspacing=0.9,
+              handletextpad=0.3, markerscale=0.8)
 
     ax = axes[1]
     xs, ys, labels = [], [], []
-    for name, c in (("none", "k"), ("top-2", "#1f77b4"), ("top-5", "#1f77b4"),
-                    ("spec3", "#d62728"), ("mean5", "#9467bd")):
+    for name, c in (("none", "k"), ("spec1", "#d62728"), ("top-2", "#1f77b4"),
+                    ("top-5", "#1f77b4"), ("spec3", "#ff7f0e"), ("mean5", "#9467bd")):
         rate = r1.get(name) or r2.get(name)
         xs.append(rate["follow_rate"])
         ys.append(cap[name]["mmlu_retention"])
-        labels.append(f"{name}\nPPL×{cap[name]['ppl_ratio']:.2f}")
-    ax.scatter(xs, ys, s=80)
+        labels.append(f"{name} PPL×{cap[name]['ppl_ratio']:.2f}")
+    ax.scatter(xs, ys, s=36)
     for x, y, t in zip(xs, ys, labels):
-        ax.annotate(t, (x, y), fontsize=7, xytext=(6, 4), textcoords="offset points")
+        ax.annotate(t, (x, y), fontsize=7, xytext=(4, 3), textcoords="offset points")
     ax.axhline(1.0, ls="--", c="gray", lw=0.8)
-    ax.set(xlabel="context-following rate ↓ (hallucination)", ylabel="MMLU retention",
+    ax.set(xlabel="context-following rate (hallucination)", ylabel="MMLU retention",
            title="(b) Capability cost", xlim=(0, 0.36), ylim=(0.97, 1.03))
-    fig.tight_layout()
-    fig.savefig(F / "fig4_tradeoff.png", bbox_inches="tight")
+    fig.tight_layout(h_pad=1.4)
     fig.savefig(F / "fig4_tradeoff.pdf", bbox_inches="tight")
+    fig.savefig(F / "fig4_tradeoff.png", bbox_inches="tight")
     plt.close(fig)
 
 
@@ -119,21 +129,27 @@ def fig5():
     B = np.array([r["effect_B_context_push"] for r in table])
     na = np.array([r["neutral_ratio"] if r["neutral_ratio"] is not None else 0 for r in table])
 
-    fig, ax = plt.subplots(figsize=(3.4, 3.2))
-    sc = ax.scatter(B, A, c=na, cmap="coolwarm", vmin=-0.5, vmax=1.0, s=70, edgecolors="k", lw=0.4)
+    fig, ax = plt.subplots(figsize=(COL, 2.9))
+    sc = ax.scatter(B, A, c=na, cmap="coolwarm", vmin=-1.5, vmax=1.5, s=42,
+                    edgecolors="k", lw=0.4)
     lim = max(A.max(), B.max()) * 1.15
-    ax.plot([0, lim], [0, lim], "--", c="gray", lw=0.8, label="A = B (fully superposed)")
+    ax.plot([0, lim], [0, lim], "--", c="gray", lw=0.8, label="A = B (strongly superposed)")
+    spec1 = next(r for r in table if r["head"] == "L22_H4")
+    ax.scatter([spec1["effect_B_context_push"]], [spec1["effect_A_restore"]],
+               marker="*", s=200, facecolors="none", edgecolors="#d62728", lw=1.4,
+               label="spec1 (L22.H4)", zorder=6)
     for r in table[:6]:
         ax.annotate(r["head"], (r["effect_B_context_push"], r["effect_A_restore"]),
-                    fontsize=7, xytext=(5, 4), textcoords="offset points")
-    cb = fig.colorbar(sc, ax=ax)
-    cb.set_label("neutral ratio N/A (red = generic memory role)")
-    ax.set(xlabel="context-push effect B (misleading → clean)", ylabel="restore effect A (clean → misleading)",
+                    fontsize=7, xytext=(4, 3), textcoords="offset points")
+    cb = fig.colorbar(sc, ax=ax, pad=0.02)
+    cb.set_label("neutral ratio N/A", fontsize=7.5)
+    cb.ax.tick_params(labelsize=7)
+    ax.set(xlabel="context-push effect B", ylabel="restore effect A",
            title="Dual roles of influential heads (Gemma-2-2B)")
-    ax.legend(frameon=False, fontsize=7, loc="lower right")
+    ax.legend(frameon=False, loc="lower right")
     fig.tight_layout()
-    fig.savefig(F / "fig5_superposition.png", bbox_inches="tight")
     fig.savefig(F / "fig5_superposition.pdf", bbox_inches="tight")
+    fig.savefig(F / "fig5_superposition.png", bbox_inches="tight")
     plt.close(fig)
 
 

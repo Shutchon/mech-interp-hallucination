@@ -471,3 +471,20 @@
 | งานใหม่ปี 2026–2027 | สืบค้นซ้ำด้วยคำค้นใน §8.5 ของแผนหลัก ก่อน submit — โดยเฉพาะ "knowledge conflict activation patching" และ "superposition attention heads" |
 
 **เคล็ดลับตรวจเร็ว:** เปิด ACL Anthology / arXiv abs page ของทุกรายการที่จะอ้างจริง แล้วคัดลอก citation จากหน้านั้นโดยตรง (อย่าพิมพ์เองจากความจำ) — Semantic Scholar API (`api.semanticscholar.org/graph/v1/paper/search?query=...`) ช่วยดึงรายชื่อผู้แต่ง/venue แบบ machine-readable ได้
+
+## 9. อ้างอิงจาก IEICE Transactions on Information and Systems (เพิ่มเพื่อ venue fit — 13 ต.ค. 2026)
+
+> วารสารปลายทางของเรา ตรวจสอบบน J-STAGE ทุกรายการแล้ว (DOI คลิกได้) — ใส่ใน `paper/main.tex` แล้ว 4 รายการ
+> หลักการเลือก: อ้างเฉพาะที่เนื้อหาเกี่ยวข้องจริง ไม่ใช่ cite เพื่อให้เกิดการอ้าง
+
+| # | รายการ | ใช้ตรงไหนใน paper | Bibkey |
+|---|--------|-------------------|--------|
+| 1 | K. Mishima, H. Yamana, "A Survey on Explainable Fake News Detection," *IEICE Trans. Inf. & Syst.*, E105-D(7), pp. 1249–1257, Jul. 2022. DOI: [10.1587/transinf.2021EDR0003](https://doi.org/10.1587/transinf.2021EDR0003) | Intro ¶1 — กรอบ "in-context misinformation" (บริบทที่เป็นเท็จ = ข่าวปลอมในบริบท) | `mishima2022fake` |
+| 2 | T. Aromsuk, P. Netisopakul, S. Nootyaskool, "Improved Naive RAG by Integrated Advanced Techniques…," *IEICE Trans. Inf. & Syst.*, E109-D(7), pp. 1057–1068, Jul. 2026. DOI: [10.1587/transinf.2025DAP0003](https://doi.org/10.1587/transinf.2025DAP0003) | Intro ¶1 — RAG pipeline เป็น scenario หลักที่เกิด CM conflict | `aromsuk2026rag` |
+| 3 | G. Cai, J. Zhu, "Interpreting Attention Mechanisms of NMT with Linguistic Features," *IEICE Trans. Inf. & Syst.*, E108-D(11), pp. 1381–1391, Nov. 2025. DOI: [10.1587/transinf.2024EDP7292](https://doi.org/10.1587/transinf.2024EDP7292) | Related Work — attention-node analysis + masking ที่ปรับปรุงคุณภาพ output (ขนานกับ pipeline "วิเคราะห์→แทรกแซง" ของเรา) | `cai2025attention` |
+| 4 | N. Dong, N. Kertkeidkachorn, X. Liu, K. Shirai, "Semantic-Driven and Rule-Based Noise Detection and Refinement in Knowledge Graphs Using Large Language Models," *IEICE Trans. Inf. & Syst.*, E109-D(8), pp. 1228–1237, Aug. 2026. DOI: [10.1587/transinf.2025EDP7162](https://doi.org/10.1587/transinf.2025EDP7162) | Related Work — data-side remedies (แก้ factual noise ที่ต้นทางข้อมูล เทียบกับ model-internal circuit ของเรา) | `dong2026kg` |
+
+**หมายเหตุ:**
+- ผู้เขียน Aromsuk et al. มาจาก KMUTT (ไทย) — เหมาะกับบริบทผู้เขียนไทยโดยไม่ต้อง force
+- ไม่มี paper ใน ECTI ที่ทำ mechanistic interpretability / activation patching โดยตรง — ยืนยัน novelty ของเราใน venue นี้อีกครั้ง
+- เลือกไม่ใช้: "A Systematic Evaluation of LLMs in API Mapping" (E109-D) และ GRPO prompt-control (E109-D) เพราะเนื้อหาห่างไกลเกินไป
