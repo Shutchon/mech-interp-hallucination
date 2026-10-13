@@ -27,7 +27,6 @@ CONFIG_HEADS = {
     "spec1": [(22, 4)],
     "spec3": [(22, 4), (22, 0), (20, 3)],
     "top-5": [(25, 4), (22, 4), (22, 0), (20, 3), (23, 7)],
-    "mean5-as-zero": [(25, 4), (22, 4), (22, 0), (20, 3), (23, 7)],
 }
 
 
@@ -61,8 +60,8 @@ def main():
             n = n_true = n_dist = 0
             for f in facts:
                 prompt = T0.format(a=f["target_true"], p=f["prompt"])
-                tid = model.to_single_token(" " + f["target_true"])
-                did = model.to_single_token(" " + f["target_false"])
+                tid = int(model.to_tokens(" " + f["target_true"])[0, -1])
+                did = int(model.to_tokens(" " + f["target_false"])[0, -1])
                 logits = model.run_with_hooks(prompt, fwd_hooks=hooks)[0, -1].float()
                 pred = int(logits.argmax())
                 n += 1

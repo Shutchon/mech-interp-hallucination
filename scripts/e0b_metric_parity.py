@@ -33,16 +33,10 @@ def load_model(dtype):
     return m.to("cuda" if torch.cuda.is_available() else "cpu")
 
 
-def first_tok(model, prompt, tstr, dstr):
-    tid = model.to_single_token(" " + tstr) if not tstr.startswith(" ") else model.to_single_token(tstr)
-    did = model.to_single_token(" " + dstr) if not dstr.startswith(" ") else model.to_single_token(dstr)
-    return tid, did
-
-
 @torch.no_grad()
 def run_sample(model, facts, suite, top_heads, n):
     """Returns dict: per-condition LD arrays + per-head A effects."""
-    ids_by_case = {s["case_id"]: s for s in suite if s["template_idx"] == 0 and s["split"] == "heldout"}
+    ids_by_case = {s["case_id"]: s for s in suite if s["template_idx"] == 0 and s["split"] == "dev"}
     dev_facts = [f for f in facts if f["split"] == "dev"][:n]
     lds = {"clean": [], "mis": [], "neu": []}
     head_eff = {h: [] for h in top_heads}
@@ -51,10 +45,8 @@ def run_sample(model, facts, suite, top_heads, n):
         s = ids_by_case.get(cid)
         if s is None:
             continue
-        t = " " + f["target_true"]
-        d = " " + f["target_false"]
-        tid = model.to_single_token(t)
-        did = model.to_single_token(d)
+        tid = int(model.to_tokens(" " + f["target_true"])[0, -1])
+        did = int(model.to_tokens(" " + f["target_false"])[0, -1])
         clean_p = f["prompt"]
         mis_p = s["prompt_shown"]
         neu_p = mis_p.replace(d.strip(), "unknown")

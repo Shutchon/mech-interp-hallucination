@@ -60,7 +60,7 @@ def main():
     rng = random.Random(0)
     idx = rng.sample(range(len(mmlu)), min(args.n_mmlu, len(mmlu)))
     letters = ["A", "B", "C", "D"]
-    tok_ids = {L: model.to_single_token(L) for L in letters}
+    tok_ids = {L: int(model.to_tokens(" " + L)[0, -1]) for L in letters}
 
     with open(OUT, "w") as fh:
         for cfg in args.configs.split(","):
@@ -69,7 +69,7 @@ def main():
             for qi, i in enumerate(idx):
                 row = mmlu[i]
                 prompt = (f"The following are multiple choice questions "
-                          f"(with answers) about {row['subject']}.\n\n"
+                          f"(with answers) about {row['subject'].replace('_', ' ')}.\n\n"
                           f"{row['question']}\n"
                           + "\n".join(f"{L}. {c}" for L, c in zip(letters, row["choices"]))
                           + "\nAnswer:")
