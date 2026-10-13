@@ -69,7 +69,7 @@ model must frequently integrate an external context with its parametric
 knowledge. When the context asserts a false fact---whether through a
 retrieval error, an adversarial document, or a mistaken user---the model
 faces a \emph{context--memory (CM) conflict}~\cite{xu2024knowledge}, and
-resolving it incorrectly produces a factual hallucination.
+resolving it incorrectly produces a factual hallucination, which can then cascade into further errors~\cite{zhang2024snowball}.
 
 Why a mechanistic account rather than a purely behavioral mitigation?
 Deployed systems need interventions that are cheap, targeted, and
@@ -136,9 +136,12 @@ tracing~\cite{meng2022rome}; best practices are systematized
 in~\cite{zhang2024bestpractices}. Head-level analyses include
 IOI~\cite{wang2023ioi} and copy suppression~\cite{mcdougall2023copy}.
 Closest to us, JuICE reports head superposition in knowledge
-conflicts~\cite{li2025juice}; we test its claim at head granularity in
-SLMs under a counterfactual-distractor regime and exploit the resulting
-taxonomy for intervention.
+conflicts~\cite{li2025juice}. Our work adds: (i) a neutral-control
+analysis that separates conflict-specialists from dual-role heads
+(JuICE does not use a neutral condition); (ii) single-head ablation
+evaluated on held-out relations (JuICE evaluates on the same data used
+for head identification); and (iii) explicit capability trade-off
+curves with MMLU and perplexity costs, which JuICE does not report.
 
 \textbf{Inference-time intervention.} ITI steers along probe-identified
 truthful directions~\cite{li2023itti}; truth directions are linearly
@@ -173,8 +176,8 @@ Fig.~\ref{fig:pipeline} summarizes the protocol.
  \label{fig:pipeline}
 \end{figure}
 
-\textbf{Models.} Primary: \emodel{} (26 layers, 8 heads). Cross-model:
-Llama-3.2-1B (16L/32H), Qwen2.5-1.5B (28L/12H). All experiments use
+\textbf{Models.} Primary: \emodel{}~(26 layers, 8 heads)~\cite{gemma2024}. Cross-model:
+Llama-3.2-1B (16L/32H)~\cite{llama2024}, Qwen2.5-1.5B (28L/12H)~\cite{qwen2025}. All experiments use
 bfloat16 on a single 24GB GPU; a parity check between our hooking framework
 and reference HuggingFace logits passed in float32 (mean KL $1.3\times
 10^{-5}$, argmax agreement 100\%), bounding numerical noise two to three
@@ -285,7 +288,7 @@ distractor immediately before the repeated question, drives following to
 98.4\%---an upper bound on recency/copy contributions that the neutral
 control and bidirectional analyses below separate from belief override.
 Reference benchmarks (lm-eval-harness, full MMLU test set):
-MMLU 49.4\%$\pm$0.4, TruthfulQA MC1/MC2
+MMLU 49.4\%$\pm$0.4, TruthfulQA MC1/MC2~\cite{lin2022truthfulqa}
 24.5\%/36.3\%, WikiText-2 PPL 65.3 (1024-token windows). The 2{,}000-question
 MMLU subset used for intervention evaluation yields 50.0\% at baseline;
 the two scores differ because of subset sampling, not protocol error.
