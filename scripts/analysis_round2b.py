@@ -39,9 +39,12 @@ out = {"experiment": "analysis_round2b"}
 p = R / "e5_interventions/gemma-2-2b/mmlu_perq.jsonl"
 if p.exists():
     rows = load_jsonl(p)
+    LET = "ABCD"
     by = defaultdict(dict)
     for r in rows:
-        by[r["config"]][r["q_idx"]] = r["is_correct"]
+        # recompute: pred letter vs integer answer (robust to e5b's letter/int slip)
+        ok = LET.index(r["pred"]) == int(r["answer"])
+        by[r["config"]][r["q_idx"]] = ok
     acc = {cfg: float(np.mean(list(v.values()))) for cfg, v in by.items()}
     common = sorted(set(by["none"]) & set(by["spec1"]))
     b = sum(1 for q in common if not by["none"][q] and by["spec1"][q])

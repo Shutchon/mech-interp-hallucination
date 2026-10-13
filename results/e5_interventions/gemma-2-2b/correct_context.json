@@ -1,0 +1,29 @@
+{
+ "experiment": "E5c_correct_context",
+ "results": [
+  {
+   "config": "none",
+   "n": 1193,
+   "true_rate": 0.9815590947191953,
+   "distractor_rate": 0.0
+  },
+  {
+   "config": "spec1",
+   "n": 1193,
+   "true_rate": 0.9606035205364627,
+   "distractor_rate": 0.0
+  },
+  {
+   "config": "spec3",
+   "n": 1193,
+   "true_rate": 0.815590947191953,
+   "distractor_rate": 0.0
+  },
+  {
+   "config": "top-5",
+   "n": 1193,
+   "true_rate": 0.6018440905280805,
+   "distractor_rate": 0.0008382229673093043
+  }
+ ]
+}
