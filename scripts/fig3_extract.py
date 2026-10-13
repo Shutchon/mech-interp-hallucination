@@ -41,7 +41,7 @@ def main():
              if json.loads(l)["split"] == "heldout"][: args.n_prompts]
     suite = {s["case_id"]: s for s in
              (json.loads(l) for l in open(R / "e1_dataset/misleading_suite.jsonl"))
-             if s["template_idx"] == 0 and s["split"] == "heldout"}
+             if s["template_idx"] == 0 and s["split"] == "heldout" and s["condition"] == "misleading"}
 
     stats = {f"L{l}.H{h}": {"bos": [], "distractor": [], "other": [], "distr_read": []}
              for l, h, _ in HEADS}
