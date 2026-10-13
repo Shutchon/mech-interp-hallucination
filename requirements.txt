@@ -13,3 +13,5 @@ lm-eval>=0.4.4
 circuitsvis>=1.0
 plotly>=5.22
 pandas>=2.2
+pyarrow>=15,<16            # datasets 2.19-era pyarrow; newer needs numpy>=2
+datasets>=2.19,<2.20       # newer datasets requires pyarrow>=16

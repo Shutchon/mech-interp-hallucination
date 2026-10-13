@@ -290,7 +290,7 @@ interpolates each model's per-layer mean-effect profile at 10 evenly
 spaced depth fractions (0.05--0.95) before Spearman ranking. Models use
 HuggingFace checkpoints \texttt{google/gemma-2-2b},
 \texttt{meta-llama/Llama-3.2-1B}, \texttt{Qwen/Qwen2.5-1.5B}
-(base, not instruct-tuned) loaded in bfloat16 via TransformerLens~2.x
+(base, not instruct-tuned) loaded in bfloat16 via TransformerLens~2.18
 with \texttt{center\_unembed=False}, \texttt{fold\_ln=False}.
 Head ablation zeroes the head's $z$-vector at \emph{all} token
 positions. MMLU uses the \texttt{cais/mmlu} ``all'' test split, a fixed
