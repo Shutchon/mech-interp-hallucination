@@ -70,7 +70,7 @@ def run_sample(model, facts, suite, top_heads, n):
             for k in range(3):
                 cpos, mpos = cln - 3 + k, mln - 3 + k
                 val = cache_c[hook][0, cpos, hd, :]
-                def hk(act, hook_, v=val, p=mpos, h_=hd):
+                def hk(act, hook, v=val, p=mpos, h_=hd):
                     act[0, p, h_, :] = v
                     return act
                 lp = model.run_with_hooks(mis_p, fwd_hooks=[(hook, hk)])[0, -1].float()
