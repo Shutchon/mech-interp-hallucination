@@ -36,7 +36,7 @@ def load_model(dtype):
 @torch.no_grad()
 def run_sample(model, facts, suite, top_heads, n):
     """Returns dict: per-condition LD arrays + per-head A effects."""
-    ids_by_case = {s["case_id"]: s for s in suite if s["template_idx"] == 0 and s["split"] == "dev"}
+    ids_by_case = {s["case_id"]: s for s in suite if s["template_idx"] == 0 and s["split"] == "dev" and s["condition"] == "misleading"}
     dev_facts = [f for f in facts if f["split"] == "dev"][:n]
     lds = {"clean": [], "mis": [], "neu": []}
     head_eff = {h: [] for h in top_heads}
