@@ -110,3 +110,20 @@
 ## หมายเหตุ
 - VM us-central1-a STOCKOUT ตั้งแต่ 13 ต.ค. — retry ทุก 10 นาที (9 ครั้ง) ถ้าไม่ได้จะสร้าง VM ใหม่ zone อื่น
 - ตอนนี้ paper = 8 หน้า (เต็มงบ PAPER) — เผื่อการเพิ่มเนื้อหาจาก VM อาจต้อง trim
+
+## Round 2 — ผล VM (14 ต.ค. 00:30)
+| งาน | ผล | ใส่ paper แล้ว |
+|-----|-----|---------------|
+| fig3 extraction (32 misleading prompts) | spec1: BOS 68±9%, distractor 18±8% จาก answer position; duals: distractor 0.5–3%; reading-position 2–11% — **เขียน passage+รูปใหม่ทั้งหมด** (ค่าเก่า 0.92–1.00 และ 0.67–0.78 เลิกใช้ เกิดจากบั๊กอ่าน neutral prompt + ตัวอย่างเดียว) | ✅ |
+| correct-context control (R11) | none 98.2% → spec1 96.1% (−2.1pts, p=6e-8 มีนัยสำคัญจริง แต่เล็กมากเทียบ gain +5.3) vs spec3 81.6% top-5 60.2% | ✅ ย่อหน้าใหม่ |
+| MMLU per-question (R8) | paired McNemar none vs spec1: 49.8% vs 49.4%, b=22 c=30, p=0.33 → ไม่มีนัยสำคัญ (ตอบข้อ "equivalence") | ✅ |
+| Llama/Qwen per-item (R8) | Llama top-1: 6.6→4.6% CI[2.9,6.6] p=0.004, accuracy −1.3pts (**แก้คำอ้าง +0.5 เดิมที่ผิด**); Qwen top-1: 14.9→7.5% CI[5.0,10.1] p=9.3e-10, accuracy +0.8pts | ✅ |
+| e0b metric parity (R7) | รันรอบสุดท้าย (OOM แก้ด้วย swap 16GB) | ⏳ |
+
+## Incident log (round 2)
+- VM us-central1-a STOCKOUT ตลอด → สร้าง spot VM ใหม่ mech-interp-l4-sg ที่ asia-southeast1-a + snapshot ดิสก์เก่ามา attach (ได้ HF_TOKEN + model cache 16GB)
+- VM ใหม่: pyarrow/datasets ต้องจับคู่ยุค numpy 1.26 (datasets==2.19.2 + pyarrow==15.0.2) — ใส่ requirements แล้ว
+- .bashrc early-return ทำให้ HF_TOKEN ไม่โผล่ใน non-interactive shell → export ตรงในคำสั่งรัน
+- e5b: datasets อ่าน cache ไม่ได้ → อ่าน parquet ตรง; is_correct เทียบ letter/int ผิด → คำนวณใหม่ใน analysis จาก pred+answer
+- fig3: 2 บั๊กซ้อน — to_string(0-dim tensor) ผิด + dict comprehension เก็บแถว neutral (ไม่มี distractor) — แก้ทั้งคู่แล้ว ตัวเลขใน paper เปลี่ยนตามความจริง
+- e0b: OOM-kill 2 ครั้ง (fp32 10.4GB + โมเดลอื่นชนกัน) → รันเดี่ยว + swap 16GB
