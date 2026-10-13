@@ -43,7 +43,8 @@ def main():
              (json.loads(l) for l in open(R / "e1_dataset/misleading_suite.jsonl"))
              if s["template_idx"] == 0 and s["split"] == "heldout"}
 
-    stats = {f"L{l}.H{h}": {"bos": [], "distractor": [], "other": []} for l, h, _ in HEADS}
+    stats = {f"L{l}.H{h}": {"bos": [], "distractor": [], "other": [], "distr_read": []}
+             for l, h, _ in HEADS}
     example = None
     for f in facts:
         s = suite[f["case_id"]]
@@ -66,6 +67,13 @@ def main():
             stats[f"L{l}.H{h}"]["bos"].append(bos_w)
             stats[f"L{l}.H{h}"]["distractor"].append(d_w)
             stats[f"L{l}.H{h}"]["other"].append(other)
+            if d_tok_idx:
+                first_d = min(d_tok_idx)
+                rows = pat[first_d + 1:, :].cpu().numpy()
+                stats[f"L{l}.H{h}"]["distr_read"].append(float(rows[:, d_tok_idx].sum(axis=1).mean()))
+        if example is None and not d_tok_idx:
+            d_tok_idx = [i for i, ts in enumerate(tok_strs)
+                         if d_low in ts.strip().lower() and i > 0]
         if example is None and d_tok_idx:
             example = {
                 "prompt": s["prompt_shown"], "tokens": tok_strs,
