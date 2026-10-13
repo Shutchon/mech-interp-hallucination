@@ -49,7 +49,7 @@ def run_sample(model, facts, suite, top_heads, n):
         did = int(model.to_tokens(" " + f["target_false"])[0, -1])
         clean_p = f["prompt"]
         mis_p = s["prompt_shown"]
-        neu_p = mis_p.replace(d.strip(), "unknown")
+        neu_p = mis_p.replace(f["target_false"], "unknown")
         logits_c = model(clean_p)[0, -1].float()
         logits_m = model(mis_p)[0, -1].float()
         logits_n = model(neu_p)[0, -1].float()
