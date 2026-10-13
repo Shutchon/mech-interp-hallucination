@@ -55,8 +55,10 @@ def main():
         center_unembed=False, fold_ln=False, center_writing_weights=False
     ).to("cuda" if torch.cuda.is_available() else "cpu")
 
-    from datasets import load_dataset
-    mmlu = load_dataset("cais/mmlu", "all", split="test")
+    import glob
+    import pandas as pd
+    snap = glob.glob(str(Path.home() / "hf_cache/hub/datasets--cais--mmlu/snapshots/*/all"))
+    mmlu = pd.read_parquet(snap[0] + "/test-00000-of-00001.parquet").to_dict("records")
     rng = random.Random(0)
     idx = rng.sample(range(len(mmlu)), min(args.n_mmlu, len(mmlu)))
     letters = ["A", "B", "C", "D"]

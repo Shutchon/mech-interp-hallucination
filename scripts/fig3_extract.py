@@ -50,7 +50,7 @@ def main():
         s = suite[f["case_id"]]
         d = f["target_false"]
         toks = model.to_tokens(s["prompt_shown"])[0]
-        tok_strs = [model.to_string(t) for t in toks]
+        tok_strs = [model.to_string(int(t)) for t in toks]
         _, cache = model.run_with_cache(
             s["prompt_shown"],
             names_filter=lambda n: n.endswith("attn.hook_pattern"))
@@ -84,8 +84,10 @@ def main():
         del cache
     summary = {}
     for k, v in stats.items():
-        summary[k] = {m: {"mean": float(np.mean(x)), "sd": float(np.std(x)),
-                          "min": float(np.min(x)), "max": float(np.max(x))}
+        summary[k] = {m: ({"mean": float(np.mean(x)), "sd": float(np.std(x)),
+                           "min": float(np.min(x)), "max": float(np.max(x))}
+                          if len(x) else {"mean": None, "sd": None,
+                                          "min": None, "max": None})
                       for m, x in v.items()}
     out = {"experiment": "fig3_v2", "n_prompts": len(facts), "answer_position": "last",
            "summary": summary, "example": example}

@@ -513,6 +513,19 @@ single-head specialist intervention is the cheapest of all: a 35\% relative
 hallucination reduction---with an accuracy \emph{gain}---at MMLU retention
 0.998 and a perplexity cost of only 5\%.
 
+\textbf{Correct-context control.} The neutral control cannot tell whether
+an intervention degrades the ability to use context that is actually
+right, so we additionally evaluated a correct-context suite (template T0
+asserting the \emph{true} target) on the same held-out facts. Baseline
+context use is near ceiling (98.2\% truth). Knocking out \spec{} alone
+leaves 96.1\%---a 2.1-point cost, well below its 5.3-point accuracy gain
+under misleading context---whereas spec3 (81.6\%) and top-5 (60.2\%)
+destroy correct-context use. The single-specialist intervention thus
+suppresses following of \emph{misleading} context without broadly
+disabling context integration; claims about deployment settings beyond
+this counterfactual regime (e.g., general RAG reliability) remain out of
+scope.
+
 \textbf{Template robustness.} Re-evaluating the none, \spec{}, and top-5
 conditions on the two remaining held-out templates tests whether the
 specialist's effect depends on how the context asserts the distractor. On T2 (user-hint
