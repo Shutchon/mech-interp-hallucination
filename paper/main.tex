@@ -285,8 +285,10 @@ Gaussian at the embedding layer ($\sigma = 3\times$ embedding std, all
 non-BOS tokens, one draw per case). The top-norm baseline ranks heads by
 mean $|z|$ over 64 dev bare-fact prompts (positions pooled); the
 mean-ablation vector is the mean head $z$ over the same prompts.
-Specialists are top-10 restore heads with $|N|{<}0.01$ (three heads);
-\spec{} is the highest-$B$ of these. Cross-model profile correlation
+Six of the top-10 restore heads pass $|N|{<}0.01$; \spec{} is the
+highest-$B$ qualifier, and spec3 takes the three highest-$A$ qualifiers
+(\spec{}, L22.H0, L20.H3)---rank-based choices among qualifiers, with no
+further threshold. Cross-model profile correlation
 interpolates each model's per-layer mean-effect profile at 10 evenly
 spaced depth fractions (0.05--0.95) before Spearman ranking. Models use
 HuggingFace checkpoints \texttt{google/gemma-2-2b},
@@ -335,7 +337,9 @@ bfloat16 on the same 200 dev facts: mean $|\Delta\mathrm{LD}|$ is
 0.07--0.08 logits against mean $|\mathrm{LD}|$ of 2.7--8.7 ($0.9$--$3\%$
 relative); the head-effect vectors rank-correlate at Spearman~$0.99$,
 the largest per-head effect difference is $0.008$, and \spec{} ranks
-first under both precisions.
+first among the compared heads on this sample under both precisions
+(the full-experiment dev ranking of Table~\ref{tab:heads} is led by
+L25.H4, a generic-role head).
 
 \begin{table}[t]
 \caption{Behavioral landscape on known facts (\emodel{}, $n{=}2{,}000$;
