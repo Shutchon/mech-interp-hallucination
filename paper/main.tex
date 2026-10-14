@@ -88,13 +88,14 @@ work rather than an afterthought.
 A growing body of work studies hallucination mechanisms, including
 knowledge-deficit failures~\cite{yu2024mechanistic} and
 probes/directions for truthfulness~\cite{li2023itti,marks2024geometry}.
-Head-level analyses of CM conflict, however, have appeared mainly in
-multimodal settings~\cite{jiang2026causal}, and recent work on
-knowledge-conflict interventions reports that influential attention heads
-play \emph{superposed} dual roles~\cite{li2025juice}. What has been missing
-for small language models of this size class is a systematic causal account: which components, located
-how, trade hallucination against general capability when intervened upon,
-and whether such findings replicate across architectures.
+Head-level analyses of CM conflict exist in text-only
+models~\cite{li2025juice,jin2024ph3} and multimodal
+settings~\cite{jiang2026causal}. What has been missing
+for this size class is a systematic causal account---which components,
+located how, trade hallucination against capability when intervened
+upon, and whether findings replicate across architectures---and, for
+head-level work generally, a neutral-control separation of head roles
+and quantified single-head intervention costs.
 
 This paper provides that account with a design that separates localization
 from validation: heads are selected only on a development split of
@@ -153,7 +154,7 @@ conflict specialists from dual-role heads, a distinction neither method
 draws; (ii) single-head specialist knockout selected and evaluated under
 a relation-disjoint dev/held-out split; and (iii) explicit capability
 trade-off curves (MMLU, perplexity) reported alongside hallucination
-metrics, which neither study reports. Our top-$k$ knockout is
+metrics, which, to our knowledge, neither study reports. Our top-$k$ knockout is
 structurally close to PH3-style context-head pruning; the specialist
 taxonomy instead removes 35\% of distractor-following with a single head
 while accuracy rises, whereas aggregate pruning must trade accuracy for
@@ -727,14 +728,12 @@ before they can be drawn. What the results do establish is that
 sink-focused heads should not be excluded from behavioral circuit
 searches.
 
-\textbf{Design implication.} The dissociation between MMLU (unchanged
-within measurement precision on a 2{,}000-question subset) and
-perplexity (degraded 5--20\%) suggests these heads implement contextual
-integration that matters for language modeling loss but not for
-knowledge-task accuracy on the tested benchmarks. The contrast with
-norm-based selection carries a practical warning: cheap proxies for
-``importance'' can select exactly the wrong components and
-\emph{worsen} the targeted behavior.
+\textbf{Design implication.} The dissociation between MMLU (no
+detected change on the tested subset) and perplexity (up 5--20\%)
+suggests these heads support contextual integration that matters for
+language-modeling loss more than for benchmark accuracy; and the
+norm-selection failure warns that cheap importance proxies can worsen
+the targeted behavior.
 
 \textbf{Limitations and future work.} (i) English-only, greedy
 completion-style evaluation; (ii) hallucination is operationalized as
@@ -848,13 +847,15 @@ model attention heads,''
 in \emph{Proc.\ BlackboxNLP}, 2024.
 
 \bibitem{li2025juice} G.~Li, Y.~Chen, and H.~Tong,
-``Taming knowledge conflicts in language models,'' in \emph{Proc.\ ICML}, 2025.
+``Taming knowledge conflicts in language models,'' in \emph{Proc.\ ICML},
+pp.~34074--34104, 2025.
 
 \bibitem{jin2024ph3} Z.~Jin, P.~Cao, H.~Yuan, Y.~Chen, J.~Xu, H.~Li,
 X.~Jiang, K.~Liu, and J.~Zhao,
 ``Cutting off the head ends the conflict: A mechanism for interpreting
 and mitigating knowledge conflicts in language models,''
-in \emph{Findings of ACL}, pp.~1193--1215, 2024.
+in \emph{Findings of ACL}, pp.~1193--1215, 2024,
+DOI: 10.18653/v1/2024.findings-acl.70.
 
 \bibitem{jiang2026causal} J.~Jiang, Z.~Wu, Z.~Wu, and X.~Dai,
 ``Causal evidence for attention head imbalance in modality conflict hallucination,''
@@ -899,7 +900,8 @@ at a practical size,'' arXiv:2408.00118, 2024.
 models,'' arXiv:2407.21783, 2024.
 
 \bibitem{llama32card} Meta, ``Llama 3.2: Revolutionizing edge AI and
-vision with open, customizable models,'' Meta AI, Sept.\ 2024.
+vision with open, customizable models,'' online:
+\texttt{https://ai.meta.com/blog/llama-3-2/}, accessed Oct.\ 2026.
 
 \bibitem{qwen2025} Qwen Team, ``Qwen2.5 technical report,''
 arXiv:2412.15115, 2024.
