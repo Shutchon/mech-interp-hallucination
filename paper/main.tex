@@ -45,8 +45,8 @@ In \emodel{}, knocking out the single specialist head L22.H4 reduces
 misleading-context distractor-following by 35\% relative (exact McNemar
 $p{=}3.4\times10^{-23}$) while
 increasing factual accuracy by 5.3 percentage points, with
-MMLU retention 0.998, a 5\% perplexity cost, and correct-context use
-nearly intact (96.1\% vs.\ 98.2\% baseline); single-head knockouts from
+MMLU retention 0.998, a 5\% perplexity cost, and accuracy under a
+supportive correct context nearly intact (96.1\% vs.\ 98.2\%); single-head knockouts from
 the patching ranking reduce distractor-following by 30--50\% in the other
 two models as well. In contrast, norm-based head selection
 \emph{increases} distractor-following. We report quantified dose--response
@@ -522,8 +522,9 @@ decrease is small but significant, $b{=}5$, $c{=}23$,
 $p{=}9.1\times10^{-4}$). Fact-clustered 95\% CIs for \spec{}: follow
 10.7--14.5\%, truth 77.5--82.0\%, neutral 90.4--93.5\%. By contrast,
 ablating the five highest-norm heads \emph{increases} hallucination to
-33.0\% ($b{=}9$, $c{=}173$): they are the dual-role workhorses, and their
-removal tips the final balance toward the context. Random-head ablation
+33.0\% ($b{=}9$, $c{=}173$): these are early/mid-layer high-$|z|$
+heads (L2--L16), not the late-layer heads of Table~\ref{tab:heads}, and
+their removal tips the final balance toward the context. Random-head ablation
 is erratic across seeds (follow 12.6--22.2\%, truth 44.8--78.8\% over
 five seeds, with inconsistent sign and magnitude).
 
@@ -546,10 +547,12 @@ leaves 96.1\%---a small but significant 2.1-point cost ($b{=}0$,
 $c{=}25$, exact $p{=}6\times10^{-8}$), well below its 5.3-point accuracy gain
 under misleading context---whereas spec3 (81.6\%) and top-5 (60.2\%)
 destroy correct-context use. The single-specialist intervention thus
-suppresses following of \emph{misleading} context without broadly
-disabling context integration; claims about deployment settings beyond
-this counterfactual regime (e.g., general RAG reliability) remain out of
-scope.
+suppresses following of \emph{misleading} context while accuracy under
+a supportive correct context stays near ceiling. Because that context
+concerns facts the model already knows, this bounds damage under
+consistent context rather than measuring context \emph{use} per se;
+deployment settings beyond this counterfactual regime (e.g., general
+RAG reliability) remain out of scope.
 
 \textbf{Template robustness.} Re-evaluating the none, \spec{}, and top-5
 conditions on the two remaining held-out templates tests whether the
