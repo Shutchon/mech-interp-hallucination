@@ -52,7 +52,7 @@ def fig2():
     llama = layer_profile(R / "e6_cross/meta-llama/Llama-3.2-1B/coarse.jsonl", 16)
     qwen = layer_profile(R / "e6_cross/Qwen/Qwen2.5-1.5B/coarse.jsonl", 28)
 
-    fig, axes = plt.subplots(2, 1, figsize=(COL, 4.15))
+    fig, axes = plt.subplots(2, 1, figsize=(COL, 3.9))
     ax = axes[0]
     ax.plot(gemma_noise, "-o", ms=2.5, lw=1.2, label="noise (ROME-style)", color="#1f77b4")
     ax.plot(gemma_mis, "-s", ms=2.5, lw=1.2, label="misleading context", color="#d62728")
@@ -129,7 +129,7 @@ def fig5():
     B = np.array([r["effect_B_context_push"] for r in table])
     na = np.array([r["neutral_ratio"] if r["neutral_ratio"] is not None else 0 for r in table])
 
-    fig, ax = plt.subplots(figsize=(COL, 2.9))
+    fig, ax = plt.subplots(figsize=(COL, 2.6))
     sc = ax.scatter(B, A, c=na, cmap="coolwarm", vmin=-1.5, vmax=1.5, s=42,
                     edgecolors="k", lw=0.4)
     lim = max(A.max(), B.max()) * 1.15

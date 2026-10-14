@@ -266,8 +266,11 @@ and neutral accuracy on held-out items; MMLU (2{,}000-question fixed subset)
 and WikiText-2 perplexity (1024-token windows) measure capability under the
 same hooks. Fairness baselines ablate randomly selected heads (5 seeds) and
 top-$|z|$-norm heads. Statistics: fact-clustered bootstrap 95\% CIs
-(10{,}000 resamples); two-sided exact binomial McNemar tests against the
-no-intervention condition.
+(10{,}000 resamples); two-sided exact binomial McNemar tests against
+``none'', where $b$ counts items the intervention fixes and $c$ items it
+breaks (per outcome: distractor-following, truth, neutral, or
+correct-context accuracy). The prespecified primary comparison is
+\spec{} vs.\ none; all other configurations are exploratory.
 
 \textbf{Reproducibility details.} Misleading templates (distractor $d$,
 prompt $p$):
@@ -529,10 +532,10 @@ five seeds, with inconsistent sign and magnitude).
 
 Capability costs are dissociated (Table~\ref{tab:cap}): MMLU retention
 remains 0.99--1.01 for every tested intervention, and a paired
-per-question rerun for \spec{} detects no change on this subset (49.8\%
-vs.\ 49.4\%; $b{=}22$ gained, $c{=}30$ lost; exact $p{=}0.33$)---no
-detected change, not demonstrated equivalence---whereas perplexity
-rises 5--20\%. The
+per-question rerun for \spec{} detects no change on this subset
+(paired difference $-0.40$ points, 95\% CI $[-1.10, +0.30]$; $b{=}22$
+gained, $c{=}30$ lost; exact $p{=}0.33$)---no detected change, not
+demonstrated equivalence---whereas perplexity rises 5--20\%. The
 single-head specialist intervention is the cheapest of all: a 35\% relative
 hallucination reduction---with an accuracy \emph{gain}---at MMLU retention
 0.998 and a perplexity cost of only 5\%.
