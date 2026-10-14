@@ -48,8 +48,10 @@ increasing factual accuracy by 5.3 percentage points, with
 MMLU retention 0.998, a 5\% perplexity cost, and accuracy under a
 supportive correct context nearly intact (96.1\% vs.\ 98.2\%); single-head knockouts from
 the patching ranking reduce distractor-following by 30--50\% in the other
-two models as well. In contrast, norm-based head selection
-\emph{increases} distractor-following. We report quantified dose--response
+two models as well. In contrast, norm-based selection \emph{increases}
+distractor-following, and although random single heads also reduce it,
+the best one collapses MMLU (retention 0.69 vs.\ 0.998). We report
+quantified dose--response
 trade-offs between reduction and capability, with relation-level splits
 guarding against circular analysis.
 \end{summary}
@@ -75,15 +77,12 @@ in-context misinformation~\cite{mishima2022fake}---the model
 faces a \emph{context--memory (CM) conflict}~\cite{xu2024knowledge}, and
 resolving it incorrectly produces a factual hallucination, which can then cascade into further errors~\cite{zhang2024snowball}.
 
-Why a mechanistic account rather than a purely behavioral mitigation?
-Deployed systems need interventions that are cheap, targeted, and
-auditable: knowing \emph{which} components carry the conflict lets a
-system builder trade hallucination against capability with measured
-confidence, instead of retraining, prompt-tuning blindly, or trusting an
-opaque detector. The account is more valuable still if the responsible
-components---and hence the mitigation recipe---transfer across
-architectures, which is why replication is a first-class concern in this
-work rather than an afterthought.
+Why a mechanistic account? Deployed systems need interventions that
+are cheap, targeted, and auditable: knowing \emph{which} components
+carry the conflict lets a builder trade hallucination against
+capability with measured confidence. The account is more valuable still
+if the responsible components transfer across architectures, which is
+why replication is a first-class concern here.
 
 A growing body of work studies hallucination mechanisms, including
 knowledge-deficit failures~\cite{yu2024mechanistic} and
@@ -155,9 +154,9 @@ draws; (ii) single-head specialist knockout selected and evaluated under
 a relation-disjoint dev/held-out split; and (iii) explicit capability
 trade-off curves (MMLU, perplexity) reported alongside hallucination
 metrics, which, to our knowledge, neither study reports. Our top-$k$ knockout is
-structurally close to PH3-style context-head pruning; the specialist
-taxonomy instead removes 35\% of distractor-following with a single head
-while accuracy rises, whereas aggregate pruning must trade accuracy for
+structurally close to PH3-style context-head pruning; specialist
+selection removes 35\% of distractor-following with one head while
+accuracy rises, whereas aggregate pruning trades accuracy for
 compliance (Sect.~\ref{sec:results-interventions}).
 
 \textbf{Inference-time intervention.} ITI steers along probe-identified
@@ -285,7 +284,10 @@ Answers are scored by first-token argmax at the final position against
 the first token of the space-prefixed targets (no autoregressive
 generation, hence no whitespace/punctuation/alias handling). All
 retained targets are single words and no pair shares a first word, so
-the comparison is well-defined; known-fact status uses the same level. Patching positions: the noise regime patches every non-BOS position of
+the comparison is well-defined; known-fact status uses the same level.
+A greedy 8-token completion check on 300 held-out items reproduces
+first-token accuracy exactly (none 82.3\%, \spec{} 83.7\%), so
+first-token and full-answer scoring coincide on this dataset. Patching positions: the noise regime patches every non-BOS position of
 the identically-lengthened runs; the misleading regime and head-level
 patching use the last three tokens, right-aligned across runs. Noise
 corruption is Gaussian at the embedding layer ($\sigma=3\times$
@@ -321,29 +323,27 @@ precisions on a fixed dev sample (Sect.~\ref{sec:results-localization}).
 \subsection{Behavioral landscape and localization}
 \label{sec:results-localization}
 
-On known facts, the bare-prompt accuracy of \emodel{} is 100\%. Under
-misleading context the competition is nearly balanced overall (47.3\%
-context-following, 95\% CI 46.0--48.5, vs.\ 46.2\% truth) but strongly
-template-dependent (24.2\%/98.4\%/19.2\% following across templates),
-matching persuasion-strength variation reported
-behaviorally~\cite{du2024context}; the neutral control stays at 87.4\%
-truth with 1.2\% copying of the neutral token, bounding pure token-copy
-effects (Table~\ref{tab:behavior}). Template~1, which places the
-distractor immediately before the repeated question, drives following to
-98.4\%---an upper bound on recency/copy contributions that the neutral
-control and bidirectional analyses below separate from belief override.
+On known facts, bare-prompt accuracy of \emodel{} is 100\%. Under
+misleading context the competition is nearly balanced (47.3\%
+following, 95\% CI 46.0--48.5, vs.\ 46.2\% truth) but strongly
+template-dependent (24.2\%/98.4\%/19.2\%), matching reported
+persuasion-strength variation~\cite{du2024context}; the neutral control
+stays at 87.4\% truth with 1.2\% neutral-token copying
+(Table~\ref{tab:behavior}). Template~1 (distractor adjacent to the
+repeated question) drives following to 98.4\%---an upper bound on
+recency/copy contributions consistent with, though not proof of, a copy
+pathway.
 Reference benchmarks (lm-eval-harness, full MMLU test set):
 MMLU 49.4\%$\pm$0.4, TruthfulQA MC1/MC2~\cite{lin2022truthfulqa}
 24.5\%/36.3\%, WikiText-2 PPL 65.3 (1024-token windows). The 2{,}000-question
 MMLU subset used for intervention evaluation yields 50.0\% at baseline;
 the two scores differ because of subset sampling, not protocol error.
-\textbf{Precision robustness.} Repeating the logit-difference
-measurements and the top-20 head-effect ranking in float32 versus
-bfloat16 on the same 200 dev facts: mean $|\Delta\mathrm{LD}|$ is
-0.07--0.08 logits against mean $|\mathrm{LD}|$ of 2.7--8.7 ($0.9$--$3\%$
-relative); the head-effect vectors rank-correlate at Spearman~$0.99$,
-the largest per-head effect difference is $0.008$, and \spec{} ranks
-first among the compared heads on this sample under both precisions.
+\textbf{Precision robustness.} Repeating the LD measurements and
+top-20 head-effect ranking in float32 vs.\ bfloat16 on the same 200
+dev facts: mean $|\Delta\mathrm{LD}|$ is 0.07--0.08 logits vs.\ mean
+$|\mathrm{LD}|$ 2.7--8.7 ($0.9$--$3\%$); head effects rank-correlate
+at Spearman 0.99 (max per-head difference 0.008), and \spec{} ranks
+first among the compared heads under both precisions.
 
 \begin{table}[t]
 \caption{Behavioral landscape on known facts (\emodel{}, $n{=}2{,}000$;
@@ -513,8 +513,8 @@ L21.H1 & 0.009 & 0.019 & \phantom{$-$}0.001 & 0.34 & \phantom{$-$}0.06 \\
 
 Table~\ref{tab:dose} and Fig.~\ref{fig:tradeoff} report the held-out
 interventions. Knocking out the dev-ranked top-$k$ heads reduces
-context-following monotonically (19.3\%$\to$1.6\% at $k{=}20$) but at
-matching accuracy cost---a blunt instrument. The Stage-4 taxonomy, however,
+context-following monotonically (19.3\%$\to$1.6\% at $k{=}20$) at
+matching accuracy cost. The Stage-4 taxonomy, however,
 predicts that removing a conflict specialist should suppress the misleading
 pull at limited collateral cost. This is borne out: knocking out the single
 head \spec{} reduces hallucination to 12.6\% (two-sided exact McNemar
@@ -531,6 +531,17 @@ their removal tips the final balance toward the context. Random-head ablation
 is erratic across seeds (follow 12.6--22.2\%, truth 44.8--78.8\% over
 five seeds, with inconsistent sign and magnitude).
 
+\textbf{How special is the specialist?} A uniformly random
+\emph{single}-head knockout reduces following for every seed tested
+(5.2--12.2\%; truth 81.9--88.3\%), and layer-matched late-layer random
+heads behave the same (9.3--10.3\%): reducing distractor-following by
+one-head $z$-knockout is \emph{not} unique to the specialist---the conflict signal is
+distributed, so removing almost any single head weakens it. The
+specialist is distinguished by cost: the best random seed behaviorally
+(L17.H3: follow 5.2\%, truth 88.3\%) collapses MMLU to 34.6\%
+(retention 0.69 vs.\ 0.998 for \spec{})---generic single heads buy the
+gain with large capability damage, which patching-guided selection avoids.
+
 Capability costs are dissociated (Table~\ref{tab:cap}): MMLU retention
 remains 0.99--1.01 for every tested intervention, and a paired
 per-question rerun for \spec{} detects no change on this subset
@@ -541,20 +552,16 @@ single-head specialist intervention is the cheapest of all: a 35\% relative
 hallucination reduction---with an accuracy \emph{gain}---at MMLU retention
 0.998 and a perplexity cost of only 5\%.
 
-\textbf{Correct-context control.} To test whether an intervention
-degrades answers under context that is actually right, we evaluated a
-correct-context suite (T0 asserting the \emph{true} target) on the same
-held-out facts. Baseline is near ceiling (98.2\% truth). Knocking out \spec{} alone
-leaves 96.1\%---a small but significant 2.1-point cost ($b{=}0$,
-$c{=}25$, exact $p{=}6\times10^{-8}$), well below its 5.3-point accuracy gain
-under misleading context---whereas spec3 (81.6\%) and top-5 (60.2\%)
-destroy correct-context use. The single-specialist intervention thus
-suppresses following of \emph{misleading} context while accuracy under
-a supportive correct context stays near ceiling. Because that context
-concerns facts the model already knows, this bounds damage under
-consistent context rather than measuring context \emph{use} per se;
-deployment settings beyond this counterfactual regime (e.g., general
-RAG reliability) remain out of scope.
+\textbf{Correct-context control.} A correct-context suite (T0
+asserting the \emph{true} target, same held-out facts) tests damage
+under context that is actually right. Baseline is near ceiling (98.2\%
+truth); \spec{} leaves 96.1\% (small but significant, $b{=}0$,
+$c{=}25$, $p{=}6\times10^{-8}$; far below its 5.3-point misleading-context
+gain), whereas spec3 (81.6\%) and top-5 (60.2\%) destroy it. Because
+this context concerns already-known facts, the result bounds damage
+under consistent context rather than measuring context \emph{use} per
+se; deployment beyond this counterfactual regime (e.g., general RAG
+reliability) is out of scope.
 
 \textbf{Template robustness.} Re-evaluating the none, \spec{}, and top-5
 conditions on the two remaining held-out templates tests whether the
@@ -597,6 +604,8 @@ mean-abl.\ top-5& 8.8 (7.2--10.5)   & 46.4 & 53.8 \\
 mean-abl.\ spec3& 11.4 (9.6--13.2)  & 63.6 & 70.2 \\
 topnorm-5       & 33.0 (30.4--35.8) & 59.1 & 85.9 \\
 random-5 (5 seeds) & 12.6--22.2 & 44.8--78.8 & --- \\
+random-1 (5 seeds) & 5.2--12.2 & 81.9--88.3 & --- \\
+late-rand-1 (5 seeds) & 9.3--10.3 & 83.2--84.3 & --- \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -720,11 +729,10 @@ $N\!\approx\!0$ under one neutral-patching control only shows that this
 intervention had minimal effect in the tested condition, not that the
 head has no other function. The
 mechanism by which a BOS-attending head influences the conflict remains
-an open question---possible routes include value vectors at the BOS
-position, attention-weight redistribution away from informative tokens,
-or downstream residual-stream effects---and although Fig.~\ref{fig:attention}(b)
-aggregates 32 prompts, mechanism-level claims need far larger samples
-before they can be drawn. What the results do establish is that
+an open question---possible routes include value vectors at BOS,
+attention redistribution, or downstream effects---and although
+Fig.~\ref{fig:attention}(b) aggregates 32 prompts, mechanism-level
+claims need larger samples. What the results do establish is that
 sink-focused heads should not be excluded from behavioral circuit
 searches.
 
@@ -755,8 +763,9 @@ neutral-control analysis in \emodel{}) can be knocked out
 individually---distractor-following falls by 30--50\% relative on the
 standard templates (9\% on the extreme adjacent-distractor template),
 accuracy rises for the \emodel{} specialist (+5.3 points; replication
-models: $-1.3$ to $+0.8$), and MMLU retention remains near 1.00 on the tested
-subset---while norm-based selection backfires. All selection was
+models: $-1.3$ to $+0.8$), and MMLU retention remains near 1.00 on the
+tested subset---while norm-based selection backfires and behaviorally
+matching random single heads collapse MMLU (0.69). All selection was
 performed on dev relations with results reported on held-out relations,
 and the core findings (late-layer concentration, single-head
 intervention effectiveness) replicated across three architectures.

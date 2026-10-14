@@ -1,0 +1,9 @@
+{
+ "experiment": "E5f_rand_capability",
+ "rand_L17H3": {
+  "mmlu_acc": 0.346,
+  "mmlu_retention": 0.6926926926926926,
+  "wiki_ppl": 60.1317253112793,
+  "ppl_ratio": 0.8811651825523249
+ }
+}

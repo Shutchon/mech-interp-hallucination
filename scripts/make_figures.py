@@ -79,7 +79,7 @@ def fig4():
     cap = dict(json.load(open(R / "e5_interventions/gemma-2-2b/capability.json"))["results"])
     cap.update(json.load(open(R / "e5_interventions/gemma-2-2b/capability_spec1.json"))["results"])
 
-    fig, axes = plt.subplots(2, 1, figsize=(COL, 4.85))
+    fig, axes = plt.subplots(2, 1, figsize=(COL, 4.55))
     ax = axes[0]
     base = r1["none"]
     ax.scatter(base["follow_rate"], base["truth_rate"], marker="*", s=140, c="k", label="none", zorder=5)
@@ -114,15 +114,22 @@ def fig4():
         xs.append(rate["follow_rate"])
         ys.append(cap[name]["mmlu_retention"])
         labels.append(f"{name} PPL×{cap[name]['ppl_ratio']:.2f}")
-    ax.scatter(xs, ys, s=36)
+    rand = json.load(open(R / "e5_interventions/gemma-2-2b/rand_capability.json"))["rand_L17H3"]
+    xs.append(0.052)
+    ys.append(rand["mmlu_retention"])
+    labels.append("rand L17.H3")
+    ax.scatter(xs[:-1], ys[:-1], s=36)
+    ax.scatter(xs[-1], ys[-1], s=60, marker="X", c="#2ca02c")
     b_off = {"none": (4, 4), "spec1": (6, -10), "top-2": (-8, 4),
-             "top-5": (4, 4), "spec3": (-2, 7), "mean5": (2, -11)}
-    for name, x, y, t in zip(("none", "spec1", "top-2", "top-5", "spec3", "mean5"), xs, ys, labels):
+             "top-5": (4, 4), "spec3": (-2, 7), "mean5": (2, -11),
+             "rand": (6, 4)}
+    names = ("none", "spec1", "top-2", "top-5", "spec3", "mean5", "rand")
+    for name, x, y, t in zip(names, xs, ys, labels):
         ax.annotate(t, (x, y), fontsize=7, xytext=b_off[name],
                     textcoords="offset points")
     ax.axhline(1.0, ls="--", c="gray", lw=0.8)
     ax.set(xlabel="context-following rate (hallucination)", ylabel="MMLU retention",
-           title="(b) Capability cost", xlim=(0, 0.36), ylim=(0.97, 1.03))
+           title="(b) Capability cost", xlim=(0, 0.36), ylim=(0.64, 1.03))
     fig.tight_layout(h_pad=1.0)
     fig.savefig(F / "fig4_tradeoff.pdf", bbox_inches="tight")
     fig.savefig(F / "fig4_tradeoff.png", bbox_inches="tight")

@@ -1,0 +1,15 @@
+{
+ "experiment": "E5f_full_answer",
+ "results": {
+  "none": {
+   "n": 300,
+   "first_token_acc": 0.8233333333333334,
+   "full_answer_acc": 0.8233333333333334
+  },
+  "spec1": {
+   "n": 300,
+   "first_token_acc": 0.8366666666666667,
+   "full_answer_acc": 0.8366666666666667
+  }
+ }
+}
