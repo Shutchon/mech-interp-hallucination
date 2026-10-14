@@ -251,7 +251,8 @@ matching the true target---both are first-token measures, so
 ``accuracy'' means first-token accuracy throughout. We use the term
 ``misleading-context distractor-following'' for this specific,
 programmatically verifiable metric, which is a strict subset of
-open-ended factual hallucination.
+open-ended factual hallucination. We use ``circuit'' to mean the
+causally localized head set, not a fully traced pathway.
 
 \textbf{Protocol.} Stage~1 (coarse): patch residual-stream block outputs
 layer-by-layer under two corruptions---ROME-style embedding noise, and the
@@ -371,7 +372,10 @@ layer (0.333); the noise regime peaks earlier (layer~21, 0.227).
 Table~\ref{tab:mid} decomposes the top blocks: the misleading-conflict
 signal is attention-dominated (L22 attention 0.121 vs.\ $\le$0.01 for
 every MLP block), whereas pure recall restoration under noise mixes MLP
-and attention almost evenly. This contrast is itself informative: the
+and attention almost evenly. (The regimes also differ in patched
+positions---all non-BOS for noise, last three for the conflict---so this
+contrast is specific to the protocol; a matched-position control is
+future work.) This contrast is itself informative: the
 classical ROME-style picture of factual recall as MLP-stored
 knowledge~\cite{meng2022rome} does not transfer to the conflict regime,
 where what an intervention can restore flows through attention. Head-level
@@ -706,8 +710,9 @@ neutral-control analysis makes this distinction measurable, addressing
 copy-vs-recall confounds.
 
 \textbf{Attention-sink specialists.} The most surprising finding is the
-identity of the conflict specialists: heads whose attention is almost
-entirely absorbed by the beginning-of-sequence token. In the
+identity of the strongest conflict specialist: \spec{}, whose
+answer-position attention is dominated by the beginning-of-sequence
+token ($68\pm9\%$; the other specialists show only 22--35\%). In the
 streaming-efficiency literature such sinks are treated as stabilizing
 but semantically inert no-ops~\cite{xiao2024sinks}. Our results show
 that a sink head can be causally significant in the CM-conflict regime:
@@ -720,9 +725,9 @@ intervention produced minimal effect in the tested condition. The
 mechanism by which a BOS-attending head influences the conflict remains
 an open question---possible routes include value vectors at the BOS
 position, attention-weight redistribution away from informative tokens,
-or downstream residual-stream effects---and our single-example attention
-visualizations should be quantified across the dataset before drawing
-mechanistic conclusions. What the results do establish is that
+or downstream residual-stream effects---and although Fig.~\ref{fig:attention}(b)
+aggregates 32 prompts, mechanism-level claims need far larger samples
+before they can be drawn. What the results do establish is that
 sink-focused heads should not be excluded from behavioral circuit
 searches.
 
