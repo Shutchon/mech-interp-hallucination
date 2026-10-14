@@ -31,7 +31,7 @@ def zero_hooks(heads):
                 act[:, :, h, :] = 0.0
                 return act
             return hk
-        return fwd.append((f"blocks.{l}.attn.hook_z", mk()))
+        fwd.append((f"blocks.{l}.attn.hook_z", mk()))
     return fwd
 
 
