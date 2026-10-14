@@ -200,7 +200,8 @@ and reference HuggingFace logits passed in float32 (mean KL $1.3\times
 themselves is reported in Sect.~\ref{sec:results-localization}.
 
 \textbf{Data.} From CounterFact~\cite{meng2022rome} we retain facts each
-model demonstrably knows (greedy completion equals the true target and the
+model demonstrably knows (first-token argmax over the full vocabulary
+equals the first token of the space-prefixed true target, and the
 first-token logit gap over the counterfactual distractor $\ge 0.5$),
 sampling 2{,}000 facts (16.7\% survival of 12{,}000 scored) split 807/1{,}193
 dev/held-out \emph{by relation}, so the held-out split shares no relation
@@ -246,7 +247,9 @@ means over per-fact effects; the reported neutral ratio $N/A$ is the
 ratio of these means (not a mean of per-fact ratios). Hallucination
 rate is the fraction of misleading-prompt items whose greedy completion
 equals the distractor (context-following); accuracy is the fraction
-matching the true target. We use the term
+matching the true target. Both are \emph{first-token} measures
+(Sect.\ \ref{sec:setup}); throughout, ``accuracy'' means first-token
+accuracy. We use the term
 ``misleading-context distractor-following'' for this specific,
 programmatically verifiable metric, which is a strict subset of
 open-ended factual hallucination.
@@ -275,8 +278,11 @@ Neutral control replaces $d$ with ``unknown''.
 The relation-level split uses seed~0: 31 relations in total, 16 dev
 (807 facts) and 15 held-out (1{,}193 facts), with zero relation overlap.
 Answers are scored by first-token argmax at the final position against
-the true/distractor first tokens (no autoregressive generation, hence no
-whitespace, punctuation, or alias handling). Patching positions: the
+the first token of the space-prefixed true/distractor targets (no
+autoregressive generation, hence no whitespace, punctuation, or alias
+handling). All retained targets are single words, and no true/distractor
+pair shares a first word, so the comparison is well-defined; the known
+facts themselves are established at the same first-token level. Patching positions: the
 noise regime patches every non-BOS position of the
 identically-lengthened runs; the misleading regime and all head-level
 patching use the last three tokens (answer position and two preceding),
