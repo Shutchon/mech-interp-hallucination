@@ -52,7 +52,7 @@ def fig2():
     llama = layer_profile(R / "e6_cross/meta-llama/Llama-3.2-1B/coarse.jsonl", 16)
     qwen = layer_profile(R / "e6_cross/Qwen/Qwen2.5-1.5B/coarse.jsonl", 28)
 
-    fig, axes = plt.subplots(2, 1, figsize=(COL, 4.7))
+    fig, axes = plt.subplots(2, 1, figsize=(COL, 4.15))
     ax = axes[0]
     ax.plot(gemma_noise, "-o", ms=2.5, lw=1.2, label="noise (ROME-style)", color="#1f77b4")
     ax.plot(gemma_mis, "-s", ms=2.5, lw=1.2, label="misleading context", color="#d62728")
@@ -67,7 +67,7 @@ def fig2():
     ax.set(xlabel="normalised depth", ylabel="restoration\neffect",
            title="(b) Cross-model layer profiles (misleading regime)")
     ax.legend(frameon=False)
-    fig.tight_layout(h_pad=1.4)
+    fig.tight_layout(h_pad=1.0)
     fig.savefig(F / "fig2_layer_profiles.pdf", bbox_inches="tight")
     fig.savefig(F / "fig2_layer_profiles.png", bbox_inches="tight")
     plt.close(fig)
@@ -117,7 +117,7 @@ def fig4():
     ax.axhline(1.0, ls="--", c="gray", lw=0.8)
     ax.set(xlabel="context-following rate (hallucination)", ylabel="MMLU retention",
            title="(b) Capability cost", xlim=(0, 0.36), ylim=(0.97, 1.03))
-    fig.tight_layout(h_pad=1.4)
+    fig.tight_layout(h_pad=1.0)
     fig.savefig(F / "fig4_tradeoff.pdf", bbox_inches="tight")
     fig.savefig(F / "fig4_tradeoff.png", bbox_inches="tight")
     plt.close(fig)

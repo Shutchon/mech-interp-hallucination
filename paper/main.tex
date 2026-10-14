@@ -247,9 +247,8 @@ means over per-fact effects; the reported neutral ratio $N/A$ is the
 ratio of these means (not a mean of per-fact ratios). Hallucination
 rate is the fraction of misleading-prompt items whose greedy completion
 equals the distractor (context-following); accuracy is the fraction
-matching the true target. Both are \emph{first-token} measures
-(Sect.\ \ref{sec:setup}); throughout, ``accuracy'' means first-token
-accuracy. We use the term
+matching the true target---both are first-token measures, so
+``accuracy'' means first-token accuracy throughout. We use the term
 ``misleading-context distractor-following'' for this specific,
 programmatically verifiable metric, which is a strict subset of
 open-ended factual hallucination.
@@ -280,9 +279,9 @@ The relation-level split uses seed~0: 31 relations in total, 16 dev
 Answers are scored by first-token argmax at the final position against
 the first token of the space-prefixed true/distractor targets (no
 autoregressive generation, hence no whitespace, punctuation, or alias
-handling). All retained targets are single words, and no true/distractor
-pair shares a first word, so the comparison is well-defined; the known
-facts themselves are established at the same first-token level. Patching positions: the
+handling). All retained targets are single words and no pair shares a
+first word, so the comparison is well-defined; known-fact status is
+established at the same first-token level. Patching positions: the
 noise regime patches every non-BOS position of the
 identically-lengthened runs; the misleading regime and all head-level
 patching use the last three tokens (answer position and two preceding),
@@ -292,9 +291,8 @@ non-BOS tokens, one draw per case). The top-norm baseline ranks heads by
 mean $|z|$ over 64 dev bare-fact prompts (positions pooled); the
 mean-ablation vector is the mean head $z$ over the same prompts.
 Six of the top-10 restore heads pass $|N|{<}0.01$; \spec{} is the
-highest-$B$ qualifier, and spec3 takes the three highest-$A$ qualifiers
-(\spec{}, L22.H0, L20.H3)---rank-based choices among qualifiers, with no
-further threshold. Cross-model profile correlation
+highest-$B$ qualifier, spec3 the three highest-$A$ qualifiers
+(\spec{}, L22.H0, L20.H3)---rank-based choices, no further threshold. Cross-model profile correlation
 interpolates each model's per-layer mean-effect profile at 10 evenly
 spaced depth fractions (0.05--0.95) before Spearman ranking. Models use
 HuggingFace checkpoints \texttt{google/gemma-2-2b},
@@ -344,8 +342,8 @@ bfloat16 on the same 200 dev facts: mean $|\Delta\mathrm{LD}|$ is
 relative); the head-effect vectors rank-correlate at Spearman~$0.99$,
 the largest per-head effect difference is $0.008$, and \spec{} ranks
 first among the compared heads on this sample under both precisions
-(the full-experiment dev ranking of Table~\ref{tab:heads} is led by
-L25.H4, a generic-role head).
+(the full dev ranking, Table~\ref{tab:heads}, is led by L25.H4, a
+generic-role head).
 
 \begin{table}[t]
 \caption{Behavioral landscape on known facts (\emodel{}, $n{=}2{,}000$;
@@ -530,11 +528,11 @@ is erratic across seeds (follow 12.6--22.2\%, truth 44.8--78.8\% over
 five seeds, with inconsistent sign and magnitude).
 
 Capability costs are dissociated (Table~\ref{tab:cap}): MMLU retention
-remains 0.99--1.01 for every tested intervention, and an independent
-paired per-question rerun for \spec{} detects no change on this subset
-(none 49.8\% vs.\ spec1 49.4\%; $b{=}22$ questions gained by spec1,
-$c{=}30$ lost; exact $p{=}0.33$)---an absence of detected change, not a
-demonstrated equivalence---whereas perplexity rises 5--20\%. The
+remains 0.99--1.01 for every tested intervention, and a paired
+per-question rerun for \spec{} detects no change on this subset (49.8\%
+vs.\ 49.4\%; $b{=}22$ gained, $c{=}30$ lost; exact $p{=}0.33$)---no
+detected change, not demonstrated equivalence---whereas perplexity
+rises 5--20\%. The
 single-head specialist intervention is the cheapest of all: a 35\% relative
 hallucination reduction---with an accuracy \emph{gain}---at MMLU retention
 0.998 and a perplexity cost of only 5\%.
@@ -601,9 +599,8 @@ random-5 (5 seeds) & 12.6--22.2 & 44.8--78.8 & --- \\
 
 \begin{table}[t]
 \caption{Capability under intervention (fixed 2{,}000-question MMLU subset;
-PPL over 1024-token WikiText-2 windows). An independent paired
-per-question rerun for \spec{} (Sect.~\ref{sec:results-interventions})
-yields 49.8\%/49.4\% (none/spec1), consistent with the table.}
+PPL over 1024-token WikiText-2 windows). A paired per-question rerun
+for \spec{} gives 49.8\%/49.4\% (none/spec1), consistent with the table.}
 \label{tab:cap}
 \begin{center}
 \begin{tabular}{lccc}
@@ -637,10 +634,10 @@ mean-abl.\ top-5 & 50.0\% & 1.001 & 1.13 \\
 \subsection{Cross-model replication}
 \label{sec:results-cross}
 
-Replicating the pipeline on Llama-3.2-1B and Qwen2.5-1.5B (600 known facts
-each, split 144/456 and 184/416 dev/held-out by relation; coarse and fine
-sweeps are restricted to the dev split, capped at 300/150 facts---all
-selection is dev-only) confirms the core structural
+Replicating the pipeline on Llama-3.2-1B and Qwen2.5-1.5B (600 known
+facts each, split 144/456 and 184/416 dev/held-out by relation; coarse
+and fine sweeps use the dev split only, capped at 300/150 facts)
+confirms the core structural
 and interventional findings, though the specialist taxonomy (Stage 4)
 was run only for \emodel{} (Table~\ref{tab:cross}). First, late-layer
 concentration holds in all three architectures: the most influential
@@ -735,18 +732,15 @@ norm-based selection carries a practical warning: cheap proxies for
 ``importance'' can select exactly the wrong components and
 \emph{worsen} the targeted behavior.
 
-\textbf{Limitations and future work.} (i) English-only, single-decoding
-(greedy), completion-style evaluation; (ii) hallucination is
-operationalized as verifiable counterfactual override, not open-ended
-factuality; (iii) head selection is causal but the circuit description is
-coarse---path-level analysis (direct vs.\ mediated effects) is the natural
-next step; (iv) \emodel{} is not the newest generation---chosen for
-tooling maturity and comparability with the interpretability literature;
-newer families (Gemma~3/4) and instruction-tuned variants are future
-work; (v) capability is proxied by MMLU/PPL subsets; (vi) the
-conflict-specialist analysis (Stage 4) was run only for \emodel{}; extending
-the specialist taxonomy to the replication models, and testing whether
-entity popularity modulates circuit reliance, remain open.
+\textbf{Limitations and future work.} (i) English-only, greedy
+completion-style evaluation; (ii) hallucination is operationalized as
+counterfactual override, not open-ended factuality; (iii) head selection
+is causal but the circuit description is coarse---path-level analysis is
+the natural next step; (iv) \emodel{} is not the newest generation
+(chosen for tooling maturity and literature comparability); newer
+families and instruction-tuned variants are future work; (v) capability
+is proxied by MMLU/PPL subsets; (vi) the Stage-4 specialist taxonomy ran
+only for \emodel{}, and entity-popularity effects remain open.
 
 \section{Conclusion}
 \label{sec:conclusion}
