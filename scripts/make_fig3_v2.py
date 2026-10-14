@@ -54,7 +54,9 @@ for i, h in enumerate(HEADS):
 cax = fig.add_subplot(gs[0, 5])
 cb = fig.colorbar(im, cax=cax)
 cb.set_label("attention", fontsize=7)
-cb.ax.tick_params(labelsize=6.5)
+cb.ax.yaxis.set_ticks_position("left")
+cb.ax.yaxis.set_label_position("left")
+cb.ax.tick_params(labelsize=6)
 
 # ---- (b) answer-position breakdown, mean±SD over prompts
 axb = fig.add_subplot(gs[0, 6])
