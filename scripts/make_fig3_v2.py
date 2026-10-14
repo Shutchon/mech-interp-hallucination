@@ -31,8 +31,8 @@ plt.rcParams.update({"figure.dpi": 200, "font.size": 8, "axes.labelsize": 8,
                      "axes.titlesize": 8})
 
 fig = plt.figure(figsize=(7.16, 2.45))
-gs = fig.add_gridspec(1, 8, width_ratios=[1, 1, 1, 1, 1, 0.12, 1.9, 0.5],
-                      wspace=0.75, left=0.045, right=0.98, top=0.86, bottom=0.15)
+gs = fig.add_gridspec(1, 8, width_ratios=[1, 1, 1, 1, 1, 0.12, 2.1, 0.75],
+                      wspace=0.75, left=0.045, right=0.845, top=0.86, bottom=0.15)
 
 # ---- (a) matrices
 ex = D["example"]
@@ -72,9 +72,9 @@ axb.set_xticks(x)
 axb.set_xticklabels(HEADS, fontsize=7, rotation=30, ha="right")
 axb.set_ylabel("attn from answer pos.", fontsize=7.5)
 axb.set_title(f"(b) answer position, {N} prompts", fontsize=7.5, pad=4)
-axb.legend(fontsize=6.5, frameon=False, loc="upper right",
-           bbox_to_anchor=(1.02, 1.0), handlelength=1.0, labelspacing=0.25)
-axb.set_ylim(0, 1.15)
+axb.legend(fontsize=6.5, frameon=False, loc="center left",
+           bbox_to_anchor=(1.04, 0.5), handlelength=1.0, labelspacing=0.3)
+axb.set_ylim(0, 1.02)
 
 fig.text(0.045, 0.955, "(a) attention patterns, one misleading prompt "
           f"({ex['true']} / distractor {ex['distractor']}; B=BOS, D=distractor, a=answer)",
