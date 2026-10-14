@@ -71,13 +71,13 @@ for j, (dest, c) in enumerate(zip(dests, colors)):
 axb.set_xticks(x)
 axb.set_xticklabels(HEADS, fontsize=7, rotation=30, ha="right")
 axb.set_ylabel("attn from answer pos.", fontsize=7.5)
-axb.set_title(f"(b) answer position, {N} prompts", fontsize=7.5, pad=4)
+axb.set_title(f"(b) attention from answer position ({N} prompts)",
+              fontsize=7.5, loc="left", pad=19)
 axb.legend(fontsize=6.5, frameon=False, loc="center left",
            bbox_to_anchor=(1.04, 0.5), handlelength=1.0, labelspacing=0.3)
 axb.set_ylim(0, 1.02)
 
-fig.text(0.045, 0.955, "(a) attention patterns, one misleading prompt "
-          f"({ex['true']} / distractor {ex['distractor']}; B=BOS, D=distractor, a=answer)",
+fig.text(0.045, 0.97, "(a) attention patterns, one misleading prompt",
           fontsize=7.5, va="bottom")
 
 fig.savefig(F / "fig3_attention.pdf", bbox_inches="tight")
