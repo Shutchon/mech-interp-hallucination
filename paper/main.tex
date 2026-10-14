@@ -328,6 +328,13 @@ MMLU 49.4\%$\pm$0.4, TruthfulQA MC1/MC2~\cite{lin2022truthfulqa}
 24.5\%/36.3\%, WikiText-2 PPL 65.3 (1024-token windows). The 2{,}000-question
 MMLU subset used for intervention evaluation yields 50.0\% at baseline;
 the two scores differ because of subset sampling, not protocol error.
+\textbf{Precision robustness.} Repeating the logit-difference
+measurements and the top-20 head-effect ranking in float32 versus
+bfloat16 on the same 200 dev facts: mean $|\Delta\mathrm{LD}|$ is
+0.07--0.08 logits against mean $|\mathrm{LD}|$ of 2.7--8.7 ($0.9$--$3\%$
+relative); the head-effect vectors rank-correlate at Spearman~$0.99$,
+the largest per-head effect difference is $0.008$, and \spec{} ranks
+first under both precisions.
 
 \begin{table}[t]
 \caption{Behavioral landscape on known facts (\emodel{}, $n{=}2{,}000$;

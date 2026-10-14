@@ -127,3 +127,7 @@
 - e5b: datasets อ่าน cache ไม่ได้ → อ่าน parquet ตรง; is_correct เทียบ letter/int ผิด → คำนวณใหม่ใน analysis จาก pred+answer
 - fig3: 2 บั๊กซ้อน — to_string(0-dim tensor) ผิด + dict comprehension เก็บแถว neutral (ไม่มี distractor) — แก้ทั้งคู่แล้ว ตัวเลขใน paper เปลี่ยนตามความจริง
 - e0b: OOM-kill 2 ครั้ง (fp32 10.4GB + โมเดลอื่นชนกัน) → รันเดี่ยว + swap 16GB
+
+## Round 2 — ปิดจบ (14 ต.ค.)
+- e0b metric parity ผ่านสุดท้าย (200 dev facts): |ΔLD| 0.07–0.08 vs |LD| 2.7–8.7 (0.9–3% rel), head-rank Spearman fp32-bf16 = 0.99, max per-head Δeffect 0.008, **L22.H4 อันดับ 1 ทั้งสอง precision** → ใส่ "Precision robustness" ใน Sect. localization แล้ว (R7 ปิด)
+- รีวิวรอบ 2 ครบ 16/16 ข้อ · paper 8 หน้าพอดี · คอมไพล์สะอาด
