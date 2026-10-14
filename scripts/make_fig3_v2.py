@@ -69,7 +69,7 @@ for j, (dest, c) in enumerate(zip(dests, colors)):
             label={"bos": "→BOS", "distractor": "→distr.", "other": "→other"}[dest],
             error_kw=dict(lw=0.8, capsize=2), edgecolor="white", lw=0.3)
 axb.set_xticks(x)
-axb.set_xticklabels(HEADS, fontsize=7, rotation=30, ha="right")
+axb.set_xticklabels([h.replace(".", "\n") for h in HEADS], fontsize=7)
 axb.set_ylabel("attn from answer pos.", fontsize=7.5)
 axb.set_title(f"(b) attention from answer position ({N} prompts)",
               fontsize=7.5, loc="left", pad=19)
