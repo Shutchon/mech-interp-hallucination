@@ -83,11 +83,12 @@ def fig4():
     ax = axes[0]
     base = r1["none"]
     ax.scatter(base["follow_rate"], base["truth_rate"], marker="*", s=140, c="k", label="none", zorder=5)
+    k_off = {"1": (3, 2), "2": (3, 2), "5": (-6, -11), "10": (5, -3), "20": (-20, 4)}
     for k, c in zip(("1", "2", "5", "10", "20"), plt.cm.Blues(np.linspace(0.45, 0.95, 5))):
         r = r1[f"top-{k}"]
         ax.scatter(r["follow_rate"], r["truth_rate"], color=c, s=34)
         ax.annotate(f"k={k}", (r["follow_rate"], r["truth_rate"]), fontsize=7,
-                    xytext=(3, 2), textcoords="offset points", color=c)
+                    xytext=k_off[k], textcoords="offset points", color=c)
     for name, m, col, lab in (("spec1", "P", "#d62728", "spec1 (L22.H4)"),
                               ("spec3", "X", "#ff7f0e", "spec3"),
                               ("mean2", "^", "#2ca02c", "mean2"),
@@ -98,10 +99,12 @@ def fig4():
     tn = r1["topnorm-5"]
     ax.scatter(tn["follow_rate"], tn["truth_rate"], marker="D", c="#7f7f7f", s=40,
                label="topnorm-5")
+    ax.annotate("topnorm-5", (tn["follow_rate"], tn["truth_rate"]), fontsize=7,
+                xytext=(-4, -12), textcoords="offset points", ha="right")
     ax.set(xlabel="context-following rate (hallucination)", ylabel="truth rate",
            title="(a) Suite trade-off (held-out)")
-    ax.legend(frameon=False, loc="lower right", ncol=2, columnspacing=0.9,
-              handletextpad=0.3, markerscale=0.8)
+    ax.legend(frameon=False, loc="upper left", ncol=2, columnspacing=0.9,
+              handletextpad=0.3, markerscale=0.8, fontsize=6.5)
 
     ax = axes[1]
     xs, ys, labels = [], [], []
@@ -112,8 +115,11 @@ def fig4():
         ys.append(cap[name]["mmlu_retention"])
         labels.append(f"{name} PPL×{cap[name]['ppl_ratio']:.2f}")
     ax.scatter(xs, ys, s=36)
-    for x, y, t in zip(xs, ys, labels):
-        ax.annotate(t, (x, y), fontsize=7, xytext=(4, 3), textcoords="offset points")
+    b_off = {"none": (4, 4), "spec1": (6, -10), "top-2": (-8, 4),
+             "top-5": (4, 4), "spec3": (-2, 7), "mean5": (2, -11)}
+    for name, x, y, t in zip(("none", "spec1", "top-2", "top-5", "spec3", "mean5"), xs, ys, labels):
+        ax.annotate(t, (x, y), fontsize=7, xytext=b_off[name],
+                    textcoords="offset points")
     ax.axhline(1.0, ls="--", c="gray", lw=0.8)
     ax.set(xlabel="context-following rate (hallucination)", ylabel="MMLU retention",
            title="(b) Capability cost", xlim=(0, 0.36), ylim=(0.97, 1.03))

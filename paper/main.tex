@@ -114,8 +114,8 @@ conflict-specialist heads with minimal neutral-control effect.
 knockout and mean-ablation, with fairness baselines: patching-guided
 selection reduces hallucination significantly (McNemar $p<10^{-6}$ even for
 a single head), whereas activation-norm selection \emph{increases} it;
-capability costs are dissociated (MMLU retention $\approx 1.00$; perplexity
-+11--20\%).
+capability costs are dissociated (MMLU retention $\approx 1.00$;
+perplexity +5--20\% across interventions).
 \end{itemize}
 
 \section{Related Work}
@@ -573,11 +573,11 @@ persuasion formats, with residual copy-mediated following as the honest
 boundary of the single-head approach.
 
 \begin{table}[t]
-\caption{Held-out interventions (\emodel{}, misleading template T0).
-$n{=}1{,}193$ misleading + $n{=}1{,}193$ neutral items per config;
-follow rates carry fact-clustered bootstrap 95\% CIs. Baselines differ
-from Table~\ref{tab:behavior} because this table covers held-out facts
-only.}
+\caption{Held-out interventions (\emodel{}, misleading template T0; all
+values \%). $n{=}1{,}193$ misleading + $n{=}1{,}193$ neutral items per
+config; follow rates carry fact-clustered bootstrap 95\% CIs. Baselines
+differ from Table~\ref{tab:behavior} because this table covers held-out
+facts only.}
 \label{tab:dose}
 \begin{center}
 \begin{tabular}{lccc}
