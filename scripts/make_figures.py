@@ -79,7 +79,7 @@ def fig4():
     cap = dict(json.load(open(R / "e5_interventions/gemma-2-2b/capability.json"))["results"])
     cap.update(json.load(open(R / "e5_interventions/gemma-2-2b/capability_spec1.json"))["results"])
 
-    fig, axes = plt.subplots(2, 1, figsize=(COL, 5.4))
+    fig, axes = plt.subplots(2, 1, figsize=(COL, 4.85))
     ax = axes[0]
     base = r1["none"]
     ax.scatter(base["follow_rate"], base["truth_rate"], marker="*", s=140, c="k", label="none", zorder=5)
