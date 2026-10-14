@@ -70,7 +70,6 @@ for j, (dest, c) in enumerate(zip(dests, colors)):
             error_kw=dict(lw=0.8, capsize=2), edgecolor="white", lw=0.3)
 axb.set_xticks(x)
 axb.set_xticklabels([h.replace(".", "\n") for h in HEADS], fontsize=7)
-axb.set_ylabel("attn from answer pos.", fontsize=7.5)
 axb.set_title(f"(b) attention from answer position ({N} prompts)",
               fontsize=7.5, loc="left", pad=19)
 axb.legend(fontsize=6.5, frameon=False, loc="center left",
