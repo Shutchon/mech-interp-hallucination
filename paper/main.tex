@@ -520,9 +520,11 @@ is erratic across seeds (follow 12.6--22.2\%, truth 44.8--78.8\% over
 five seeds, with inconsistent sign and magnitude).
 
 Capability costs are dissociated (Table~\ref{tab:cap}): MMLU retention
-remains 0.99--1.01 for every tested intervention, and a paired
-per-question McNemar for \spec{} finds no significant change (49.8\%
-vs.\ 49.4\%, $b{=}22$, $c{=}30$, $p{=}0.33$), whereas perplexity rises 5--20\%. The
+remains 0.99--1.01 for every tested intervention, and an independent
+paired per-question rerun for \spec{} detects no change on this subset
+(none 49.8\% vs.\ spec1 49.4\%; $b{=}22$ questions gained by spec1,
+$c{=}30$ lost; exact $p{=}0.33$)---an absence of detected change, not a
+demonstrated equivalence---whereas perplexity rises 5--20\%. The
 single-head specialist intervention is the cheapest of all: a 35\% relative
 hallucination reduction---with an accuracy \emph{gain}---at MMLU retention
 0.998 and a perplexity cost of only 5\%.
@@ -589,19 +591,21 @@ random-5 (5 seeds) & 12.6--22.2 & 44.8--78.8 & --- \\
 
 \begin{table}[t]
 \caption{Capability under intervention (fixed 2{,}000-question MMLU subset;
-PPL over 1024-token WikiText-2 windows).}
+PPL over 1024-token WikiText-2 windows). An independent paired
+per-question rerun for \spec{} (Sect.~\ref{sec:results-interventions})
+yields 49.8\%/49.4\% (none/spec1), consistent with the table.}
 \label{tab:cap}
 \begin{center}
 \begin{tabular}{lccc}
 \toprule
 config & MMLU & retention & PPL ratio \\
 \midrule
-none   & 50.0\% & 1.00 & 1.00 \\
-top-2  & 49.7\% & 0.99 & 1.11 \\
-top-5  & 50.5\% & 1.01 & 1.20 \\
-\textbf{spec1 (\spec{} only)} & \textbf{49.9\%} & \textbf{1.00} & \textbf{1.05} \\
-spec3  & 50.4\% & 1.01 & 1.16 \\
-mean-abl.\ top-5 & 50.0\% & 1.00 & 1.13 \\
+none   & 50.0\% & 1.000 & 1.00 \\
+top-2  & 49.7\% & 0.995 & 1.11 \\
+top-5  & 50.5\% & 1.011 & 1.20 \\
+\textbf{spec1 (\spec{} only)} & \textbf{49.9\%} & \textbf{0.998} & \textbf{1.05} \\
+spec3  & 50.4\% & 1.009 & 1.16 \\
+mean-abl.\ top-5 & 50.0\% & 1.001 & 1.13 \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -624,7 +628,9 @@ mean-abl.\ top-5 & 50.0\% & 1.00 & 1.13 \\
 \label{sec:results-cross}
 
 Replicating the pipeline on Llama-3.2-1B and Qwen2.5-1.5B (600 known facts
-each; 300/150 facts for coarse/fine sweeps) confirms the core structural
+each, split 144/456 and 184/416 dev/held-out by relation; coarse and fine
+sweeps are restricted to the dev split, capped at 300/150 facts---all
+selection is dev-only) confirms the core structural
 and interventional findings, though the specialist taxonomy (Stage 4)
 was run only for \emodel{} (Table~\ref{tab:cross}). First, late-layer
 concentration holds in all three architectures: the most influential
@@ -656,20 +662,24 @@ separate that reading from generally weaker per-head effects.
 \begin{center}
 \begin{tabular}{lccc}
 \toprule
- & Gemma-2-2B & Llama & Qwen \\
+ & \emodel{} & Llama-3.2-1B & Qwen2.5-1.5B \\
 \midrule
 layers            & 26 & 16 & 28 \\
 top coarse layers & 20--25 & 13--15 & 22--27 \\
-facts used        & 2{,}000 & 600 & 600 \\
+facts (dev/held-out) & 807/1{,}193 & 144/456 & 184/416 \\
+coarse/fine sweep facts & 300/150 & 144/144 & 184/150 \\
+knockout head (top-1) & \spec{}$^{*}$ & L15.H7 & L27.H2 \\
 follow (none)     & 19.3\% & 6.6\% & 14.9\% \\
-follow (top-1)    & 12.6\%$^{*}$ & 4.6\% & 7.5\% \\
-$\Delta$ truth    & $+5.3$$^{*}$ & $+0.5$ & $+0.5$ \\
+follow (top-1)    & 12.6\% & 4.6\% & 7.5\% \\
+$\Delta$ truth    & $+5.3$$^{*}$ & $-1.3$ & $+0.8$ \\
 MMLU retention    & .99--1.01 & 1.01 & 1.00 \\
 \bottomrule
 \end{tabular}
 \end{center}
-\flushleft{\footnotesize $^{*}$\emodel{} uses the Stage-4-selected specialist
-(\spec{}); the other models use their own dev-ranking top-1. \emodel{}
+\flushleft{\footnotesize $^{*}$\emodel{} uses the Stage-4-selected
+specialist (\spec{}); the other models use their own dev-ranking top-1.
+All coarse/fine selection runs use the dev split only (capped at
+300/150 facts; see Sect.~\ref{sec:setup}). \emodel{}
 retention spans the tested interventions (top-2/5, spec3, mean-abl.).}
 \end{table}
 
