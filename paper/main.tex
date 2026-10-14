@@ -37,15 +37,16 @@ Qwen2.5-1.5B (600 facts), each filtered to facts the model demonstrably
 knows. Restoration effects concentrate in the final quarter of the network
 across all three architectures (pairwise Spearman rank correlation of layer
 profiles 0.81--1.00), with a small set of late-layer attention heads
-dominating. Bidirectional patching reveals that influential heads are
-superposed---each both conveys the misleading context and carries the
-memorized answer---and separates dual-role workhorses from
+dominating. Bidirectional patching shows that influential heads act in
+both patching directions (head-level superposition) and separates
+dual-role workhorses from
 conflict-specialist heads whose neutral-control effect is minimal.
 In \emodel{}, knocking out the single specialist head L22.H4 reduces
 misleading-context distractor-following by 35\% relative (exact McNemar
 $p{=}3.4\times10^{-23}$) while
 increasing factual accuracy by 5.3 percentage points, with
-MMLU retention 0.998 and a 5\% perplexity cost; single-head knockouts from
+MMLU retention 0.998, a 5\% perplexity cost, and correct-context use
+nearly intact (96.1\% vs.\ 98.2\% baseline); single-head knockouts from
 the patching ranking reduce distractor-following by 30--50\% in the other
 two models as well. In contrast, norm-based head selection
 \emph{increases} distractor-following. We report quantified dose--response
@@ -736,7 +737,8 @@ which specialist heads (identified via bidirectional patching and a
 neutral-control analysis in \emodel{}) can be knocked out
 individually---distractor-following falls by 30--50\% relative on the
 standard templates (9\% on the extreme adjacent-distractor template),
-accuracy rises, and MMLU retention remains near 1.00 on the tested
+accuracy rises for the \emodel{} specialist (+5.3 points; replication
+models: $-1.3$ to $+0.8$), and MMLU retention remains near 1.00 on the tested
 subset---while norm-based selection backfires. All selection was
 performed on dev relations with results reported on held-out relations,
 and the core findings (late-layer concentration, single-head
