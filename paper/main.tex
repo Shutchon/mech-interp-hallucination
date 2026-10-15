@@ -49,8 +49,8 @@ MMLU retention 0.998, a 5\% perplexity cost, and accuracy under a
 supportive correct context nearly intact (96.1\% vs.\ 98.2\%); single-head knockouts from
 the patching ranking reduce distractor-following by 30--50\% in the other
 two models as well. In contrast, norm-based selection \emph{increases}
-distractor-following, and although random single heads also reduce it,
-the best one collapses MMLU (retention 0.69 vs.\ 0.998). We report
+distractor-following; random single heads also reduce it, and the one
+measured for capability collapses MMLU (retention 0.69 vs.\ 0.998). We report
 quantified dose--response
 trade-offs between reduction and capability, with relation-level splits
 guarding against circular analysis.
@@ -537,10 +537,13 @@ five seeds, with inconsistent sign and magnitude).
 heads behave the same (9.3--10.3\%): reducing distractor-following by
 one-head $z$-knockout is \emph{not} unique to the specialist---the conflict signal is
 distributed, so removing almost any single head weakens it. The
-specialist is distinguished by cost: the best random seed behaviorally
-(L17.H3: follow 5.2\%, truth 88.3\%) collapses MMLU to 34.6\%
-(retention 0.69 vs.\ 0.998 for \spec{})---generic single heads buy the
-gain with large capability damage, which patching-guided selection avoids.
+specialist is distinguished by cost in the one random head we measured
+for capability: the behaviorally best random seed (L17.H3: follow
+5.2\%, truth 88.3\%) collapses MMLU to 34.6\% (retention 0.69 vs.\
+0.998 for \spec{}). Capability was not measured for the other random
+heads, so this case---together with random-5's erratic truth
+rates---illustrates, rather than bounds, the cost profile of
+unprincipled selection.
 
 Capability costs are dissociated (Table~\ref{tab:cap}): MMLU retention
 remains 0.99--1.01 for every tested intervention, and a paired
@@ -614,7 +617,8 @@ late-rand-1 (5 seeds) & 9.3--10.3 & 83.2--84.3 & --- \\
 \begin{table}[t]
 \caption{Capability under intervention (fixed 2{,}000-question MMLU subset;
 PPL over 1024-token WikiText-2 windows). A paired per-question rerun
-for \spec{} gives 49.8\%/49.4\% (none/spec1), consistent with the table.}
+for \spec{} gives 49.8\%/49.4\%, within bf16 run-to-run variation of
+the tabulated 50.0\%/49.9\%.}
 \label{tab:cap}
 \begin{center}
 \begin{tabular}{lccc}
@@ -764,8 +768,8 @@ individually---distractor-following falls by 30--50\% relative on the
 standard templates (9\% on the extreme adjacent-distractor template),
 accuracy rises for the \emodel{} specialist (+5.3 points; replication
 models: $-1.3$ to $+0.8$), and MMLU retention remains near 1.00 on the
-tested subset---while norm-based selection backfires and behaviorally
-matching random single heads collapse MMLU (0.69). All selection was
+tested subset---while norm-based selection backfires and the one
+capability-measured random head collapses MMLU (0.69). All selection was
 performed on dev relations with results reported on held-out relations,
 and the core findings (late-layer concentration, single-head
 intervention effectiveness) replicated across three architectures.
