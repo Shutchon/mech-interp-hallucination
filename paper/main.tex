@@ -209,7 +209,8 @@ model demonstrably knows (first-token argmax over the full vocabulary
 equals the first token of the space-prefixed true target, and the
 first-token logit gap over the counterfactual distractor $\ge 0.5$),
 sampling 2{,}000 facts from the 2{,}130 that pass both filters
-(16.7\% survival; seed 0) split 807/1{,}193
+(17.8\% filter survival; 16.7\% of scored facts retained; seed 0),
+split 807/1{,}193
 dev/held-out \emph{by relation}, so the held-out split shares no relation
 with the split used for any selection. A CM-conflict suite asserts the
 distractor in three templates; a neutral control replaces it with a
@@ -320,7 +321,12 @@ uses five separate seeds. Coarse/fine sweeps take the first dev facts in case or
 facts $\times$ 3 positions $=$ 450 fact--position records), averaged
 to head level over records, with bootstrap resampling at the fact
 level (positions travel with their fact). The replication models apply the same filters with a 600-fact cap
-sampled from survivor pools of 3{,}860 (Llama) and 3{,}151 (Qwen). Relation and case IDs per split, head lists for every
+sampled from survivor pools of 3{,}860 (Llama; 28 relations, 14/14
+dev/held-out) and 3{,}151 (Qwen; 28 relations, 14/14). All sweeps
+take the first dev cases in \texttt{case\_id} order---a fixed,
+deterministic policy, though case order can correlate with relation
+blocks. All runs use a single NVIDIA L4 (24\,GB); dataset, checkpoint,
+and package versions are available from the author upon request. Relation and case IDs per split, head lists for every
 configuration, MMLU question IDs, per-item records, plotting scripts,
 and exact package versions are available from the author upon
 request. Models use
@@ -456,16 +462,18 @@ run). Near-zero signed means are not mere cancellation: for the
 neutral runs; median $|\Delta\mathrm{LD}_N|{=}0$ for every top head,
 95\% bootstrap CI $=[0,0]$; verified at the logit level in bfloat16), with mean
 $|\Delta\mathrm{LD}_N|$ of 0.03--0.08 logits driven by a minority of
-cases. Cases surviving denominator thresholds 0.5/1/2 logits are
-291/186/72 of 450, under which L25.H4's share stays largest
-($N{=}0.029/0.019/0.006$ vs.\ $\le$0.016 for the specialists). Two
-caveats remain: threshold sensitivity zeroes $N$ for cases below the
-threshold (no case is dropped), and the qualifier set is
-threshold-sensitive (4/6/9 heads pass $|N|{<}0.005/0.01/0.02$;
-\spec{} itself is excluded at 0.005). ``Specialist'' therefore means
-\emph{low signed-mean neutral effect under this control}, not absence
-of other functions; its behavioral value is established by the
-interventions, not the threshold. Read as each head's \emph{share of
+cases. Two distinct thresholds are involved. \emph{Denominator}
+thresholds (0.5/1/2 logits) change the $N$ estimate itself: cases
+below them are zeroed, not dropped, leaving 291/186/72 of 450, under
+which L25.H4's share stays largest ($N{=}0.029/0.019/0.006$ vs.\
+$\le$0.016 for the specialists). \emph{Membership} criteria on
+$|N|$ instead change which heads qualify: 4/6/9 heads pass
+$|N|{<}0.005/0.01/0.02$, and \spec{} ($N{=}-0.006$) is selected
+under the working criterion $|N|{<}0.01$ but would be excluded at
+0.005. ``Specialist'' therefore means \emph{low signed-mean neutral
+effect under this control}, not absence of other functions; its
+behavioral value is established by the interventions, not the
+threshold. Read as each head's \emph{share of
 the clean--neutral gap}, L25.H4 carries the largest share and keeps it
 under every threshold, whereas \spec{}, L22.H0, and L20.H3 remain at
 $N\!\approx\!0$ under every threshold tested (0.005/0.01/0.02)---
@@ -473,8 +481,9 @@ $N\!\approx\!0$ under every threshold tested (0.005/0.01/0.02)---
 magnitude on this test set, even though the classification itself is
 threshold-dependent. Fig.~\ref{fig:attention} measures, from the answer position of
 32 misleading held-out prompts (mean$\pm$SD), where each head reads
-(prompts are tokenized with a leading BOS; the distractor token is
-located by exact single-token match).
+(the first 32 held-out T0 prompts whose distractor matches exactly
+one token---targets are single words but may tokenize into several
+tokens, and all occurrences of the matched token are counted).
 The strongest specialist, \spec{}, concentrates $68\pm9\%$ of its
 answer-position attention on $\langle$bos$\rangle$ and a further
 $18\pm8\%$ on the token asserting the distractor ($86\%$ combined);
@@ -496,8 +505,8 @@ carrier''; all participate in conveying the context. Second, the
 specialist cluster (\spec{}, L22.H0, L20.H3) combines $N\approx 0$ with
 mid-range asymmetry ($S$ 0.33--0.43), whereas heads combining large
 $|N/A|$ with higher asymmetry (L20.H7, L22.H3) sit lower in the restore
-ranking: a large generic role, not asymmetry alone, makes a head a poor
-intervention target.
+ranking---though a large $|N/A|$ can also reflect a small $A$, so
+this reads as an association, not a causal role claim.
 
 \begin{table}[t]
 \caption{Per-head characterization (\emodel{}, top-10 by restore effect
@@ -576,9 +585,9 @@ five seeds (follow 12.6--22.2\%, truth 44.8--78.8\%, inconsistent
 sign and magnitude). For \spec{}, the paired
 fact-clustered 95\% CI of the difference is $[+5.3, +8.1]$ points of
 following removed and $[+3.7, +6.9]$ points of truth gained;
-per-relation, following falls in 11 of 15 held-out relations (median
-4.2 points, range 0--16.7), so the effect is broad but not
-relation-uniform.
+per-relation, following falls in 11 of 15 held-out relations
+(median 4.2 points, range 0--16.7)---broad but not relation-uniform;
+all CIs are conditional on this fixed relation split.
 
 \textbf{How special is the specialist?} A uniformly random
 \emph{single}-head knockout reduces following for every seed tested
@@ -595,8 +604,9 @@ draws are behaviorally effective and capability-preserving, a minority
 carry large metric-specific costs. In this experiment \spec{} falls in
 the low-cost region (retention 0.992, PPL $\times$1.05); with one
 selected head we cannot show that the selection procedure itself
-controls this variance, but the dev-side causal evidence at least
-screens for conflict-relevant heads rather than sampling blindly.
+controls this variance; the dev-side patching evidence identifies
+conflict-relevant heads, but whether such screening systematically
+yields safer heads than random draws is not established here.
 
 \begin{table}[t]
 \caption{Random single-head knockouts, per head (ten draws from one
@@ -658,8 +668,8 @@ accuracy from 0.8\% to 8.7\%, while top-5 reduces following from 98.4\%
 to 58.3\% (40.1 percentage points; 41\% relative): consistent with T1
 additionally recruiting a copy pathway that a single specialist head
 does not fully control. The intervention thus generalizes across
-persuasion formats, with residual copy-mediated following as a remaining
-limitation of the single-head approach.
+persuasion formats; residual following under T1 is consistent with a
+copying contribution that the single-head approach does not remove.
 
 \begin{table}[t]
 \caption{Held-out interventions (\emodel{}, misleading template T0; all
@@ -803,8 +813,9 @@ and the influential heads convey the misleading context at least as
 much as they carry memory ($B>A$
 throughout). ``Restoration'' by patching therefore partly works by
 displacing a head's context conveyance rather than injecting memory---the
-neutral-control analysis makes this distinction measurable, addressing
-copy-vs-recall confounds.
+neutral-control analysis makes this distinction measurable at the
+level of patching effects between conditions---it does not by itself
+identify the underlying pathway.
 
 \textbf{Attention-sink specialists.} The most surprising finding is the
 identity of the strongest conflict specialist: \spec{}, whose

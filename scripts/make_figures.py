@@ -90,16 +90,19 @@ def fig4():
     pts += [(f"top-{k}", r1[f"top-{k}"]) for k in ("1", "2", "5", "10", "20")]
     pts += [(name, r2[name]) for name in ("spec1", "spec3", "mean2", "mean5", "meanspec3")]
     pts += [("topnorm-5", r1["topnorm-5"])]
-    pair_off = {"top-2": (-2, 7), "mean2": (2, -13),
-                "top-5": (-2, 7), "mean5": (2, -13),
-                "spec3": (-2, 7), "meanspec3": (2, -13)}
+    pair_off = {"top-2": (-14, -3), "mean2": (7, 5),
+                "top-5": (-14, -3), "mean5": (7, 5),
+                "spec3": (-14, -3), "meanspec3": (7, 5),
+                "topnorm-5": (-13, -10)}
     for i, (name, r) in enumerate(pts, start=1):
         col = "#d62728" if name == "spec1" else ("#7f7f7f" if name == "topnorm-5" else "#1f77b4")
         ax.scatter(r["follow_rate"], r["truth_rate"], c=col, s=36,
                    zorder=6 if name == "spec1" else 3)
-        off = pair_off.get(name, (-11, -8) if name == "topnorm-5" else (4, -8))
+        off = pair_off.get(name, (5, -4))
         ax.annotate(str(i), (r["follow_rate"], r["truth_rate"]), fontsize=7,
-                    fontweight="bold", xytext=off, textcoords="offset points")
+                    fontweight="bold", xytext=off, textcoords="offset points",
+                    bbox=dict(boxstyle="round,pad=0.15", fc="white", ec="none", alpha=0.85),
+                    zorder=7)
     # random-1 baselines: uniform (circle) and late-layer (triangle)
     ax.scatter([x["follow_rate"] for x in randr[:5]],
                [x["truth_rate"] for x in randr[:5]], c="#2ca02c", s=26,
@@ -107,13 +110,14 @@ def fig4():
     ax.scatter([x["follow_rate"] for x in randr[5:]],
                [x["truth_rate"] for x in randr[5:]], c="#2ca02c", s=26,
                marker="^", alpha=0.9, zorder=2, label="random-1 (late)")
-    ax.legend(frameon=False, fontsize=7, loc="lower left")
+    ax.legend(frameon=False, fontsize=7, loc="upper right")
     key_l = "1  none\n2  top-1\n3  top-2\n4  top-5\n5  top-10\n6  top-20"
     key_r = "7  spec1\n8  spec3\n9  mean2\n10 mean5\n11 meanspec3\n12 topnorm-5"
     ax.text(0.60, 0.03, key_l, transform=ax.transAxes, fontsize=7.5,
             va="bottom", ha="left", linespacing=1.5)
     ax.text(0.83, 0.03, key_r, transform=ax.transAxes, fontsize=7.5,
             va="bottom", ha="left", linespacing=1.5)
+    ax.grid(alpha=0.25, lw=0.4)
     ax.set(xlabel="context-following rate (hallucination)", ylabel="truth rate",
            title="(a) Suite trade-off (held-out)", ylim=(0.12, 0.95))
 
