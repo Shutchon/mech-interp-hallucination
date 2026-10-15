@@ -97,10 +97,10 @@ def fig4():
                     fontweight="bold", xytext=off, textcoords="offset points")
     key_l = "1  none\n2  top-1\n3  top-2\n4  top-5\n5  top-10\n6  top-20"
     key_r = "7  spec1\n8  spec3\n9  mean2\n10 mean5\n11 meanspec3\n12 topnorm-5"
-    ax.text(0.02, 0.98, key_l, transform=ax.transAxes, fontsize=6.5,
-            va="top", ha="left", linespacing=1.5)
-    ax.text(0.22, 0.98, key_r, transform=ax.transAxes, fontsize=6.5,
-            va="top", ha="left", linespacing=1.5)
+    ax.text(0.60, 0.03, key_l, transform=ax.transAxes, fontsize=6.5,
+            va="bottom", ha="left", linespacing=1.5)
+    ax.text(0.80, 0.03, key_r, transform=ax.transAxes, fontsize=6.5,
+            va="bottom", ha="left", linespacing=1.5)
     ax.set(xlabel="context-following rate (hallucination)", ylabel="truth rate",
            title="(a) Suite trade-off (held-out)")
 
