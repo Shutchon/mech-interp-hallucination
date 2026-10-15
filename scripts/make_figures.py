@@ -74,6 +74,8 @@ def fig2():
 
 
 def fig4():
+    randr = json.load(open(R / "e5_interventions/gemma-2-2b/random1.json"))["results"]
+    randcap = json.load(open(R / "e5_interventions/gemma-2-2b/capability_unified.json"))["configs"]
     r1 = {r["config"]: r for r in json.load(open(R / "e5_interventions/gemma-2-2b/dose_response.json"))["results"]}
     r2 = {r["config"]: r for r in json.load(open(R / "e5_interventions/gemma-2-2b/round2.json"))["results"]}
     cap = dict(json.load(open(R / "e5_interventions/gemma-2-2b/capability.json"))["results"])
@@ -109,30 +111,27 @@ def fig4():
 
     ax = axes[1]
     xs, ys, labels = [], [], []
-    for name, c in (("none", "k"), ("spec1", "#d62728"), ("top-2", "#1f77b4"),
-                    ("top-5", "#1f77b4"), ("spec3", "#ff7f0e"), ("mean5", "#9467bd")):
+    for name in ("none", "spec1", "top-2", "top-5", "spec3", "mean5"):
         rate = r1.get(name) or r2.get(name)
         xs.append(rate["follow_rate"])
-        ys.append(cap[name]["mmlu_retention"])
-        labels.append(f"{name} PPL×{cap[name]['ppl_ratio']:.2f}")
-    rand = json.load(open(R / "e5_interventions/gemma-2-2b/rand_capability.json"))["rand_L17H3"]
-    xs.append(0.052)
-    ys.append(rand["mmlu_retention"])
-    labels.append("rand L17.H3")
-    ax.scatter(xs[:-1], ys[:-1], s=36)
-    ax.scatter(xs[-1], ys[-1], s=60, marker="X", c="#2ca02c")
+        ys.append(randcap[name]["mmlu_acc"] / randcap["none"]["mmlu_acc"])
+        labels.append(name)
+    ax.scatter(xs, ys, s=36, zorder=4)
     # numbered markers + side key (labels collide when points cluster)
     names = ("none", "spec1", "top-2", "top-5", "spec3", "mean5", "rand")
-    b_dig = {1: (4, 4), 2: (-2, -12), 3: (6, 3), 4: (-4, 5), 5: (5, -11), 6: (5, 4), 7: (6, 4)}
+    b_dig = {1: (4, 4), 2: (-2, -12), 3: (6, 3), 4: (-4, 5), 5: (5, -11), 6: (5, 4)}
     for i, (x, y) in enumerate(zip(xs, ys), start=1):
         ax.annotate(str(i), (x, y), fontsize=7, fontweight="bold",
                     xytext=b_dig[i], textcoords="offset points")
-    ppl = {"none": 1.00, "spec1": 1.05, "top-2": 1.11, "top-5": 1.20,
-           "spec3": 1.16, "mean5": 1.13}
-    key = "\n".join([f"{i}: {n} (PPL x{ppl.get(n, '-')})"
-                     for i, n in enumerate(names[:6], start=1)] + ["7: rand L17.H3"])
-    ax.text(0.97, 0.05, key, transform=ax.transAxes, fontsize=6.5,
+    ppl = {n: randcap[n]["wiki_ppl"] / randcap["none"]["wiki_ppl"] for n in names[:6]}
+    key = "\n".join([f"{i}: {n} (PPL x{ppl[n]:.2f})"
+                     for i, n in enumerate(names[:6], start=1)])
+    ax.text(0.97, 0.05, key, transform=ax.transAxes, fontsize=7,
             ha="right", va="bottom", linespacing=1.5)
+    for i, x in enumerate(randr):
+        k = ("rand-" if i < 5 else "laterand-") + x["head"].replace(".", "")
+        ax.scatter(x["follow_rate"], randcap[k]["mmlu_acc"] / randcap["none"]["mmlu_acc"],
+                   c="#2ca02c", s=22, alpha=0.85)
     ax.axhline(1.0, ls="--", c="gray", lw=0.8)
     ax.set(xlabel="context-following rate (hallucination)", ylabel="MMLU retention",
            title="(b) Capability cost", xlim=(0, 0.36), ylim=(0.64, 1.03))
@@ -151,7 +150,7 @@ def fig5():
     fig, ax = plt.subplots(figsize=(COL, 2.4))
     sc = ax.scatter(B, A, c=na, cmap="coolwarm", vmin=-1.5, vmax=1.5, s=42,
                     edgecolors="k", lw=0.4)
-    lim = max(A.max(), B.max()) * 1.15
+    lim = max(A.max(), B.max()) * 1.22
     ax.plot([0, lim], [0, lim], "--", c="gray", lw=0.8, label="A = B (strongly superposed)")
     spec1 = next(r for r in table if r["head"] == "L22_H4")
     ax.scatter([spec1["effect_B_context_push"]], [spec1["effect_A_restore"]],
@@ -159,7 +158,7 @@ def fig5():
                label="spec1 (L22.H4)", zorder=6)
     for r in table[:6]:
         ax.annotate(r["head"], (r["effect_B_context_push"], r["effect_A_restore"]),
-                    fontsize=7, xytext=(5, -9), textcoords="offset points")
+                    fontsize=7, xytext=(6, -10), textcoords="offset points")
     cb = fig.colorbar(sc, ax=ax, pad=0.02)
     cb.set_label("neutral ratio N/A", fontsize=7.5)
     cb.ax.tick_params(labelsize=7)

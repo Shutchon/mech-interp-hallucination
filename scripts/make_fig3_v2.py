@@ -56,7 +56,7 @@ cb = fig.colorbar(im, cax=cax)
 cb.set_label("attention", fontsize=7)
 cb.ax.yaxis.set_ticks_position("left")
 cb.ax.yaxis.set_label_position("left")
-cb.ax.tick_params(labelsize=6)
+cb.ax.tick_params(labelsize=7)
 
 # ---- (b) answer-position breakdown, mean±SD over prompts
 axb = fig.add_subplot(gs[0, 6])
@@ -74,7 +74,7 @@ axb.set_xticks(x)
 axb.set_xticklabels([h.replace(".", "\n") for h in HEADS], fontsize=7)
 axb.set_title(f"(b) attention from answer position ({N} prompts)",
               fontsize=7.5, loc="left", pad=19)
-axb.legend(fontsize=6.5, frameon=False, loc="center left",
+axb.legend(fontsize=7, frameon=False, loc="center left",
            bbox_to_anchor=(1.04, 0.5), handlelength=1.0, labelspacing=0.3)
 axb.set_ylim(0, 1.02)
 

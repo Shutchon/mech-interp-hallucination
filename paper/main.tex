@@ -50,7 +50,8 @@ the patching ranking reduce distractor-following by 30--50\% in the other
 two models as well. In contrast, norm-based selection \emph{increases}
 distractor-following, and random single heads reduce it at capability
 costs ranging from clean to catastrophic (MMLU retention 1.01 to 0.70;
-PPL up to $\times$2.3)---tail risk that principled selection avoids. We report
+PPL up to $\times$2.3)---risk that this experiment's selected head
+avoided. We report
 quantified dose--response
 trade-offs between reduction and capability, with relation-level splits
 guarding against circular analysis.
@@ -66,10 +67,10 @@ mechanistic interpretability, hallucination, knowledge conflict, activation patc
 % Narrative: SLM deployment -> hallucination under misleading context is a
 % systems problem -> gap -> contributions.
 
-Language models of 1--2.6B parameters now power on-device assistants,
-retrieval-augmented pipelines~\cite{aromsuk2026rag}, and
-document-processing systems where
-latency and memory budgets preclude larger models. In such deployments the
+Language models of 1--2.6B parameters now power on-device
+assistants~\cite{llama32card}, retrieval-augmented
+pipelines~\cite{aromsuk2026rag}, and document-processing systems
+where latency and memory budgets preclude larger models. In such deployments the
 model must frequently integrate an external context with its parametric
 knowledge. When the context asserts a false fact---whether through a
 retrieval error, an adversarial document, or a mistaken user---one way
@@ -267,8 +268,8 @@ WikiText-2 perplexity (1024-token windows) under the same hooks. Statistics: fac
 (10{,}000 resamples); two-sided exact binomial McNemar tests against
 ``none'', where $b$ counts items the intervention fixes and $c$ items it
 breaks (per outcome: distractor-following, truth, neutral, or
-correct-context accuracy). The prespecified primary comparison is
-\spec{} vs.\ none; all other configurations are exploratory.
+correct-context accuracy). The primary comparison is \spec{} vs.\ none; all other
+configurations are exploratory.
 
 \textbf{Reproducibility details.} Misleading templates (distractor
 $d$, prompt $p$): T0 = ``\emph{Earlier you learned that the correct
@@ -295,7 +296,9 @@ the identically-lengthened runs; the misleading regime and head-level
 patching use the last three tokens, right-aligned across runs. Noise
 corruption is Gaussian at the embedding layer ($\sigma=3\times$
 embedding std, all non-BOS tokens, one draw per case). The top-norm
-baseline ranks heads by mean $|z|$ over 64 dev bare-fact prompts; the
+baseline ranks heads by mean absolute $z$-component (averaged over
+token positions and the head dimension, then over 64 dev bare-fact
+prompts); the
 mean-ablation vector is each head's mean $z$ over those prompts pooled
 across token positions, substituted at all positions during
 evaluation.
@@ -305,8 +308,12 @@ highest-$B$ qualifier, spec3 the three highest-$A$ qualifiers
 interpolates each model's per-layer mean-effect profile at 10 evenly
 spaced depth fractions (0.05--0.95) before Spearman ranking. Head
 rankings and Stage-4 selection use template T0; random-baseline heads
-were drawn with seed 20261014 (uniform: L23.H2, L17.H3, L5.H4, L21.H5,
-L24.H4; late-layer: L21.H1, L23.H6, L24.H5, L24.H0, L22.H5). Relation
+are ten successive draws from one seeded RNG (20261014; per-head
+results in Table~\ref{tab:rand1}), while random-5 uses five separate
+seeds. Coarse/fine sweeps take the first dev facts in case order (caps
+300/150); Stage~4 uses 150 dev facts $\times$ three aligned suffix
+positions. The replication models apply the same filters with a
+600-fact cap sampled from a larger survivor pool. Relation
 IDs per split, per-item records, and exact package versions are
 available from the author upon request. Models use
 HuggingFace checkpoints \texttt{google/gemma-2-2b},
@@ -348,7 +355,7 @@ pathway.
 Reference benchmarks (lm-eval-harness): MMLU 49.4\%$\pm$0.4 (full
 test set), TruthfulQA MC1/MC2 24.5\%/36.3\%~\cite{lin2022truthfulqa},
 WikiText-2 PPL 65.3; the 2{,}000-question intervention subset yields
-50.0\%---subset sampling, not protocol error.
+49.8\% (unified capability run)---subset sampling, not protocol error.
 \textbf{Precision robustness.} Repeating the LD measurements and
 top-20 head-effect ranking in float32 vs.\ bfloat16 on the same 200
 dev facts: mean $|\Delta\mathrm{LD}|$ is 0.07--0.08 logits vs.\ mean
@@ -386,10 +393,11 @@ every MLP block), whereas pure recall restoration under noise mixes MLP
 and attention almost evenly. (The regimes also differ in patched
 positions---all non-BOS for noise, last three for the conflict---so this
 contrast is specific to the protocol; a matched-position control is
-future work.) This contrast is informative but protocol-bound: the
-classical ROME-style picture of factual recall as MLP-stored
-knowledge~\cite{meng2022rome} does not transfer to the conflict regime
-under this patching protocol,
+future work.) Under this protocol, attention blocks yield higher restoration than
+MLP blocks in the conflict regime---a contrast with the classical
+ROME-style MLP-storage picture~\cite{meng2022rome}, though the
+regimes' differing patch positions (all non-BOS vs.\ last three)
+preclude a mechanistic conclusion without a matched-position control,
 where what an intervention can restore flows through attention. Head-level
 patching then identifies a compact set: \{L22.H0 (0.26), L25.H4 (0.24),
 L20.H3 (0.15), L25.H6 (0.12)\} under noise, and \{L25.H4 (0.08), L22.H4
@@ -542,8 +550,13 @@ ablating the five highest-norm heads \emph{increases} hallucination to
 33.0\% ($b{=}9$, $c{=}173$): these are early/mid-layer high-$|z|$
 heads (L2--L16), not the late-layer heads of Table~\ref{tab:heads}, and
 their removal tips the final balance toward the context. Random-head ablation
-is erratic across seeds (follow 12.6--22.2\%, truth 44.8--78.8\% over
-five seeds, with inconsistent sign and magnitude).
+is erratic across seeds (follow 12.6--22.2\%, truth 44.8--78.8\%,
+inconsistent sign and magnitude). For \spec{}, the paired
+fact-clustered 95\% CI of the difference is $[+5.3, +8.1]$ points of
+following removed and $[+3.7, +6.9]$ points of truth gained;
+per-relation, following falls in 11 of 15 held-out relations (median
+4.2 points, range 0--16.7), so the effect is broad but not
+relation-uniform.
 
 \textbf{How special is the specialist?} A uniformly random
 \emph{single}-head knockout reduces following for every seed tested
@@ -551,24 +564,52 @@ five seeds, with inconsistent sign and magnitude).
 heads behave the same (9.3--10.3\%): reducing distractor-following by
 one-head $z$-knockout is \emph{not} unique to the specialist---all ten randomly drawn heads
 tested weaken it. With capability measured for all ten random heads
-(Table~\ref{tab:cap}), the picture is sharper: eight of the ten are
+(Table~\ref{tab:rand1}), the picture is sharper: eight of the ten are
 capability-clean (MMLU retention 0.996--1.01, PPL ratio
 0.99--1.05) \emph{and} behaviorally better than \spec{}; two carry
 silent catastrophic costs (L17.H3: MMLU retention 0.70; L5.H4: PPL
-ratio 2.31). Unprincipled single-head selection is thus a lottery with
-a favorable mean but a heavy tail, and the patching-guided specialist
-is a draw from the safe region by construction (retention 0.992, PPL
-$\times$1.05)---selection buys tail-risk control, not a better mean.
+ratio 2.31). Unprincipled single-head selection is thus a lottery with a favorable
+mean but a heavy tail. In this experiment \spec{} lands in the safe
+region (retention 0.992, PPL $\times$1.05); with one selected head we
+cannot show that the selection procedure itself controls the tail, but
+the dev-side causal evidence at least screens for conflict-relevant
+heads rather than sampling blindly.
+
+\begin{table}[t]
+\caption{Random single-head knockouts, per head (ten draws from one
+seeded RNG, seed 20261014; late = layers 20--25). Follow/truth in \%;
+retention and PPL ratio from the unified capability run.}
+\label{tab:rand1}
+\begin{center}
+\begin{tabular}{lcccc}
+\toprule
+head & follow$\downarrow$ & truth$\uparrow$ & MMLU ret. & PPL ratio \\
+\midrule
+L23.H2 & 9.8 & 83.9 & 0.996 & 0.99 \\
+L17.H3 & 5.2 & 88.3 & 0.695 & 0.88 \\
+L5.H4 & 10.6 & 81.9 & 0.947 & 2.31 \\
+L21.H5 & 12.2 & 82.1 & 0.998 & 1.01 \\
+L24.H4 & 9.6 & 83.2 & 1.010 & 1.03 \\
+\midrule
+L21.H1 & 10.0 & 83.2 & 0.998 & 1.00 \\
+L23.H6 & 9.7 & 83.8 & 1.008 & 1.02 \\
+L24.H5 & 9.3 & 84.3 & 1.002 & 0.99 \\
+L24.H0 & 9.9 & 83.8 & 1.003 & 1.05 \\
+L22.H5 & 10.3 & 83.2 & 1.005 & 1.05 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{table}
 
 Capability costs are dissociated (Table~\ref{tab:cap}): MMLU retention
 remains 0.99--1.01 for every tested intervention, and a paired
 per-question rerun for \spec{} detects no change on this subset
 (paired difference $-0.40$ points, 95\% CI $[-1.10, +0.30]$; $b{=}22$
 gained, $c{=}30$ lost; exact $p{=}0.33$)---no detected change, not
-demonstrated equivalence---whereas perplexity rises 5--20\%. The
-single-head specialist intervention is the cheapest of all: a 35\% relative
-hallucination reduction---with an accuracy \emph{gain}---at MMLU retention
-0.992 and a perplexity cost of only 5\%.
+demonstrated equivalence---whereas perplexity rises 5--20\%. Among the patching-guided configurations, the single-head specialist
+is the cheapest: a 35\% relative hallucination reduction---with an
+accuracy \emph{gain}---at MMLU retention 0.992 and a 5\% perplexity
+cost.
 
 \textbf{Correct-context control.} A correct-context suite (T0
 asserting the \emph{true} target, same held-out facts) tests damage
@@ -621,8 +662,8 @@ mean-abl.\ top-5& 8.8 (7.2--10.5)   & 46.4 & 53.8 \\
 mean-abl.\ spec3& 11.4 (9.6--13.2)  & 63.6 & 70.2 \\
 topnorm-5       & 33.0 (30.4--35.8) & 59.1 & 85.9 \\
 random-5 (5 seeds) & 12.6--22.2 & 44.8--78.8 & --- \\
-random-1 (5 seeds) & 5.2--12.2 & 81.9--88.3 & --- \\
-late-rand-1 (5 seeds) & 9.3--10.3 & 83.2--84.3 & --- \\
+random-1 (5 draws) & 5.2--12.2 & 81.9--88.3 & --- \\
+late-rand-1 (5 draws) & 9.3--10.3 & 83.2--84.3 & --- \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -655,12 +696,15 @@ random-1 (10 heads) & 34.6--50.3\% & 0.70--1.01 & 0.88--2.31 \\
  \begin{center}
   \includegraphics[width=\columnwidth]{figs/fig4_tradeoff.pdf}
  \end{center}
- \caption{Trade-offs. (a) suite space: hallucination vs.\ truth; the
- specialist point (red P) attains the highest accuracy of all
- intervention configs while removing a third of distractor-following
- (top-2 removes more following, 11.7 vs.\ 12.6\%, but at 9.8 points
- lower accuracy, so neither Pareto-dominates the other). (b) capability
- space: hallucination vs.\ MMLU retention (PPL ratios annotated).}
+ \caption{Trade-offs. (a) Suite space: hallucination vs.\ truth. Among
+ the plotted patching-guided configurations (numbers keyed at bottom
+ right; random-1 heads shown as the dotted range box, excluded from the
+ comparison), the specialist (red, 7) attains the highest accuracy
+ while removing a third of distractor-following (top-2 removes more
+ following, 11.7 vs.\ 12.6\%, but at 9.8 points lower accuracy, so
+ neither Pareto-dominates). (b) Capability space: hallucination vs.\
+ MMLU retention; keys list PPL ratios, and the green X marks the
+ capability-collapsing random head.}
  \label{fig:tradeoff}
 \end{figure}
 
@@ -684,8 +728,10 @@ vs.\ 1{,}193 held-out)---so differences mix persuadability with data
 composition).
 Third, and most importantly, the single-head knockout from each model's
 own dev ranking reduces distractor-following by 30\% (Llama:
-6.6\%$\to$4.6\%, 95\% CI 2.9--6.6, exact McNemar $p{=}0.004$) and 50\%
-(Qwen: 14.9\%$\to$7.5\%, CI 5.0--10.1, $p{=}9\times10^{-10}$) with small
+6.6\%$\to$4.6\%, 95\% CI 2.9--6.6, exact McNemar $b{=}0$, $c{=}9$,
+$p{=}0.004$) and 50\%
+(Qwen: 14.9\%$\to$7.5\%, CI 5.0--10.1, $b{=}0$, $c{=}31$,
+$p{=}9\times10^{-10}$) with small
 accuracy changes ($-1.3$ and $+0.8$ points) and MMLU retention
 1.01/1.00---a strong following reduction at near-zero accuracy cost,
 obtained without any per-model specialist analysis, suggesting
@@ -787,8 +833,8 @@ accuracy rises for the \emodel{} specialist (+5.3 points; replication
 models: $-1.3$ to $+0.8$), and MMLU retention remains near 1.00 on the
 tested subset---while norm-based selection backfires and random
 single heads range from capability-clean to catastrophic (retention
-1.01 to 0.70, PPL up to $\times$2.3), a tail the principled selection
-avoids. All selection was
+1.01 to 0.70, PPL up to $\times$2.3), a tail this experiment's
+selected head happened to avoid. All selection was
 performed on dev relations with results reported on held-out relations,
 and the core findings (late-layer concentration, single-head
 intervention effectiveness) replicated across three architectures.
