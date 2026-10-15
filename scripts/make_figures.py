@@ -83,28 +83,26 @@ def fig4():
     ax = axes[0]
     base = r1["none"]
     ax.scatter(base["follow_rate"], base["truth_rate"], marker="*", s=140, c="k", label="none", zorder=5)
-    k_off = {"1": (3, 2), "2": (3, 2), "5": (-6, -11), "10": (5, -3), "20": (-20, 4)}
-    for k, c in zip(("1", "2", "5", "10", "20"), plt.cm.Blues(np.linspace(0.45, 0.95, 5))):
-        r = r1[f"top-{k}"]
-        ax.scatter(r["follow_rate"], r["truth_rate"], color=c, s=34)
-        ax.annotate(f"k={k}", (r["follow_rate"], r["truth_rate"]), fontsize=7,
-                    xytext=k_off[k], textcoords="offset points", color=c)
-    for name, m, col, lab in (("spec1", "P", "#d62728", "spec1 (L22.H4)"),
-                              ("spec3", "X", "#ff7f0e", "spec3"),
-                              ("mean2", "^", "#2ca02c", "mean2"),
-                              ("mean5", "v", "#9467bd", "mean5"),
-                              ("meanspec3", "<", "#8c564b", "meanspec3")):
-        r = r2[name]
-        ax.scatter(r["follow_rate"], r["truth_rate"], marker=m, c=col, s=44, label=lab)
-    tn = r1["topnorm-5"]
-    ax.scatter(tn["follow_rate"], tn["truth_rate"], marker="D", c="#7f7f7f", s=40,
-               label="topnorm-5")
-    ax.annotate("topnorm-5", (tn["follow_rate"], tn["truth_rate"]), fontsize=7,
-                xytext=(-4, -12), textcoords="offset points", ha="right")
+    # numbered markers + two-column key (matches panel b style)
+    pts = [("none", r1["none"])]
+    pts += [(f"top-{k}", r1[f"top-{k}"]) for k in ("1", "2", "5", "10", "20")]
+    pts += [(name, r2[name]) for name in ("spec1", "spec3", "mean2", "mean5", "meanspec3")]
+    pts += [("topnorm-5", r1["topnorm-5"])]
+    for i, (name, r) in enumerate(pts, start=1):
+        col = "#d62728" if name == "spec1" else ("#7f7f7f" if name == "topnorm-5" else "#1f77b4")
+        ax.scatter(r["follow_rate"], r["truth_rate"], c=col, s=36,
+                   zorder=6 if name == "spec1" else 3)
+        off = (-11, -8) if name == "topnorm-5" else (4, -8)
+        ax.annotate(str(i), (r["follow_rate"], r["truth_rate"]), fontsize=7,
+                    fontweight="bold", xytext=off, textcoords="offset points")
+    key_l = "1  none\n2  top-1\n3  top-2\n4  top-5\n5  top-10\n6  top-20"
+    key_r = "7  spec1\n8  spec3\n9  mean2\n10 mean5\n11 meanspec3\n12 topnorm-5"
+    ax.text(0.02, 0.98, key_l, transform=ax.transAxes, fontsize=6.5,
+            va="top", ha="left", linespacing=1.5)
+    ax.text(0.22, 0.98, key_r, transform=ax.transAxes, fontsize=6.5,
+            va="top", ha="left", linespacing=1.5)
     ax.set(xlabel="context-following rate (hallucination)", ylabel="truth rate",
            title="(a) Suite trade-off (held-out)")
-    ax.legend(frameon=False, loc="upper left", ncol=2, columnspacing=0.9,
-              handletextpad=0.3, markerscale=0.8, fontsize=6.5)
 
     ax = axes[1]
     xs, ys, labels = [], [], []
