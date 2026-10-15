@@ -57,7 +57,7 @@ def main():
             for k in range(3):
                 cpos, npos = cln - 3 + k, nln - 3 + k
                 val = cache[hook][0, cpos, h, :]
-                def hk(act, hook_, v=val, p=npos, h_=h):
+                def hk(act, hook, v=val, p=npos, h_=h):
                     act[0, p, h_, :] = v
                     return act
                 lp = model.run_with_hooks(neu_p, fwd_hooks=[(hook, hk)])[0, -1].float()
