@@ -44,12 +44,13 @@ In \emodel{}, knocking out the single specialist head L22.H4 reduces
 misleading-context distractor-following by 35\% relative (exact McNemar
 $p{=}3.4\times10^{-23}$) while
 increasing factual accuracy by 5.3 percentage points, with
-MMLU retention 0.998, a 5\% perplexity cost, and accuracy under a
+MMLU retention 0.992, a 5\% perplexity cost, and accuracy under a
 supportive correct context nearly intact (96.1\% vs.\ 98.2\%); single-head knockouts from
 the patching ranking reduce distractor-following by 30--50\% in the other
 two models as well. In contrast, norm-based selection \emph{increases}
-distractor-following; random single heads also reduce it, and the one
-measured for capability collapses MMLU (retention 0.69 vs.\ 0.998). We report
+distractor-following, and random single heads reduce it at capability
+costs ranging from clean to catastrophic (MMLU retention 1.01 to 0.70;
+PPL up to $\times$2.3)---tail risk that principled selection avoids. We report
 quantified dose--response
 trade-offs between reduction and capability, with relation-level splits
 guarding against circular analysis.
@@ -549,13 +550,15 @@ five seeds, with inconsistent sign and magnitude).
 (5.2--12.2\%; truth 81.9--88.3\%), and layer-matched late-layer random
 heads behave the same (9.3--10.3\%): reducing distractor-following by
 one-head $z$-knockout is \emph{not} unique to the specialist---all ten randomly drawn heads
-tested weaken it. The
-specialist is distinguished by cost in the one random head we measured
-for capability: the behaviorally best random seed (L17.H3: follow
-5.2\%, truth 88.3\%) collapses MMLU to 34.6\% (retention 0.69 vs.\
-0.998 for \spec{}). Capability was not measured for the other random
-heads; this case and random-5's erratic truth rates illustrate, rather
-than bound, the cost of unprincipled selection.
+tested weaken it. With capability measured for all ten random heads
+(Table~\ref{tab:cap}), the picture is sharper: eight of the ten are
+capability-clean (MMLU retention 0.996--1.01, PPL ratio
+0.99--1.05) \emph{and} behaviorally better than \spec{}; two carry
+silent catastrophic costs (L17.H3: MMLU retention 0.70; L5.H4: PPL
+ratio 2.31). Unprincipled single-head selection is thus a lottery with
+a favorable mean but a heavy tail, and the patching-guided specialist
+is a draw from the safe region by construction (retention 0.992, PPL
+$\times$1.05)---selection buys tail-risk control, not a better mean.
 
 Capability costs are dissociated (Table~\ref{tab:cap}): MMLU retention
 remains 0.99--1.01 for every tested intervention, and a paired
@@ -565,7 +568,7 @@ gained, $c{=}30$ lost; exact $p{=}0.33$)---no detected change, not
 demonstrated equivalence---whereas perplexity rises 5--20\%. The
 single-head specialist intervention is the cheapest of all: a 35\% relative
 hallucination reduction---with an accuracy \emph{gain}---at MMLU retention
-0.998 and a perplexity cost of only 5\%.
+0.992 and a perplexity cost of only 5\%.
 
 \textbf{Correct-context control.} A correct-context suite (T0
 asserting the \emph{true} target, same held-out facts) tests damage
@@ -626,22 +629,23 @@ late-rand-1 (5 seeds) & 9.3--10.3 & 83.2--84.3 & --- \\
 \end{table}
 
 \begin{table}[t]
-\caption{Capability under intervention (fixed 2{,}000-question MMLU subset;
-PPL over 1024-token WikiText-2 windows). A paired per-question rerun
-for \spec{} gives 49.8\%/49.4\%, within bf16 run-to-run variation of
-the tabulated 50.0\%/49.9\%.}
+\caption{Capability under intervention, all from one unified run
+(fixed 2{,}000-question MMLU subset with per-question records; PPL
+over 100 non-overlapping 1024-token WikiText-2 windows). The random-1
+row spans all ten heads tested (Sect.~\ref{sec:results-interventions}).}
 \label{tab:cap}
 \begin{center}
 \begin{tabular}{lccc}
 \toprule
 config & MMLU & retention & PPL ratio \\
 \midrule
-none   & 50.0\% & 1.000 & 1.00 \\
-top-2  & 49.7\% & 0.995 & 1.11 \\
-top-5  & 50.5\% & 1.011 & 1.20 \\
-\textbf{spec1 (\spec{} only)} & \textbf{49.9\%} & \textbf{0.998} & \textbf{1.05} \\
-spec3  & 50.4\% & 1.009 & 1.16 \\
-mean-abl.\ top-5 & 50.0\% & 1.001 & 1.13 \\
+none   & 49.8\% & 1.000 & 1.00 \\
+top-2  & 49.7\% & 0.998 & 1.11 \\
+top-5  & 50.2\% & 1.007 & 1.20 \\
+\textbf{spec1 (\spec{} only)} & \textbf{49.4\%} & \textbf{0.992} & \textbf{1.05} \\
+spec3  & 49.8\% & 1.000 & 1.16 \\
+mean-abl.\ top-5 & 50.2\% & 1.007 & 1.20 \\
+random-1 (10 heads) & 34.6--50.3\% & 0.70--1.01 & 0.88--2.31 \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -738,7 +742,7 @@ streaming-efficiency literature such sinks are treated as stabilizing
 but semantically inert no-ops~\cite{xiao2024sinks}. Our results show
 that a sink head can be causally significant here: \spec{} conveys the
 strongest context push ($B{=}0.143$), and its removal improves accuracy
-at MMLU retention 0.998 (PPL $\times$1.05). But
+at MMLU retention 0.992 (PPL $\times$1.05). But
 $N\!\approx\!0$ under one neutral-patching control only shows that this
 intervention had minimal effect in the tested condition, not that the
 head has no other function. The
@@ -781,8 +785,10 @@ individually---distractor-following falls by 30--50\% relative on the
 standard templates (9\% on the extreme adjacent-distractor template),
 accuracy rises for the \emodel{} specialist (+5.3 points; replication
 models: $-1.3$ to $+0.8$), and MMLU retention remains near 1.00 on the
-tested subset---while norm-based selection backfires and the one
-capability-measured random head collapses MMLU (0.69). All selection was
+tested subset---while norm-based selection backfires and random
+single heads range from capability-clean to catastrophic (retention
+1.01 to 0.70, PPL up to $\times$2.3), a tail the principled selection
+avoids. All selection was
 performed on dev relations with results reported on held-out relations,
 and the core findings (late-layer concentration, single-head
 intervention effectiveness) replicated across three architectures.
