@@ -111,8 +111,10 @@ superposition per head and separates dual-role heads from
 conflict-specialist heads with minimal neutral-control effect.
 \item \textbf{Quantified intervention trade-offs.} Dose--response curves for
 knockout and mean-ablation, with fairness baselines: patching-guided
-selection reduces hallucination significantly (McNemar $p<10^{-6}$ even for
-a single head), whereas activation-norm selection \emph{increases} it;
+selection reduces hallucination significantly (exact McNemar
+$p{<}10^{-6}$ for single-head knockouts in \emodel{}; $p{=}0.004$
+(Llama) and $9\times10^{-10}$ (Qwen) for the replications' top-1),
+whereas activation-norm selection \emph{increases} it;
 capability costs are dissociated (MMLU retention $\approx 1.00$;
 perplexity +5--20\% across interventions).
 \end{itemize}
@@ -285,9 +287,12 @@ the first token of the space-prefixed targets (no autoregressive
 generation, hence no whitespace/punctuation/alias handling). All
 retained targets are single words and no pair shares a first word, so
 the comparison is well-defined; known-fact status uses the same level.
-A greedy 8-token completion check on 300 held-out items reproduces
-first-token accuracy exactly (none 82.3\%, \spec{} 83.7\%), so
-first-token and full-answer scoring coincide on this dataset. Patching positions: the noise regime patches every non-BOS position of
+A greedy 8-token completion check on the 300 held-out items tested
+reproduces first-token accuracy exactly (none 82.3\%, \spec{} 83.7\%;
+matching compares the leading word of the continuation,
+case- and punctuation-stripped, with the target), so the two scoring
+levels coincide on those items. No true/distractor pair shares a first
+token: the argmax-plus-gap filter would score such a pair 0 and drop it. Patching positions: the noise regime patches every non-BOS position of
 the identically-lengthened runs; the misleading regime and head-level
 patching use the last three tokens, right-aligned across runs. Noise
 corruption is Gaussian at the embedding layer ($\sigma=3\times$
@@ -343,7 +348,8 @@ top-20 head-effect ranking in float32 vs.\ bfloat16 on the same 200
 dev facts: mean $|\Delta\mathrm{LD}|$ is 0.07--0.08 logits vs.\ mean
 $|\mathrm{LD}|$ 2.7--8.7 ($0.9$--$3\%$); head effects rank-correlate
 at Spearman 0.99 (max per-head difference 0.008), and \spec{} ranks
-first among the compared heads under both precisions.
+first by mean restore effect among the compared heads on this sample,
+under both precisions.
 
 \begin{table}[t]
 \caption{Behavioral landscape on known facts (\emodel{}, $n{=}2{,}000$;
@@ -374,9 +380,10 @@ every MLP block), whereas pure recall restoration under noise mixes MLP
 and attention almost evenly. (The regimes also differ in patched
 positions---all non-BOS for noise, last three for the conflict---so this
 contrast is specific to the protocol; a matched-position control is
-future work.) This contrast is itself informative: the
+future work.) This contrast is informative but protocol-bound: the
 classical ROME-style picture of factual recall as MLP-stored
-knowledge~\cite{meng2022rome} does not transfer to the conflict regime,
+knowledge~\cite{meng2022rome} does not transfer to the conflict regime
+under this patching protocol,
 where what an intervention can restore flows through attention. Head-level
 patching then identifies a compact set: \{L22.H0 (0.26), L25.H4 (0.24),
 L20.H3 (0.15), L25.H6 (0.12)\} under noise, and \{L25.H4 (0.08), L22.H4
@@ -535,8 +542,8 @@ five seeds, with inconsistent sign and magnitude).
 \emph{single}-head knockout reduces following for every seed tested
 (5.2--12.2\%; truth 81.9--88.3\%), and layer-matched late-layer random
 heads behave the same (9.3--10.3\%): reducing distractor-following by
-one-head $z$-knockout is \emph{not} unique to the specialist---the conflict signal is
-distributed, so removing almost any single head weakens it. The
+one-head $z$-knockout is \emph{not} unique to the specialist---all ten randomly drawn heads
+tested weaken it. The
 specialist is distinguished by cost in the one random head we measured
 for capability: the behaviorally best random seed (L17.H3: follow
 5.2\%, truth 88.3\%) collapses MMLU to 34.6\% (retention 0.69 vs.\
@@ -733,8 +740,10 @@ $N\!\approx\!0$ under one neutral-patching control only shows that this
 intervention had minimal effect in the tested condition, not that the
 head has no other function. The
 mechanism by which a BOS-attending head influences the conflict remains
-an open question---possible routes include value vectors at BOS,
-attention redistribution, or downstream effects---and although
+an open question. The BOS value vector itself cannot encode the
+misleading context (which follows it in the causal mask); plausible
+routes are a fixed output bias written at the BOS position, attention
+redistribution, or downstream effects---and although
 Fig.~\ref{fig:attention}(b) aggregates 32 prompts, mechanism-level
 claims need larger samples. What the results do establish is that
 sink-focused heads should not be excluded from behavioral circuit
