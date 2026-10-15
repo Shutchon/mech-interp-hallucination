@@ -156,7 +156,7 @@ def fig5():
     ax.scatter([spec1["effect_B_context_push"]], [spec1["effect_A_restore"]],
                marker="*", s=200, facecolors="none", edgecolors="#d62728", lw=1.4,
                label="spec1 (L22.H4)", zorder=6)
-    for r in table[:6]:
+    for r in table[:3]:
         ax.annotate(r["head"], (r["effect_B_context_push"], r["effect_A_restore"]),
                     fontsize=7, xytext=(6, -10), textcoords="offset points")
     cb = fig.colorbar(sc, ax=ax, pad=0.02)

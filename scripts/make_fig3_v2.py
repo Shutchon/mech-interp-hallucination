@@ -31,7 +31,7 @@ plt.rcParams.update({"figure.dpi": 200, "font.size": 8, "axes.labelsize": 8,
                      "axes.titlesize": 8})
 
 fig = plt.figure(figsize=(7.16, 2.3))
-gs = fig.add_gridspec(1, 8, width_ratios=[0.95, 0.95, 0.95, 0.95, 0.95, 0.12, 2.5, 0.75],
+gs = fig.add_gridspec(1, 8, width_ratios=[0.9, 0.9, 0.9, 0.9, 0.9, 0.12, 2.9, 0.75],
                       wspace=0.9, left=0.04, right=0.80, top=0.86, bottom=0.15)
 
 # ---- (a) matrices
