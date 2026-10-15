@@ -123,9 +123,10 @@ def fig4():
     ax.scatter(xs[-1], ys[-1], s=60, marker="X", c="#2ca02c")
     # numbered markers + side key (labels collide when points cluster)
     names = ("none", "spec1", "top-2", "top-5", "spec3", "mean5", "rand")
+    b_dig = {1: (4, 4), 2: (-2, -12), 3: (6, 3), 4: (-4, 5), 5: (5, -11), 6: (5, 4), 7: (6, 4)}
     for i, (x, y) in enumerate(zip(xs, ys), start=1):
         ax.annotate(str(i), (x, y), fontsize=7, fontweight="bold",
-                    xytext=(4, -8), textcoords="offset points")
+                    xytext=b_dig[i], textcoords="offset points")
     ppl = {"none": 1.00, "spec1": 1.05, "top-2": 1.11, "top-5": 1.20,
            "spec3": 1.16, "mean5": 1.13}
     key = "\n".join([f"{i}: {n} (PPL x{ppl.get(n, '-')})"
@@ -158,7 +159,7 @@ def fig5():
                label="spec1 (L22.H4)", zorder=6)
     for r in table[:6]:
         ax.annotate(r["head"], (r["effect_B_context_push"], r["effect_A_restore"]),
-                    fontsize=7, xytext=(4, 3), textcoords="offset points")
+                    fontsize=7, xytext=(5, -9), textcoords="offset points")
     cb = fig.colorbar(sc, ax=ax, pad=0.02)
     cb.set_label("neutral ratio N/A", fontsize=7.5)
     cb.ax.tick_params(labelsize=7)

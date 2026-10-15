@@ -14,7 +14,7 @@
 \authorlist{%
  \authorentry[shutchon.pr@rmuti.ac.th]{Shutchon Premchaisawatt}{m}{1}\MembershipNumber{92617430}
 }
-\affiliate[1]{Rajamangala University of Technology Isan, Khon Kaen Campus, Khon Kaen, Thailand}
+\affiliate[1]{Department of Computer Engineering, Rajamangala University of Technology Isan, Khon Kaen Campus, 40000, Thailand}
 
 \received{2026}{10}{13}
 \revised{2026}{10}{13}
@@ -103,7 +103,8 @@ Our contributions are:
 \item \textbf{Localization.} A coarse-to-fine activation-patching map
 of the CM-conflict circuit in \emodel{}, replicated in two other
 architectures: restoration concentrates in late layers, and the
-attention/MLP decomposition is attention-dominated, unlike the
+attention/MLP decomposition is attention-dominated under our patching
+protocol (positions differ across corruption regimes), unlike the
 MLP-heavy picture of classical fact recall.
 \item \textbf{Characterization.} Bidirectional patching quantifies
 per-head asymmetry and separates dual-role from
@@ -197,11 +198,13 @@ and reference HuggingFace logits passed in float32 (mean KL $1.3\times
 10^{-5}$, argmax agreement 100\%). Precision robustness of the metrics
 themselves is reported in Sect.~\ref{sec:results-localization}.
 
-\textbf{Data.} From CounterFact~\cite{meng2022rome} we retain facts each
+\textbf{Data.} From CounterFact~\cite{meng2022rome} (first 12{,}000
+facts of the \texttt{wangzn2001/counteract} copy, case order) we
+retain facts each
 model demonstrably knows (first-token argmax over the full vocabulary
 equals the first token of the space-prefixed true target, and the
 first-token logit gap over the counterfactual distractor $\ge 0.5$),
-sampling 2{,}000 facts (16.7\% survival of 12{,}000 scored) split 807/1{,}193
+keeping all 2{,}000 facts that pass both filters (16.7\% survival) split 807/1{,}193
 dev/held-out \emph{by relation}, so the held-out split shares no relation
 with the split used for any selection. A CM-conflict suite asserts the
 distractor in three templates; a neutral control replaces it with a
@@ -276,20 +279,25 @@ and 15 held-out (1{,}193), zero overlap.
 Answers are scored by first-token argmax at the final position against
 the first token of the space-prefixed targets (no autoregressive
 generation, hence no whitespace/punctuation/alias handling). All
-retained targets are single words and no pair shares a first word, so
-the comparison is well-defined; known-fact status uses the same level.
-A greedy 8-token completion check on the 300 held-out items tested
-reproduces first-token accuracy exactly (none 82.3\%, \spec{} 83.7\%;
-matching compares the leading word of the continuation,
-case- and punctuation-stripped, with the target), so the two scoring
-levels coincide on those items. No true/distractor pair shares a first
+retained targets are single words (a verified property, not a filter)
+and no pair shares a first word, so the comparison is well-defined;
+known-fact status uses the same level.
+A greedy 8-token completion check on 300 held-out items (template
+T0, first 300 in case order---relation-clustered, hence an easier
+subset with a higher baseline than Table~\ref{tab:dose}; the check
+validates scoring coincidence, not aggregate rates) reproduces
+first-token accuracy exactly (none 82.3\%, \spec{} 83.7\%; matching
+compares the leading word of the continuation, case- and
+punctuation-stripped, with the target). No true/distractor pair shares a first
 token: the argmax-plus-gap filter would score such a pair 0 and drop it. Patching positions: the noise regime patches every non-BOS position of
 the identically-lengthened runs; the misleading regime and head-level
 patching use the last three tokens, right-aligned across runs. Noise
 corruption is Gaussian at the embedding layer ($\sigma=3\times$
 embedding std, all non-BOS tokens, one draw per case). The top-norm
 baseline ranks heads by mean $|z|$ over 64 dev bare-fact prompts; the
-mean-ablation vector is the mean $z$ over the same prompts.
+mean-ablation vector is each head's mean $z$ over those prompts pooled
+across token positions, substituted at all positions during
+evaluation.
 Six of the top-10 restore heads pass $|N|{<}0.01$; \spec{} is the
 highest-$B$ qualifier, spec3 the three highest-$A$ qualifiers
 (\spec{}, L22.H0, L20.H3)---rank-based choices, no further threshold. Cross-model profile correlation
@@ -298,19 +306,21 @@ spaced depth fractions (0.05--0.95) before Spearman ranking. Head
 rankings and Stage-4 selection use template T0; random-baseline heads
 were drawn with seed 20261014 (uniform: L23.H2, L17.H3, L5.H4, L21.H5,
 L24.H4; late-layer: L21.H1, L23.H6, L24.H5, L24.H0, L22.H5). Relation
-IDs per split, per-item records, and exact package versions are in the
-repository. Models use
+IDs per split, per-item records, and exact package versions are
+available from the author upon request. Models use
 HuggingFace checkpoints \texttt{google/gemma-2-2b},
 \texttt{meta-llama/Llama-3.2-1B}, \texttt{Qwen/Qwen2.5-1.5B}
 (base, not instruct-tuned) loaded in bfloat16 via TransformerLens~2.18
 with \texttt{center\_unembed=False}, \texttt{fold\_ln=False}.
 Head ablation zeroes the head's $z$-vector at \emph{all} token
 positions. MMLU uses the \texttt{cais/mmlu} ``all'' test split, a fixed
-2{,}000-question subset (seed~0), 0-shot, scored by comparing logits of
-the letters ``A''--``D'' at the answer
-position~\cite{hendrycks2021mmlu}; WikiText-2 uses the
-\texttt{wikitext-2-raw-v1} test split, 100 windows of 1024
-tokens~\cite{merity2016wikitext}. The parity check between
+2{,}000-question subset (seed~0), 0-shot lm-eval format (subject
+header, lettered choices, ``Answer:'' suffix), scored by a single
+forward pass comparing the logits of \texttt{~A}--\texttt{~D} at the
+answer position~\cite{hendrycks2021mmlu}; WikiText-2 uses the
+\texttt{wikitext-2-raw-v1} test split, 100 non-overlapping windows of
+1024 tokens taken sequentially from the joined test text, perplexity
+from mean NLL over predicted tokens~\cite{merity2016wikitext}. The parity check between
 TransformerLens and HuggingFace logits was conducted in float32
 (mean KL $1.3\!\times\!10^{-5}$); all experiments run in bfloat16. KL
 quantifies distribution-level divergence between precisions, not the
@@ -514,9 +524,10 @@ L21.H1 & 0.009 & 0.019 & \phantom{$-$}0.001 & 0.34 & \phantom{$-$}0.06 \\
 \label{sec:results-interventions}
 
 Table~\ref{tab:dose} and Fig.~\ref{fig:tradeoff} report the held-out
-interventions. Knocking out the dev-ranked top-$k$ heads reduces
-context-following monotonically (19.3\%$\to$1.6\% at $k{=}20$) at
-matching accuracy cost. The Stage-4 taxonomy predicts that removing a
+interventions. Knocking out the dev-ranked top-$k$ heads reduces context-following
+monotonically (19.3\%$\to$1.6\% at $k{=}20$), with overall accuracy
+loss as $k$ grows (66.8\%$\to$19.4\%, with a small non-monotonic
+bump at $k{=}2$). The Stage-4 taxonomy predicts that removing a
 conflict specialist suppresses the misleading pull at limited collateral
 cost: knocking out the single
 head \spec{} reduces hallucination to 12.6\% (two-sided exact McNemar
@@ -573,8 +584,7 @@ specialist's effect depends on how the context asserts the distractor. On T2 (us
 template) \spec{} again reduces following (16.6\%$\to$11.1\%) while
 raising accuracy by 3.3 points, replicating T0. On T1---the extreme
 adjacent-distractor template whose baseline behavior is nearly pure
-context-following (98.4\%) and which the neutral-control analysis
-attributes largely to recency copying---\spec{} reduces following from
+context-following (98.4\%) consistent with, though not isolated by, a recency-copying route---\spec{} reduces following from
 98.4\% to 89.4\% (9.0 percentage points; 9\% relative) and raises
 accuracy from 0.8\% to 8.7\%, while top-5 reduces following from 98.4\%
 to 58.3\% (40.1 percentage points; 41\% relative): consistent with T1
@@ -735,7 +745,8 @@ head has no other function. The
 mechanism by which a BOS-attending head influences the conflict remains
 an open question. The BOS value vector itself cannot encode the
 misleading context (which follows it in the causal mask); plausible
-routes are a fixed output bias written at the BOS position, attention
+routes are a query-position output bias fed by the BOS value (the
+write happens where the head queries, not at BOS), attention
 redistribution, or downstream effects---and although
 Fig.~\ref{fig:attention}(b) aggregates 32 prompts, mechanism-level
 claims need larger samples. What the results do establish is that
@@ -775,8 +786,8 @@ capability-measured random head collapses MMLU (0.69). All selection was
 performed on dev relations with results reported on held-out relations,
 and the core findings (late-layer concentration, single-head
 intervention effectiveness) replicated across three architectures.
-Code, per-item records, and scripts are available from the author upon
-request.
+Code, per-item records, and scripts are available from the author
+upon request (a public release is planned upon publication).
 
 \section*{Acknowledgment}
 This research project is supported by Science Research and Innovation
@@ -857,10 +868,11 @@ in \emph{Proc.\ ICLR}, 2024, arXiv:2309.16042.
 ``Interpretability in the wild: A circuit for indirect object identification in GPT-2 small,''
 in \emph{Proc.\ ICLR}, 2023, arXiv:2211.00593.
 
-\bibitem{mcdougall2023copy} C.~McDougall, A.~Conmy, C.~Rushing, and
-T.~McGrath,
-``Copy suppression: Comprehensively understanding an attention head,''
-in \emph{Proc.\ BlackboxNLP}, 2024, arXiv:2310.04625.
+\bibitem{mcdougall2023copy} C.~S.~McDougall, A.~Conmy, C.~Rushing,
+T.~McGrath, and N.~Nanda,
+``Copy suppression: Comprehensively understanding a motif in language
+model attention heads,'' in \emph{Proc.\ BlackboxNLP}, pp.~337--363,
+2024, DOI: 10.18653/v1/2024.blackboxnlp-1.22.
 
 \bibitem{li2025juice} G.~Li, Y.~Chen, and H.~Tong,
 ``Taming knowledge conflicts in language models,'' in \emph{Proc.\ ICML},
