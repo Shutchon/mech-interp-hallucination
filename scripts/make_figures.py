@@ -120,13 +120,17 @@ def fig4():
     labels.append("rand L17.H3")
     ax.scatter(xs[:-1], ys[:-1], s=36)
     ax.scatter(xs[-1], ys[-1], s=60, marker="X", c="#2ca02c")
-    b_off = {"none": (4, 4), "spec1": (6, -10), "top-2": (-8, 4),
-             "top-5": (4, 4), "spec3": (-2, 7), "mean5": (2, -11),
-             "rand": (6, 4)}
+    # numbered markers + side key (labels collide when points cluster)
     names = ("none", "spec1", "top-2", "top-5", "spec3", "mean5", "rand")
-    for name, x, y, t in zip(names, xs, ys, labels):
-        ax.annotate(t, (x, y), fontsize=7, xytext=b_off[name],
-                    textcoords="offset points")
+    for i, (x, y) in enumerate(zip(xs, ys), start=1):
+        ax.annotate(str(i), (x, y), fontsize=7, fontweight="bold",
+                    xytext=(4, -8), textcoords="offset points")
+    ppl = {"none": 1.00, "spec1": 1.05, "top-2": 1.11, "top-5": 1.20,
+           "spec3": 1.16, "mean5": 1.13}
+    key = "\n".join([f"{i}: {n} (PPL x{ppl.get(n, '-')})"
+                     for i, n in enumerate(names[:6], start=1)] + ["7: rand L17.H3"])
+    ax.text(0.97, 0.05, key, transform=ax.transAxes, fontsize=6.5,
+            ha="right", va="bottom", linespacing=1.5)
     ax.axhline(1.0, ls="--", c="gray", lw=0.8)
     ax.set(xlabel="context-following rate (hallucination)", ylabel="MMLU retention",
            title="(b) Capability cost", xlim=(0, 0.36), ylim=(0.64, 1.03))
