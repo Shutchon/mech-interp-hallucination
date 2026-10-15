@@ -442,17 +442,29 @@ Bidirectional patching (Fig.~\ref{fig:superposition}) shows every
 influential head conveys the context more strongly than it restores the
 memory ($B>A$; $S$ 0.21--0.62), consistent with head-level
 superposition~\cite{li2025juice}. The neutral
-control separates two populations, subject to a normalization caveat:
-$N$ divides by the clean--neutral gap, which is far smaller than $D$
-(median 0.25 vs.\ 6.7 logits; 35\% of cases below 0.5 logits, and 5.3\%
-with $|$gap$|{<}10^{-6}$ set to $N{=}0$), so the ratio $N/A$ must not be
-read as a fraction of effect retained---in raw logit units, patching
-L25.H4's clean value changes the neutral run by only 0.01 logits (0.50
-logits when patched into the misleading run), and no top head shows a
-large absolute neutral effect. Read instead as each head's \emph{share
-of the clean--neutral gap}, L25.H4 carries the largest share among top
-heads and keeps it under every denominator threshold we tested (0.5, 1,
-2 logits), whereas \spec{}, L22.H0, and L20.H3 remain at
+control separates two populations, subject to a normalization caveat.
+$N$ divides by the clean--neutral $|$gap$|$, which is far smaller than
+$|D|$ (median 0.75 vs.\ 6.7 logits; 35\% of cases below 0.5; 5.3\%
+with $|$gap$|{<}10^{-6}$ set to $N{=}0$), so $N/A$ is not a fraction of
+effect retained---in raw logit units, patching L25.H4's clean value
+changes the neutral run by only 0.01 logits (0.50 in the misleading
+run). Near-zero signed means are not mere cancellation: for the
+\emph{median} case the patch is an exact no-op (the head's $z$ is
+identical between clean and neutral runs; median $|\Delta\mathrm{LD}_N|
+{=}0$ for every top head, 95\% bootstrap CI $=[0,0]$), with mean
+$|\Delta\mathrm{LD}_N|$ of 0.03--0.08 logits driven by a minority of
+cases. Cases surviving denominator thresholds 0.5/1/2 logits are
+291/186/72 of 450, under which L25.H4's share stays largest
+($N{=}0.029/0.019/0.006$ vs.\ $\le$0.016 for the specialists). Two
+caveats remain: threshold sensitivity zeroes $N$ for cases below the
+threshold (no case is dropped), and the qualifier set is
+threshold-sensitive (4/6/9 heads pass $|N|{<}0.005/0.01/0.02$;
+\spec{} itself is excluded at 0.005). ``Specialist'' therefore means
+\emph{low signed-mean neutral effect under this control}, not absence
+of other functions; its behavioral value is established by the
+interventions, not the threshold. Read as each head's \emph{share of
+the clean--neutral gap}, L25.H4 carries the largest share and keeps it
+under every threshold, whereas \spec{}, L22.H0, and L20.H3 remain at
 $N\!\approx\!0$ under every threshold---\emph{conflict specialists}
 whose minimal neutral-control effect is robust to the normalization
 choice. Fig.~\ref{fig:attention} measures, from the answer position of
@@ -469,7 +481,8 @@ modest for every head ($2$--$11\%$ averaged over positions following
 the distractor). We note that BOS precedes the misleading context in
 the causal decoder, so BOS attention limits \emph{what the head reads}
 rather than explaining \emph{how} it conveys context information---the
-mechanism may operate through the value vectors at BOS, through
+mechanism may operate through a query-position output fed by the BOS
+value (the write happens where the head queries, not at BOS), through
 attention reallocation, or through downstream residual-stream effects;
 separating these hypotheses remains open.
 Table~\ref{tab:heads} reports the full per-head characterization for the
