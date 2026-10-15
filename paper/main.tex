@@ -31,13 +31,12 @@
 Small language models (SLMs) are increasingly deployed in resource-constrained
 systems, yet they remain prone to factual hallucination, particularly when a
 misleading context conflicts with parametric knowledge (a context--memory
-conflict). We present a systematic activation-patching study of this conflict
-in three SLMs: Gemma-2-2B (2{,}000 facts), Llama-3.2-1B (600 facts), and
-Qwen2.5-1.5B (600 facts), each filtered to facts the model demonstrably
-knows. Restoration effects concentrate in the final quarter of the network
-across all three architectures (pairwise Spearman rank correlation of layer
-profiles 0.81--1.00), with a small set of late-layer attention heads
-dominating. Bidirectional patching shows that influential heads act in
+conflict). We present a systematic activation-patching study of this conflict in
+three SLMs---\emodel{} (2{,}000 facts), Llama-3.2-1B and Qwen2.5-1.5B
+(600 facts each)---each filtered to facts the model demonstrably knows.
+Restoration effects concentrate in the final quarter of the network
+(pairwise Spearman correlation of layer profiles 0.81--1.00), dominated
+by a small set of late-layer attention heads. Bidirectional patching shows that influential heads act in
 both patching directions (head-level superposition) and separates
 dual-role workhorses from
 conflict-specialist heads whose neutral-control effect is minimal.
@@ -72,8 +71,8 @@ document-processing systems where
 latency and memory budgets preclude larger models. In such deployments the
 model must frequently integrate an external context with its parametric
 knowledge. When the context asserts a false fact---whether through a
-retrieval error, an adversarial document, or a mistaken user; in effect,
-in-context misinformation~\cite{mishima2022fake}---the model
+retrieval error, an adversarial document, or a mistaken user---one way
+misinformation reaches a model in context~\cite{mishima2022fake}---the model
 faces a \emph{context--memory (CM) conflict}~\cite{xu2024knowledge}, and
 resolving it incorrectly produces a factual hallucination, which can then cascade into further errors~\cite{zhang2024snowball}.
 
@@ -101,22 +100,20 @@ from validation: heads are selected only on a development split of
 relations, and all intervention results are reported on held-out relations.
 Our contributions are:
 \begin{itemize}
-\item \textbf{Localization.} A coarse-to-fine activation-patching map of
-the CM-conflict circuit in \emodel{} (and its replication in two other
-architectures): restoration effects concentrate in late layers, and the
-attention/MLP decomposition shows the conflict is attention-dominated,
-unlike the MLP-heavy picture of classical fact recall.
+\item \textbf{Localization.} A coarse-to-fine activation-patching map
+of the CM-conflict circuit in \emodel{}, replicated in two other
+architectures: restoration concentrates in late layers, and the
+attention/MLP decomposition is attention-dominated, unlike the
+MLP-heavy picture of classical fact recall.
 \item \textbf{Characterization.} Bidirectional patching quantifies
-superposition per head and separates dual-role heads from
-conflict-specialist heads with minimal neutral-control effect.
-\item \textbf{Quantified intervention trade-offs.} Dose--response curves for
-knockout and mean-ablation, with fairness baselines: patching-guided
-selection reduces hallucination significantly (exact McNemar
-$p{<}10^{-6}$ for single-head knockouts in \emodel{}; $p{=}0.004$
-(Llama) and $9\times10^{-10}$ (Qwen) for the replications' top-1),
-whereas activation-norm selection \emph{increases} it;
-capability costs are dissociated (MMLU retention $\approx 1.00$;
-perplexity +5--20\% across interventions).
+per-head asymmetry and separates dual-role from
+conflict-specialist heads via the neutral control.
+\item \textbf{Quantified trade-offs.} Dose--response curves for knockout
+and mean-ablation with fairness baselines: patching-guided selection
+reduces hallucination significantly (exact McNemar $p{<}10^{-6}$ for
+single heads in \emodel{}; $p{=}0.004$/$9{\times}10^{-10}$ in the
+replications), norm-based selection \emph{increases} it, and capability
+costs dissociate (MMLU $\approx$1.00; perplexity +5--20\%).
 \end{itemize}
 
 \section{Related Work}
@@ -125,11 +122,10 @@ perplexity +5--20\% across interventions).
 \textbf{Hallucination and knowledge conflict.} Surveys taxonomize
 hallucination in NLG~\cite{ji2023survey} and knowledge conflicts in
 LLMs~\cite{xu2024knowledge}. Behavioral studies quantify when context
-overrides memory~\cite{du2024context}; Chuang et al.\ detect contextual
-hallucinations from attention maps~\cite{chuang2024lookback}, and
-attention-node analysis likewise enables quality-improving masking in
-machine translation~\cite{cai2025attention}. Data-side remedies refine
-noisy factual resources with LLM assistance~\cite{dong2026kg}.
+overrides memory~\cite{du2024context}; attention-map analysis detects
+contextual hallucinations~\cite{chuang2024lookback} and enables
+quality-improving masking in MT~\cite{cai2025attention}; data-side
+remedies refine noisy factual resources~\cite{dong2026kg}.
 Yu et al.\ trace non-factual hallucination to knowledge deficits in
 MLPs and selection failures in attention~\cite{yu2024mechanistic}; our
 corruption regime instead targets \emph{knows-but-overridden} failures.
@@ -229,14 +225,12 @@ N_h &= \frac{\mathrm{LD}(n \leftarrow c_h) - \mathrm{LD}(n)}
 {\mathrm{LD}(c) - \mathrm{LD}(n)}.
 \label{eq:N}
 \end{align}
-Here $A_h$ is the \emph{restore effect} (how much patching the clean
-value into the misleading run restores the true-answer margin; $A=1$ is
-full restoration), $B_h$ is the \emph{context-push effect} (how much
-patching the misleading value into the clean run degrades the margin;
-$B=1$ is full degradation), and $N_h$ is the \emph{neutral effect}
-(patch into the neutral-context run, normalized by the clean--neutral
-gap, \emph{not} the clean--misleading gap $D$ of Eq.\,(\ref{eq:denom})
-used for $A$ and $B$).
+Here $A_h$ is the \emph{restore effect} (patching the clean value
+into the misleading run; $A{=}1$ is full restoration), $B_h$ the
+\emph{context-push effect} (patching the misleading value into the
+clean run; $B{=}1$ is full degradation), and $N_h$ the \emph{neutral
+effect} (patch into the neutral run, normalized by the clean--neutral
+gap, not $D$ of Eq.\,(\ref{eq:denom}) used for $A$ and $B$).
 The \emph{directional asymmetry index} $S = |A-B|/(|A|+|B|+\epsilon)$,
 with $\epsilon = 10^{-8}$, equals 1 for a head that pushes one direction
 only and 0 for a balanced dual-role head; low $S$ thus corresponds to
@@ -256,30 +250,27 @@ programmatically verifiable metric, which is a strict subset of
 open-ended factual hallucination. We use ``circuit'' to mean the
 causally localized head set, not a fully traced pathway.
 
-\textbf{Protocol.} Stage~1 (coarse): patch residual-stream block outputs
-layer-by-layer under two corruptions---ROME-style embedding noise, and the
-misleading context itself---measuring the normalized restoration of the
-true-vs-distractor logit difference. Stage~2 decomposes attention vs.\ MLP
-outputs on top layers; Stage~3 patches per-head $z$-vectors. Stage~4:
-bidirectional and neutral-context patching characterize each top head
-($A$, $B$, $N$ in Eqs.\,(\ref{eq:A})--(\ref{eq:N}); $S$ as above). Stage~5 intervenes by zeroing or
-mean-ablating selected heads and evaluates hallucination rate, accuracy,
-and neutral accuracy on held-out items; MMLU (2{,}000-question fixed subset)
-and WikiText-2 perplexity (1024-token windows) measure capability under the
-same hooks. Fairness baselines ablate randomly selected heads (5 seeds) and
-top-$|z|$-norm heads. Statistics: fact-clustered bootstrap 95\% CIs
+\textbf{Protocol.} Stage~1 (coarse): patch residual-stream block
+outputs layer-by-layer under two corruptions---ROME-style embedding
+noise and the misleading context---measuring normalized restoration of
+the true-vs-distractor logit difference. Stage~2 decomposes
+attention vs.\ MLP outputs on top layers; Stage~3 patches per-head
+$z$-vectors; Stage~4 characterizes each top head bidirectionally
+(Eqs.\,(\ref{eq:A})--(\ref{eq:N})); Stage~5 zeroes or mean-ablates
+selected heads and evaluates hallucination, accuracy, and neutral
+accuracy on held-out items, with MMLU (2{,}000-question subset) and
+WikiText-2 perplexity (1024-token windows) under the same hooks. Statistics: fact-clustered bootstrap 95\% CIs
 (10{,}000 resamples); two-sided exact binomial McNemar tests against
 ``none'', where $b$ counts items the intervention fixes and $c$ items it
 breaks (per outcome: distractor-following, truth, neutral, or
 correct-context accuracy). The prespecified primary comparison is
 \spec{} vs.\ none; all other configurations are exploratory.
 
-\textbf{Reproducibility details.} Misleading templates (distractor $d$,
-prompt $p$):
-T0 = ``\emph{Earlier you learned that the correct answer is $d$.~$p$}'';
-T1 = ``\emph{The document states: $p$~$d$. Now answer correctly:~$p$}'';
-T2 = ``\emph{Hint from the user: I am sure it is $d$.~$p$}''.
-Neutral control replaces $d$ with ``unknown''.
+\textbf{Reproducibility details.} Misleading templates (distractor
+$d$, prompt $p$): T0 = ``\emph{Earlier you learned that the correct
+answer is $d$.~$p$}''; T1 = ``\emph{The document states: $p$~$d$. Now
+answer correctly:~$p$}''; T2 = ``\emph{Hint from the user: I am sure
+it is $d$.~$p$}''; the neutral control replaces $d$ with ``unknown''.
 The relation-level split uses seed~0: 31 relations, 16 dev (807 facts)
 and 15 held-out (1{,}193), zero overlap.
 Answers are scored by first-token argmax at the final position against
@@ -303,7 +294,12 @@ Six of the top-10 restore heads pass $|N|{<}0.01$; \spec{} is the
 highest-$B$ qualifier, spec3 the three highest-$A$ qualifiers
 (\spec{}, L22.H0, L20.H3)---rank-based choices, no further threshold. Cross-model profile correlation
 interpolates each model's per-layer mean-effect profile at 10 evenly
-spaced depth fractions (0.05--0.95) before Spearman ranking. Models use
+spaced depth fractions (0.05--0.95) before Spearman ranking. Head
+rankings and Stage-4 selection use template T0; random-baseline heads
+were drawn with seed 20261014 (uniform: L23.H2, L17.H3, L5.H4, L21.H5,
+L24.H4; late-layer: L21.H1, L23.H6, L24.H5, L24.H0, L22.H5). Relation
+IDs per split, per-item records, and exact package versions are in the
+repository. Models use
 HuggingFace checkpoints \texttt{google/gemma-2-2b},
 \texttt{meta-llama/Llama-3.2-1B}, \texttt{Qwen/Qwen2.5-1.5B}
 (base, not instruct-tuned) loaded in bfloat16 via TransformerLens~2.18
@@ -338,11 +334,10 @@ stays at 87.4\% truth with 1.2\% neutral-token copying
 repeated question) drives following to 98.4\%---an upper bound on
 recency/copy contributions consistent with, though not proof of, a copy
 pathway.
-Reference benchmarks (lm-eval-harness, full MMLU test set):
-MMLU 49.4\%$\pm$0.4, TruthfulQA MC1/MC2~\cite{lin2022truthfulqa}
-24.5\%/36.3\%, WikiText-2 PPL 65.3 (1024-token windows). The 2{,}000-question
-MMLU subset used for intervention evaluation yields 50.0\% at baseline;
-the two scores differ because of subset sampling, not protocol error.
+Reference benchmarks (lm-eval-harness): MMLU 49.4\%$\pm$0.4 (full
+test set), TruthfulQA MC1/MC2 24.5\%/36.3\%~\cite{lin2022truthfulqa},
+WikiText-2 PPL 65.3; the 2{,}000-question intervention subset yields
+50.0\%---subset sampling, not protocol error.
 \textbf{Precision robustness.} Repeating the LD measurements and
 top-20 head-effect ranking in float32 vs.\ bfloat16 on the same 200
 dev facts: mean $|\Delta\mathrm{LD}|$ is 0.07--0.08 logits vs.\ mean
@@ -371,9 +366,9 @@ neutral control      & 1.2\%$^{\dagger}$ & 87.4\% \\
 \flushleft{\footnotesize $^{\dagger}$fraction copying the neutral token.}
 \end{table}
 
-Fig.~\ref{fig:profiles} shows the coarse maps. Restoration under the
-misleading regime concentrates in the final layers, peaking at the last
-layer (0.333); the noise regime peaks earlier (layer~21, 0.227).
+Fig.~\ref{fig:profiles} shows the coarse maps: restoration under the
+misleading regime concentrates in the final layers (peak 0.333 at the
+last layer); the noise regime peaks earlier (layer~21, 0.227).
 Table~\ref{tab:mid} decomposes the top blocks: the misleading-conflict
 signal is attention-dominated (L22 attention 0.121 vs.\ $\le$0.01 for
 every MLP block), whereas pure recall restoration under noise mixes MLP
@@ -423,9 +418,9 @@ L20 MLP       & 0.058 & $\le$0.01 \\
 \label{sec:results-superposition}
 
 Bidirectional patching (Fig.~\ref{fig:superposition}) shows every
-influential head conveys the misleading context more strongly than it
-restores the memory ($B>A$; asymmetry indices $S$ 0.21--0.62), consistent
-with head-level superposition~\cite{li2025juice} in this regime. The neutral
+influential head conveys the context more strongly than it restores the
+memory ($B>A$; $S$ 0.21--0.62), consistent with head-level
+superposition~\cite{li2025juice}. The neutral
 control separates two populations, subject to a normalization caveat:
 $N$ divides by the clean--neutral gap, which is far smaller than $D$
 (median 0.25 vs.\ 6.7 logits; 35\% of cases below 0.5 logits, and 5.3\%
@@ -521,9 +516,9 @@ L21.H1 & 0.009 & 0.019 & \phantom{$-$}0.001 & 0.34 & \phantom{$-$}0.06 \\
 Table~\ref{tab:dose} and Fig.~\ref{fig:tradeoff} report the held-out
 interventions. Knocking out the dev-ranked top-$k$ heads reduces
 context-following monotonically (19.3\%$\to$1.6\% at $k{=}20$) at
-matching accuracy cost. The Stage-4 taxonomy, however,
-predicts that removing a conflict specialist should suppress the misleading
-pull at limited collateral cost. This is borne out: knocking out the single
+matching accuracy cost. The Stage-4 taxonomy predicts that removing a
+conflict specialist suppresses the misleading pull at limited collateral
+cost: knocking out the single
 head \spec{} reduces hallucination to 12.6\% (two-sided exact McNemar
 $b{=}81$, $c{=}1$, $p{=}3.4\times10^{-23}$) while \emph{increasing} accuracy to 79.7\% (+5.3 points;
 the gain is itself significant: $b{=}81$, $c{=}18$, $p{=}1.0\times10^{-10}$)
@@ -548,9 +543,8 @@ specialist is distinguished by cost in the one random head we measured
 for capability: the behaviorally best random seed (L17.H3: follow
 5.2\%, truth 88.3\%) collapses MMLU to 34.6\% (retention 0.69 vs.\
 0.998 for \spec{}). Capability was not measured for the other random
-heads, so this case---together with random-5's erratic truth
-rates---illustrates, rather than bounds, the cost profile of
-unprincipled selection.
+heads; this case and random-5's erratic truth rates illustrate, rather
+than bound, the cost of unprincipled selection.
 
 Capability costs are dissociated (Table~\ref{tab:cap}): MMLU retention
 remains 0.99--1.01 for every tested intervention, and a paired
@@ -669,12 +663,11 @@ concentration holds in all three architectures: the most influential
 coarse layers are 20--25 of 26 (\emodel{}), 13--15 of 16 (Llama), and
 22--27 of 28 (Qwen), and the normalized-depth profiles rank-correlate at
 0.81 (\emodel{} vs.\ each other model) and 1.00 (Llama vs.\ Qwen).
-Second, baseline distractor-following rates vary across models (6.6\%
-and 14.9\%, both lower than \emodel{}'s 19.3\%; note that the splits are
-relation-disjoint but \emph{not} item-identical---each model's known-fact
-filter retains different facts, 456/416 held-out facts for
-Llama/Qwen vs.\ 1{,}193 for \emodel{}---so baseline differences mix
-persuadability with data composition).
+Second, baseline following varies across models (6.6\% and 14.9\%,
+both below \emodel{}'s 19.3\%; the splits are relation-disjoint but not
+item-identical---each model's filter retains different facts (456/416
+vs.\ 1{,}193 held-out)---so differences mix persuadability with data
+composition).
 Third, and most importantly, the single-head knockout from each model's
 own dev ranking reduces distractor-following by 30\% (Llama:
 6.6\%$\to$4.6\%, 95\% CI 2.9--6.6, exact McNemar $p{=}0.004$) and 50\%
@@ -733,9 +726,9 @@ answer-position attention is dominated by the beginning-of-sequence
 token ($68\pm9\%$; the other specialists show only 22--35\%). In the
 streaming-efficiency literature such sinks are treated as stabilizing
 but semantically inert no-ops~\cite{xiao2024sinks}. Our results show
-that a sink head can be causally significant in the CM-conflict regime:
-\spec{} conveys the strongest context push ($B{=}0.143$) and its removal
-improves accuracy at MMLU retention 0.998, PPL ratio 1.05. But
+that a sink head can be causally significant here: \spec{} conveys the
+strongest context push ($B{=}0.143$), and its removal improves accuracy
+at MMLU retention 0.998 (PPL $\times$1.05). But
 $N\!\approx\!0$ under one neutral-patching control only shows that this
 intervention had minimal effect in the tested condition, not that the
 head has no other function. The
@@ -771,7 +764,7 @@ only for \emodel{}, and entity-popularity effects remain open.
 
 We mapped and exploited the CM-conflict circuit of small language
 models: late-layer attention heads with measurable superposition, among
-which specialist heads (identified via bidirectional patching and a
+which specialists (identified via bidirectional patching and a
 neutral-control analysis in \emodel{}) can be knocked out
 individually---distractor-following falls by 30--50\% relative on the
 standard templates (9\% on the extreme adjacent-distractor template),
@@ -792,19 +785,20 @@ Fund. Agreement No.\ FF68/KKC/006.
 \begin{thebibliography}{99}
 
 \bibitem{meng2022rome} K.~Meng, D.~Bau, A.~Andonian, and Y.~Belinkov,
-``Locating and editing factual associations in GPT,'' in \emph{Proc.\ NeurIPS}, 2022.
+``Locating and editing factual associations in GPT,'' in \emph{Proc.\ NeurIPS}, 2022,
+arXiv:2202.05262.
 
 \bibitem{yu2024mechanistic} L.~Yu, M.~Cao, J.~C.~K.~Cheung, and Y.~Dong,
 ``Mechanistic understanding and mitigation of language model non-factual hallucinations,''
-in \emph{Findings of EMNLP}, 2024.
+in \emph{Findings of EMNLP}, 2024, arXiv:2403.18167.
 
 \bibitem{li2023itti} K.~Li, O.~Patel, F.~Vi\'egas, H.~Pfister, and M.~Wattenberg,
 ``Inference-time intervention: Eliciting truthful answers from a language model,''
-in \emph{Proc.\ NeurIPS}, 2023.
+in \emph{Proc.\ NeurIPS}, 2023, arXiv:2306.03341.
 
 \bibitem{marks2024geometry} S.~Marks and M.~Tegmark,
 ``The geometry of truth: Emergent linear structure in large language model representations of true/false datasets,''
-in \emph{Proc.\ COLM}, 2024.
+in \emph{Proc.\ COLM}, 2024, arXiv:2310.06824.
 
 \bibitem{xu2024knowledge} R.~Xu, Z.~Qi, Z.~Guo, C.~Wang, H.~Wang, Y.~Zhang, and W.~Xu,
 ``Knowledge conflicts for LLMs: A survey,'' in \emph{Proc.\ EMNLP}, 2024.
@@ -821,7 +815,8 @@ DOI: 10.1145/3571730.
 Jul.~2022.
 
 \bibitem{du2024context} K.~Du, V.~Sn\ae bjarnarson, N.~Stoehr, J.~C.~White, A.~Schein, and R.~Cotterell,
-``Context versus prior knowledge in language models,'' in \emph{Proc.\ ACL}, 2024.
+``Context versus prior knowledge in language models,'' in \emph{Proc.\ ACL}, 2024,
+arXiv:2404.04633.
 
 \bibitem{aromsuk2026rag} T.~Aromsuk, P.~Netisopakul, and S.~Nootyaskool,
 ``Improved naive RAG by integrated advanced techniques: A comprehensive
@@ -835,7 +830,7 @@ DOI: 10.1587/transinf.2025DAP0003.
 R.~Krishna, Y.~Kim, and J.~Glass,
 ``Lookback lens: Detecting and mitigating contextual hallucinations in
 large language models using only attention maps,''
-in \emph{Proc.\ EMNLP}, 2024.
+in \emph{Proc.\ EMNLP}, 2024, arXiv:2407.07071.
 
 \bibitem{cai2025attention} G.~Cai and J.~Zhu,
 ``Interpreting attention mechanisms of NMT with linguistic features,''
@@ -852,21 +847,20 @@ DOI: 10.1587/transinf.2025EDP7162.
 
 \bibitem{vig2020bias} J.~Vig, S.~Gehrmann, Y.~Belinkov, S.~Qian, D.~Nevo, Y.~Singer, and S.~Shieber,
 ``Investigating gender bias in language models using causal mediation analysis,''
-in \emph{Proc.\ NeurIPS}, 2020.
+in \emph{Proc.\ NeurIPS}, 2020, arXiv:2004.12265.
 
 \bibitem{zhang2024bestpractices} F.~Zhang and N.~Nanda,
 ``Towards best practices of activation patching in language models: Metrics and methods,''
-in \emph{Proc.\ ICLR}, 2024.
+in \emph{Proc.\ ICLR}, 2024, arXiv:2309.16042.
 
 \bibitem{wang2023ioi} K.~Wang, A.~Variengien, A.~Conmy, B.~Shlegeris, and J.~Steinhardt,
 ``Interpretability in the wild: A circuit for indirect object identification in GPT-2 small,''
-in \emph{Proc.\ ICLR}, 2023.
+in \emph{Proc.\ ICLR}, 2023, arXiv:2211.00593.
 
-\bibitem{mcdougall2023copy} C.~McDougall, A.~Conmy, C.~Rushing,
-T.~McGrath, and N.~Nanda,
-``Copy suppression: Comprehensively understanding a motif in language
-model attention heads,''
-in \emph{Proc.\ BlackboxNLP}, 2024.
+\bibitem{mcdougall2023copy} C.~McDougall, A.~Conmy, C.~Rushing, and
+T.~McGrath,
+``Copy suppression: Comprehensively understanding an attention head,''
+in \emph{Proc.\ BlackboxNLP}, 2024, arXiv:2310.04625.
 
 \bibitem{li2025juice} G.~Li, Y.~Chen, and H.~Tong,
 ``Taming knowledge conflicts in language models,'' in \emph{Proc.\ ICML},
@@ -885,12 +879,12 @@ arXiv:2605.19250, 2026.
 
 \bibitem{xiao2024sinks} G.~Xiao, Y.~Tian, B.~Chen, S.~Han, and M.~Lewis,
 ``Efficient streaming language models with attention sinks,''
-in \emph{Proc.\ ICLR}, 2024.
+in \emph{Proc.\ ICLR}, 2024, arXiv:2309.17453.
 
 \bibitem{yao2023editing} Y.~Yao, P.~Wang, B.~Tian, S.~Cheng, Z.~Li,
 S.~Deng, H.~Chen, and N.~Zhang,
 ``Editing large language models: Problems, methods, and
-opportunities,'' in \emph{Proc.\ EMNLP}, 2023.
+opportunities,'' in \emph{Proc.\ EMNLP}, 2023, arXiv:2301.04713.
 
 \bibitem{farquhar2024semantic} S.~Farquhar, J.~Kossen, L.~Kuhn, and
 Y.~Gal, ``Detecting hallucinations in large language models using
@@ -909,11 +903,11 @@ competitions of mechanisms in large language models,''
 \bibitem{hendrycks2021mmlu} D.~Hendrycks, C.~Burns, S.~Basart, A.~Zou,
 M.~Mazeika, D.~Song, and J.~Steinhardt,
 ``Measuring massive multitask language understanding,''
-in \emph{Proc.\ ICLR}, 2021.
+in \emph{Proc.\ ICLR}, 2021, arXiv:2009.03300.
 
 \bibitem{merity2016wikitext} S.~Merity, C.~Xiong, J.~Bradbury, and
 R.~Socher, ``Pointer sentinel mixture models,''
-in \emph{Proc.\ ICLR}, 2017.
+in \emph{Proc.\ ICLR}, 2017, arXiv:1609.07843.
 
 \bibitem{gemma2024} Gemma Team, ``Gemma 2: Improving open language models
 at a practical size,'' arXiv:2408.00118, 2024.
@@ -929,10 +923,12 @@ vision with open, customizable models,'' online:
 arXiv:2412.15115, 2024.
 
 \bibitem{lin2022truthfulqa} S.~Lin, J.~Hilton, and O.~Evans,
-``TruthfulQA: Measuring how models mimic human falsehoods,'' in \emph{Proc.\ ACL}, 2022.
+``TruthfulQA: Measuring how models mimic human falsehoods,'' in \emph{Proc.\ ACL}, 2022,
+arXiv:2109.07958.
 
 \bibitem{zhang2024snowball} M.~Zhang, O.~Press, W.~Merrill, A.~Liu, and N.~A.~Smith,
-``How language model hallucinations can snowball,'' in \emph{Proc.\ ICML}, 2024.
+``How language model hallucinations can snowball,'' in \emph{Proc.\ ICML}, 2024,
+arXiv:2305.13534.
 
 \end{thebibliography}
 

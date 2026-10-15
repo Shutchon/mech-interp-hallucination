@@ -21,7 +21,7 @@ F.mkdir(exist_ok=True)
 
 def fig1_pipeline():
     """Compact vertical layout for IEICE column (~3.4in wide, ≤4.5in tall)."""
-    fig, ax = plt.subplots(figsize=(3.3, 4.0))
+    fig, ax = plt.subplots(figsize=(3.3, 3.6))
     ax.axis("off")
     W = 30.0
 

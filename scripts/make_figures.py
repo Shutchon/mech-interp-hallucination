@@ -52,7 +52,7 @@ def fig2():
     llama = layer_profile(R / "e6_cross/meta-llama/Llama-3.2-1B/coarse.jsonl", 16)
     qwen = layer_profile(R / "e6_cross/Qwen/Qwen2.5-1.5B/coarse.jsonl", 28)
 
-    fig, axes = plt.subplots(2, 1, figsize=(COL, 3.55))
+    fig, axes = plt.subplots(2, 1, figsize=(COL, 3.25))
     ax = axes[0]
     ax.plot(gemma_noise, "-o", ms=2.5, lw=1.2, label="noise (ROME-style)", color="#1f77b4")
     ax.plot(gemma_mis, "-s", ms=2.5, lw=1.2, label="misleading context", color="#d62728")
@@ -79,7 +79,7 @@ def fig4():
     cap = dict(json.load(open(R / "e5_interventions/gemma-2-2b/capability.json"))["results"])
     cap.update(json.load(open(R / "e5_interventions/gemma-2-2b/capability_spec1.json"))["results"])
 
-    fig, axes = plt.subplots(2, 1, figsize=(COL, 4.55))
+    fig, axes = plt.subplots(2, 1, figsize=(COL, 4.25))
     ax = axes[0]
     base = r1["none"]
     ax.scatter(base["follow_rate"], base["truth_rate"], marker="*", s=140, c="k", label="none", zorder=5)
@@ -88,11 +88,14 @@ def fig4():
     pts += [(f"top-{k}", r1[f"top-{k}"]) for k in ("1", "2", "5", "10", "20")]
     pts += [(name, r2[name]) for name in ("spec1", "spec3", "mean2", "mean5", "meanspec3")]
     pts += [("topnorm-5", r1["topnorm-5"])]
+    pair_off = {"top-2": (-2, 7), "mean2": (2, -13),
+                "top-5": (-2, 7), "mean5": (2, -13),
+                "spec3": (-2, 7), "meanspec3": (2, -13)}
     for i, (name, r) in enumerate(pts, start=1):
         col = "#d62728" if name == "spec1" else ("#7f7f7f" if name == "topnorm-5" else "#1f77b4")
         ax.scatter(r["follow_rate"], r["truth_rate"], c=col, s=36,
                    zorder=6 if name == "spec1" else 3)
-        off = (-11, -8) if name == "topnorm-5" else (4, -8)
+        off = pair_off.get(name, (-11, -8) if name == "topnorm-5" else (4, -8))
         ax.annotate(str(i), (r["follow_rate"], r["truth_rate"]), fontsize=7,
                     fontweight="bold", xytext=off, textcoords="offset points")
     key_l = "1  none\n2  top-1\n3  top-2\n4  top-5\n5  top-10\n6  top-20"
@@ -144,7 +147,7 @@ def fig5():
     B = np.array([r["effect_B_context_push"] for r in table])
     na = np.array([r["neutral_ratio"] if r["neutral_ratio"] is not None else 0 for r in table])
 
-    fig, ax = plt.subplots(figsize=(COL, 2.6))
+    fig, ax = plt.subplots(figsize=(COL, 2.4))
     sc = ax.scatter(B, A, c=na, cmap="coolwarm", vmin=-1.5, vmax=1.5, s=42,
                     edgecolors="k", lw=0.4)
     lim = max(A.max(), B.max()) * 1.15
