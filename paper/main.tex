@@ -43,15 +43,16 @@ conflict-specialist heads whose neutral-control effect is minimal.
 In \emodel{}, knocking out the single specialist head L22.H4 reduces
 misleading-context distractor-following by 35\% relative (exact McNemar
 $p{=}3.4\times10^{-23}$) while
-increasing factual accuracy by 5.3 percentage points, with
+increasing first-token accuracy by 5.3 percentage points, with
 MMLU retention 0.992, a 5\% perplexity cost, and accuracy under a
 supportive correct context nearly intact (96.1\% vs.\ 98.2\%); single-head knockouts from
 the patching ranking reduce distractor-following by 30--50\% in the other
-two models as well. In contrast, norm-based selection \emph{increases}
-distractor-following, and random single heads reduce it at capability
-costs ranging from negligible to severe (MMLU retention 1.01 to 0.70;
-PPL up to $\times$2.3)---risk that this experiment's selected head
-avoided. We report
+two models as well. Eight of ten random single-head knockouts beat the
+specialist on both behavioral metrics at comparable capability cost;
+two carry severe costs (retention 0.70; PPL $\times$2.3). The work's
+contribution is thus causal localization, role characterization, and
+measured trade-offs---not a demonstrated superiority of the selection
+procedure over random single-head ablation. We report
 quantified dose--response
 trade-offs between reduction and capability, with relation-level splits
 guarding against circular analysis.
@@ -207,7 +208,8 @@ retain facts each
 model demonstrably knows (first-token argmax over the full vocabulary
 equals the first token of the space-prefixed true target, and the
 first-token logit gap over the counterfactual distractor $\ge 0.5$),
-keeping all 2{,}000 facts that pass both filters (16.7\% survival) split 807/1{,}193
+sampling 2{,}000 facts from the 2{,}130 that pass both filters
+(16.7\% survival; seed 0) split 807/1{,}193
 dev/held-out \emph{by relation}, so the held-out split shares no relation
 with the split used for any selection. A CM-conflict suite asserts the
 distractor in three templates; a neutral control replaces it with a
@@ -310,14 +312,18 @@ highest-$B$ qualifier, spec3 the three highest-$A$ qualifiers
 interpolates each model's per-layer mean-effect profile at 10 evenly
 spaced depth fractions (0.05--0.95) before Spearman ranking. Head
 rankings and Stage-4 selection use template T0; random-baseline heads
-are ten successive draws from one seeded RNG (20261014; per-head
-results in Table~\ref{tab:rand1}), while random-5 uses five separate
-seeds. Coarse/fine sweeps take the first dev facts in case order (caps
-300/150); Stage~4 uses 150 dev facts $\times$ three aligned suffix
-positions. The replication models apply the same filters with a 600-fact cap
-sampled from survivor pools of 3{,}860 (Llama) and 3{,}151 (Qwen). Relation
-IDs per split, per-item records, and exact package versions are
-available from the author upon request. Models use
+are five draws from the full-head pool followed by five from the
+late-layer pool (layers 20--25), one continuous RNG sequence (seed
+20261014; per-head results in Table~\ref{tab:rand1}), while random-5
+uses five separate seeds. Coarse/fine sweeps take the first dev facts in case order (caps
+300/150); Stage~4 patches one suffix position at a time (150 dev
+facts $\times$ 3 positions $=$ 450 fact--position records), averaged
+to head level over records, with bootstrap resampling at the fact
+level (positions travel with their fact). The replication models apply the same filters with a 600-fact cap
+sampled from survivor pools of 3{,}860 (Llama) and 3{,}151 (Qwen). Relation and case IDs per split, head lists for every
+configuration, MMLU question IDs, per-item records, plotting scripts,
+and exact package versions are available from the author upon
+request. Models use
 HuggingFace checkpoints \texttt{google/gemma-2-2b},
 \texttt{meta-llama/Llama-3.2-1B}, \texttt{Qwen/Qwen2.5-1.5B}
 (base, not instruct-tuned) loaded in bfloat16 via TransformerLens~2.18
@@ -333,7 +339,8 @@ answer position~\cite{hendrycks2021mmlu}; WikiText-2 uses the
 from mean NLL over predicted tokens~\cite{merity2016wikitext}. The parity check between
 TransformerLens and HuggingFace logits was conducted in float32
 (mean KL $1.3\!\times\!10^{-5}$); all experiments run in bfloat16. KL
-quantifies distribution-level divergence between precisions, not the
+quantifies distribution-level divergence between the two framework
+runs, not the
 error of our summary metrics directly, so we additionally compared
 logit differences, patching effects, and head rankings between the two
 precisions on a fixed dev sample (Sect.~\ref{sec:results-localization}).
@@ -351,9 +358,8 @@ template-dependent (24.2\%/98.4\%/19.2\%), matching reported
 persuasion-strength variation~\cite{du2024context}; the neutral control
 stays at 87.4\% truth with 1.2\% neutral-token copying
 (Table~\ref{tab:behavior}). Template~1 (distractor adjacent to the
-repeated question) drives following to 98.4\%---an upper bound on
-recency/copy contributions consistent with, though not proof of, a copy
-pathway.
+repeated question) drives following to 98.4\%, compatible with a
+strong recency/copy contribution that this protocol does not isolate.
 Reference benchmarks (lm-eval-harness): MMLU 49.4\%$\pm$0.4 (full
 test set), TruthfulQA MC1/MC2 24.5\%/36.3\%~\cite{lin2022truthfulqa},
 WikiText-2 PPL 65.3; the 2{,}000-question intervention subset yields
@@ -392,15 +398,11 @@ last layer); the noise regime peaks earlier (layer~21, 0.227).
 Table~\ref{tab:mid} decomposes the top blocks: the misleading-conflict
 signal is attention-dominated (L22 attention 0.121 vs.\ $\le$0.01 for
 every MLP block), whereas pure recall restoration under noise mixes MLP
-and attention almost evenly. (The regimes also differ in patched
-positions---all non-BOS for noise, last three for the conflict---so this
-contrast is specific to the protocol; a matched-position control is
-future work.) Under this protocol, attention blocks yield higher restoration than
-MLP blocks in the conflict regime---a contrast with the classical
-ROME-style MLP-storage picture~\cite{meng2022rome}, though the
-regimes' differing patch positions (all non-BOS vs.\ last three)
-preclude a mechanistic conclusion without a matched-position control,
-where what an intervention can restore flows through attention. Head-level
+and attention almost evenly. In short: under this protocol,
+attention patching restores more than MLP patching in the conflict
+regime; because the regimes also differ in patched positions (all
+non-BOS vs.\ last three), no matched-position control has been run,
+so the contrast is protocol-bound rather than mechanistic. Head-level
 patching then identifies a compact set: \{L22.H0 (0.26), L25.H4 (0.24),
 L20.H3 (0.15), L25.H6 (0.12)\} under noise, and \{L25.H4 (0.08), L22.H4
 (0.07), L22.H0, L20.H3\} under the misleading context---note the partial
@@ -449,9 +451,10 @@ with $|$gap$|{<}10^{-6}$ set to $N{=}0$), so $N/A$ is not a fraction of
 effect retained---in raw logit units, patching L25.H4's clean value
 changes the neutral run by only 0.01 logits (0.50 in the misleading
 run). Near-zero signed means are not mere cancellation: for the
-\emph{median} case the patch is an exact no-op (the head's $z$ is
-identical between clean and neutral runs; median $|\Delta\mathrm{LD}_N|
-{=}0$ for every top head, 95\% bootstrap CI $=[0,0]$), with mean
+\emph{median} case the patch leaves the output logits bit-identical
+(consistent with the head's $z$ coinciding between the clean and
+neutral runs; median $|\Delta\mathrm{LD}_N|{=}0$ for every top head,
+95\% bootstrap CI $=[0,0]$; verified at the logit level in bfloat16), with mean
 $|\Delta\mathrm{LD}_N|$ of 0.03--0.08 logits driven by a minority of
 cases. Cases surviving denominator thresholds 0.5/1/2 logits are
 291/186/72 of 450, under which L25.H4's share stays largest
@@ -465,9 +468,10 @@ of other functions; its behavioral value is established by the
 interventions, not the threshold. Read as each head's \emph{share of
 the clean--neutral gap}, L25.H4 carries the largest share and keeps it
 under every threshold, whereas \spec{}, L22.H0, and L20.H3 remain at
-$N\!\approx\!0$ under every threshold---\emph{conflict specialists}
-whose minimal neutral-control effect is robust to the normalization
-choice. Fig.~\ref{fig:attention} measures, from the answer position of
+$N\!\approx\!0$ under every threshold tested (0.005/0.01/0.02)---
+\emph{conflict specialists} whose neutral effect is small in
+magnitude on this test set, even though the classification itself is
+threshold-dependent. Fig.~\ref{fig:attention} measures, from the answer position of
 32 misleading held-out prompts (mean$\pm$SD), where each head reads
 (prompts are tokenized with a leading BOS; the distractor token is
 located by exact single-token match).
@@ -552,8 +556,9 @@ L21.H1 & 0.009 & 0.019 & \phantom{$-$}0.001 & 0.34 & \phantom{$-$}0.06 \\
 Table~\ref{tab:dose} and Fig.~\ref{fig:tradeoff} report the held-out
 interventions. Knocking out the dev-ranked top-$k$ heads reduces context-following
 monotonically (19.3\%$\to$1.6\% at $k{=}20$), with overall accuracy
-loss as $k$ grows (66.8\%$\to$19.4\%, with a small non-monotonic
-bump at $k{=}2$). The Stage-4 taxonomy predicts that removing a
+loss as $k$ grows (truth 74.4\% at none $\to$ 66.8\% at $k{=}1$
+$\to$ 19.4\% at $k{=}20$, with a small non-monotonic bump at
+$k{=}2$). The Stage-4 taxonomy predicts that removing a
 conflict specialist suppresses the misleading pull at limited collateral
 cost: knocking out the single
 head \spec{} reduces hallucination to 12.6\% (two-sided exact McNemar
@@ -771,11 +776,11 @@ separate that reading from generally weaker per-head effects.
 \midrule
 layers            & 26 & 16 & 28 \\
 top coarse layers & 20--25 & 13--15 & 22--27 \\
-facts (dev/held-out) & 807/1{,}193 & 144/456 & 184/416 \\
-coarse/fine sweep facts & 300/150 & 144/144 & 184/150 \\
-selected single head & \spec{}$^{*}$ & L15.H7 (top-1) & L27.H2 (top-1) \\
+dev/held-out & 807/1{,}193 & 144/456 & 184/416 \\
+sweep facts & 300/150 & 144/144 & 184/150 \\
+head & \spec{}$^{*}$ & L15.H7 & L27.H2 \\
 follow (none)     & 19.3\% & 6.6\% & 14.9\% \\
-follow (top-1)    & 12.6\% & 4.6\% & 7.5\% \\
+follow (selected head) & 12.6\% & 4.6\% & 7.5\% \\
 $\Delta$ truth    & $+5.3$$^{*}$ & $-1.3$ & $+0.8$ \\
 MMLU retention    & 0.992$^{*}$ & 1.01 & 1.00 \\
 \bottomrule
@@ -784,10 +789,9 @@ MMLU retention    & 0.992$^{*}$ & 1.01 & 1.00 \\
 \flushleft{\footnotesize $^{*}$\emodel{} uses the Stage-4-selected
 specialist (\spec{}, not the dev-ranking top-1); the other models use
 their own dev-ranking top-1; the \emodel{} retention shown is \spec{}'s
-for like-for-like comparison.
-All coarse/fine selection runs use the dev split only (capped at
-300/150 facts; see Sect.~\ref{sec:setup}). \emodel{}
-retention spans the tested interventions (top-2/5, spec3, mean-abl.).}
+for like-for-like comparison. All coarse/fine selection runs use the
+dev split only (capped at 300/150 facts; see
+Sect.~\ref{sec:setup}).}
 \end{table}
 
 \section{Discussion}
@@ -851,12 +855,13 @@ which specialists (identified via bidirectional patching and a
 neutral-control analysis in \emodel{}) can be knocked out
 individually---distractor-following falls by 30--50\% relative on the
 standard templates (9\% on the extreme adjacent-distractor template),
-accuracy rises for the \emodel{} specialist (+5.3 points; replication
-models: $-1.3$ to $+0.8$), and MMLU retention remains near 1.00 on the
-tested subset---while norm-based selection backfires and random
-single heads range from capability-clean to severely degraded
-(retention 1.01 to 0.70, PPL up to $\times$2.3), costs this
-experiment's selected head did not incur. All selection was
+first-token accuracy rises for the \emodel{} specialist (+5.3
+points; replication models: $-1.3$ to $+0.8$) at MMLU retention near
+1.00, while norm-based selection backfires. Most random single heads
+match or beat the specialist behaviorally at similar cost; a minority
+degrade capability severely. The contribution is the causal
+characterization and measured trade-offs, not a selection procedure
+proven superior to random ablation. All selection was
 performed on dev relations with results reported on held-out relations,
 and the core findings (late-layer concentration, single-head
 intervention effectiveness) replicated across three architectures.
@@ -875,7 +880,8 @@ arXiv:2202.05262.
 
 \bibitem{yu2024mechanistic} L.~Yu, M.~Cao, J.~C.~K.~Cheung, and Y.~Dong,
 ``Mechanistic understanding and mitigation of language model non-factual hallucinations,''
-in \emph{Findings of EMNLP}, 2024, arXiv:2403.18167.
+in \emph{Findings of EMNLP}, pp.~7943--7956, 2024,
+DOI: 10.18653/v1/2024.findings-emnlp.466.
 
 \bibitem{li2023itti} K.~Li, O.~Patel, F.~Vi\'egas, H.~Pfister, and M.~Wattenberg,
 ``Inference-time intervention: Eliciting truthful answers from a language model,''
@@ -1003,7 +1009,7 @@ models,'' arXiv:2407.21783, 2024.
 
 \bibitem{llama32card} Meta, ``Llama 3.2: Revolutionizing edge AI and
 vision with open, customizable models,'' online:
-\texttt{https://ai.meta.com/blog/llama-3-2/}, accessed Oct.\ 2026.
+\texttt{https://ai.meta.com/blog/llama-3-2/}, accessed 10 Oct.\ 2026.
 
 \bibitem{qwen2025} Qwen Team, ``Qwen2.5 technical report,''
 arXiv:2412.15115, 2024.

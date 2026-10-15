@@ -100,14 +100,22 @@ def fig4():
         off = pair_off.get(name, (-11, -8) if name == "topnorm-5" else (4, -8))
         ax.annotate(str(i), (r["follow_rate"], r["truth_rate"]), fontsize=7,
                     fontweight="bold", xytext=off, textcoords="offset points")
+    # random-1 baselines: uniform (circle) and late-layer (triangle)
+    ax.scatter([x["follow_rate"] for x in randr[:5]],
+               [x["truth_rate"] for x in randr[:5]], c="#2ca02c", s=26,
+               marker="o", alpha=0.9, zorder=2, label="random-1 (uniform)")
+    ax.scatter([x["follow_rate"] for x in randr[5:]],
+               [x["truth_rate"] for x in randr[5:]], c="#2ca02c", s=26,
+               marker="^", alpha=0.9, zorder=2, label="random-1 (late)")
+    ax.legend(frameon=False, fontsize=7, loc="lower left")
     key_l = "1  none\n2  top-1\n3  top-2\n4  top-5\n5  top-10\n6  top-20"
     key_r = "7  spec1\n8  spec3\n9  mean2\n10 mean5\n11 meanspec3\n12 topnorm-5"
-    ax.text(0.60, 0.03, key_l, transform=ax.transAxes, fontsize=6.5,
+    ax.text(0.60, 0.03, key_l, transform=ax.transAxes, fontsize=7.5,
             va="bottom", ha="left", linespacing=1.5)
-    ax.text(0.80, 0.03, key_r, transform=ax.transAxes, fontsize=6.5,
+    ax.text(0.83, 0.03, key_r, transform=ax.transAxes, fontsize=7.5,
             va="bottom", ha="left", linespacing=1.5)
     ax.set(xlabel="context-following rate (hallucination)", ylabel="truth rate",
-           title="(a) Suite trade-off (held-out)")
+           title="(a) Suite trade-off (held-out)", ylim=(0.12, 0.95))
 
     ax = axes[1]
     xs, ys, labels = [], [], []
@@ -126,7 +134,7 @@ def fig4():
     ppl = {n: randcap[n]["wiki_ppl"] / randcap["none"]["wiki_ppl"] for n in names[:6]}
     key = "\n".join([f"{i}: {n} (PPL x{ppl[n]:.2f})"
                      for i, n in enumerate(names[:6], start=1)])
-    ax.text(0.97, 0.05, key, transform=ax.transAxes, fontsize=7,
+    ax.text(0.97, 0.05, key, transform=ax.transAxes, fontsize=7.5,
             ha="right", va="bottom", linespacing=1.5)
     for i, x in enumerate(randr):
         k = ("rand-" if i < 5 else "laterand-") + x["head"].replace(".", "")

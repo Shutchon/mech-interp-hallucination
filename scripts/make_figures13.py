@@ -34,9 +34,9 @@ def fig1_pipeline():
         ax.add_patch(FancyArrowPatch((1 + W / 2, y1), (1 + W / 2, y2), arrowstyle="-|>",
                                      mutation_scale=8, color="#555555", lw=1.0))
 
-    box(67, 11, "CounterFact (21,919)", fc="#fdf3e7", ec="#d62728")
+    box(67, 11, "CounterFact (21,919)\nfirst 12,000 scored", fc="#fdf3e7", ec="#d62728")
     arrow(67, 63)
-    box(52, 11, "known-fact filter → 2,000", fc="#fdf3e7", ec="#d62728")
+    box(52, 11, "known-fact filter → 2,130 →\nsample 2,000 (seed 0)", fc="#fdf3e7", ec="#d62728")
     arrow(52, 48)
     box(37, 11, "CM-conflict suite (3T + neutral)", fc="#fdf3e7", ec="#d62728")
     arrow(37, 33)
