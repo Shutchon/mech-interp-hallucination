@@ -81,7 +81,7 @@ def fig4():
     cap = dict(json.load(open(R / "e5_interventions/gemma-2-2b/capability.json"))["results"])
     cap.update(json.load(open(R / "e5_interventions/gemma-2-2b/capability_spec1.json"))["results"])
 
-    fig, axes = plt.subplots(1, 2, figsize=(COL, 2.75))
+    fig, axes = plt.subplots(1, 2, figsize=(7.16, 2.9))
     ax = axes[0]
     base = r1["none"]
     ax.scatter(base["follow_rate"], base["truth_rate"], marker="*", s=140, c="k", label="none", zorder=5)
@@ -146,7 +146,7 @@ def fig4():
     ax.axhline(1.0, ls="--", c="gray", lw=0.8)
     ax.set(xlabel="context-following rate (hallucination)", ylabel="MMLU retention",
            title="(b) Capability cost", xlim=(0, 0.36), ylim=(0.64, 1.03))
-    fig.tight_layout(w_pad=1.8)
+    fig.tight_layout(w_pad=2.2)
     fig.savefig(F / "fig4_tradeoff.pdf", bbox_inches="tight")
     fig.savefig(F / "fig4_tradeoff.png", bbox_inches="tight")
     plt.close(fig)
