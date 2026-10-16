@@ -789,7 +789,7 @@ separate that reading from generally weaker per-head effects.
 \begin{center}
 \begin{tabular}{lccc}
 \toprule
- & \emodel{} & Llama-3.2-1B & Qwen2.5-1.5B \\
+ & \emodel{} & Llama & Qwen \\
 \midrule
 layers            & 26 & 16 & 28 \\
 top coarse layers & 20--25 & 13--15 & 22--27 \\
@@ -808,7 +808,8 @@ specialist (\spec{}, not the dev-ranking top-1); the other models use
 their own dev-ranking top-1; the \emodel{} retention shown is \spec{}'s
 for like-for-like comparison. All coarse/fine selection runs use the
 dev split only (capped at 300/150 facts; see
-Sect.~\ref{sec:setup}).}
+Sect.~\ref{sec:setup}). Llama = Llama-3.2-1B, Qwen =
+Qwen2.5-1.5B.}
 \end{table}
 
 \section{Discussion}
@@ -1027,7 +1028,8 @@ models,'' arXiv:2407.21783, 2024.
 
 \bibitem{llama32card} Meta, ``Llama 3.2: Revolutionizing edge AI and
 vision with open, customizable models,'' online:
-\texttt{https://ai.meta.com/blog/llama-3-2/}, accessed 10 Oct.\ 2026.
+\texttt{ai.meta.com/\allowbreak blog/\allowbreak llama-3-2},
+accessed 10 Oct.\ 2026.
 
 \bibitem{qwen2025} Qwen Team, ``Qwen2.5 technical report,''
 arXiv:2412.15115, 2024.
