@@ -40,8 +40,8 @@ by a small set of late-layer attention heads. Bidirectional patching shows that 
 both patching directions (head-level superposition) and separates
 dual-role heads from the specialist head whose neutral-control
 effect is minimal. In \emodel{}, knocking out that specialist, L22.H4
-(the only head passing the neutral criterion in both bfloat16 and
-float32), reduces
+(the only head, of the four checked in both bfloat16 and float32,
+passing the neutral criterion), reduces
 misleading-context distractor-following by 35\% relative (exact McNemar
 $p{=}3.4\times10^{-23}$) while
 increasing first-token accuracy by 5.3 percentage points, with
@@ -512,10 +512,10 @@ fp32 values for L22.H0 and L20.H3 (0.067, 0.020), however, no longer
 pass $|N|{<}0.01$, so the \emph{additional} members of spec3 are
 precision-sensitive, while \spec{} itself is not. Read as each head's \emph{share of the
 clean--neutral gap}, L25.H4 carries the largest share under every
-denominator threshold. Among the heads checked in both precisions
+denominator threshold. Among the four heads checked in both precisions
 (Table~\ref{tab:neutral}), \spec{} is the only one below the working
-criterion in \emph{both}, the sole precision-robust specialist; its
-bootstrap CI also straddles zero most tightly. spec3 (\spec{}, L22.H0, L20.H3) is
+criterion in \emph{both}; its bootstrap CI also straddles zero most
+tightly. spec3 (\spec{}, L22.H0, L20.H3) is
 a bfloat16-selected exploratory configuration whose additional
 members are precision-sensitive; its behavioral results stand as
 reported, without resting on the classification label.
@@ -953,8 +953,8 @@ models. Late-layer localization and single-head intervention
 effectiveness replicate across all three architectures (following
 falls 30--50\% under each model's dev-ranked head); the specialist
 characterization itself is established only in \emodel{}, where
-L22.H4, the sole head passing the neutral criterion in both
-precisions, can be knocked out individually, reducing
+L22.H4, the sole head (of the four checked in both precisions)
+passing the neutral criterion, can be knocked out individually, reducing
 distractor-following by 35\% on the standard template (9\% on the
 extreme adjacent-distractor template),
 first-token accuracy rises for \spec{} (+5.3 points; the
