@@ -105,10 +105,10 @@ Our contributions are:
 \begin{itemize}
 \item \textbf{Localization.} A coarse-to-fine activation-patching map
 of the CM-conflict circuit in \emodel{}, replicated in two other
-architectures: restoration concentrates in late layers, and the
-attention/MLP decomposition is attention-dominated under our patching
-protocol (positions differ across corruption regimes), unlike the
-MLP-heavy picture of classical fact recall.
+architectures: restoration concentrates in late layers, and
+attention patches restore more than MLP patches under our protocol
+(positions differ across corruption regimes)---a protocol-bound
+contrast with the MLP-heavy picture of classical fact recall.
 \item \textbf{Characterization.} Bidirectional patching quantifies
 per-head asymmetry and separates dual-role from
 conflict-specialist heads via the neutral control.
@@ -136,8 +136,9 @@ corruption regime instead targets \emph{knows-but-overridden} failures.
 Mechanistic work has also examined conflicts inside parametric memory
 itself~\cite{pham2026intra} and cautioned that heads appearing to
 implement factual recall may partly implement generic
-copying~\cite{campregher2025}---a confound our neutral-control design
-quantifies directly.
+copying~\cite{campregher2025}---a confound our neutral control
+tests for at the level of patching effects between conditions (not a
+pathway isolation).
 
 \textbf{Activation patching and circuits.} Causal mediation introduced the
 method~\cite{vig2020bias}; ROME localized factual associations with causal
@@ -375,8 +376,11 @@ top-20 head-effect ranking in float32 vs.\ bfloat16 on the same 200
 dev facts: mean $|\Delta\mathrm{LD}|$ is 0.07--0.08 logits vs.\ mean
 $|\mathrm{LD}|$ 2.7--8.7 ($0.9$--$3\%$); head effects rank-correlate
 at Spearman 0.99 (max per-head difference 0.008), and \spec{} ranks
-first by mean restore effect among the compared heads on this sample,
-under both precisions.
+first by mean restore effect among the compared heads on this
+200-fact parity sample, under both precisions (the full-experiment
+ranking of Table~\ref{tab:heads} uses 150 dev facts with per-head
+averaging over three suffix positions, hence its different leader,
+L25.H4).
 
 \begin{table}[t]
 \caption{Behavioral landscape on known facts (\emodel{}, $n{=}2{,}000$;
@@ -451,10 +455,11 @@ influential head conveys the context more strongly than it restores the
 memory ($B>A$; $S$ 0.21--0.62), consistent with head-level
 superposition~\cite{li2025juice}. The neutral
 control separates two populations, subject to a normalization caveat.
-$N$ divides by the clean--neutral $|$gap$|$, which is far smaller than
-$|D|$ (median 0.75 vs.\ 6.7 logits; 35\% of cases below 0.5; 5.3\%
-with $|$gap$|{<}10^{-6}$ set to $N{=}0$), so $N/A$ is not a fraction of
-effect retained---in raw logit units, patching L25.H4's clean value
+$N$ divides by the clean--neutral gap (Eq.\,(\ref{eq:N}); the
+absolute value enters only the near-zero guard and magnitude reports),
+which is far smaller than $D$ (median $|$gap$|$ 0.75 vs.\ 6.7 logits;
+35\% of cases below 0.5; 5.3\% with $|$gap$|{<}10^{-6}$ set to
+$N{=}0$), so $N/A$ is not a fraction of effect retained---in raw logit units, patching L25.H4's clean value
 changes the neutral run by only 0.01 logits (0.50 in the misleading
 run). Near-zero signed means are not mere cancellation: for the
 \emph{median} case the patch leaves the output logits bit-identical in
@@ -479,13 +484,14 @@ facts) confirms \spec{} ($N{=}0.006$, passes; mean $|\Delta\mathrm{LD}_N|$
 artifacts (fp32 medians 0.002--0.007 logits, still minuscule); the
 fp32 values for L22.H0 and L20.H3 (0.067, 0.020), however, no longer
 pass $|N|{<}0.01$, so the \emph{additional} members of spec3 are
-precision-sensitive, while \spec{} itself is not. Read as each head's \emph{share of
-the clean--neutral gap}, L25.H4 carries the largest share and keeps it
-under every threshold, whereas \spec{}, L22.H0, and L20.H3 remain at
-$N\!\approx\!0$ under every threshold tested (0.005/0.01/0.02)---
-\emph{conflict specialists} whose neutral effect is small in
-magnitude on this test set, even though the classification itself is
-threshold-dependent. Fig.~\ref{fig:attention} measures, from the answer position of
+precision-sensitive, while \spec{} itself is not. Read as each head's \emph{share of the
+clean--neutral gap}, L25.H4 carries the largest share under every
+denominator threshold. \spec{} is the only head whose neutral effect
+stays below the working criterion in \emph{both} precisions---the
+sole precision-robust specialist. spec3 (\spec{}, L22.H0, L20.H3) is
+a bfloat16-selected exploratory configuration whose additional
+members are precision-sensitive; its behavioral results stand as
+reported, without resting on the classification label. Fig.~\ref{fig:attention} measures, from the answer position of
 32 misleading held-out prompts (mean$\pm$SD), where each head reads
 (the first 32 held-out T0 prompts whose distractor matches exactly
 one token---targets are single words but may tokenize into several
@@ -506,9 +512,10 @@ attention reallocation, or through downstream residual-stream effects;
 separating these hypotheses remains open.
 Table~\ref{tab:heads} reports the full per-head characterization for the
 ten highest-restore heads. Two structure-level observations follow. First,
-$B>A$ for \emph{every} head---no influential head is a pure ``memory
-carrier''; all participate in conveying the context. Second, the
-specialist cluster (\spec{}, L22.H0, L20.H3) combines $N\approx 0$ with
+$B>A$ for \emph{every} head tested---none behaves as a pure ``memory
+carrier'' under these patching directions; all respond in both
+directions. Second, the bfloat16-selected spec3 set (\spec{}, L22.H0,
+L20.H3) combines $N\approx 0$ with
 mid-range asymmetry ($S$ 0.33--0.43), whereas heads combining large
 $|N/A|$ with higher asymmetry (L20.H7, L22.H3) sit lower in the restore
 ranking---though a large $|N/A|$ can also reflect a small $A$, so
@@ -516,7 +523,8 @@ this reads as an association, not a causal role claim.
 
 \begin{table}[t]
 \caption{Per-head characterization (\emodel{}, top-10 by restore effect
-$A$; $S$ = directional asymmetry index; $N/A$ = neutral ratio).}
+$A$; $S$ = directional asymmetry index; $N/A$ = neutral ratio;
+bfloat16 values---see text for the float32 check).}
 \label{tab:heads}
 \begin{center}
 \begin{tabular}{lccccr}

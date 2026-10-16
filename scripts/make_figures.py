@@ -122,30 +122,27 @@ def fig4():
            title="(a) Suite trade-off (held-out)", ylim=(0.12, 0.95))
 
     ax = axes[1]
-    xs, ys, labels = [], [], []
-    for name in ("none", "spec1", "top-2", "top-5", "spec3", "mean5"):
+    # SAME numbers as panel (a): none=1 top-2=3 top-5=4 spec1=7 spec3=8 mean5=10
+    b_pts = [("none", 1), ("top-2", 3), ("top-5", 4), ("spec1", 7), ("spec3", 8), ("mean5", 10)]
+    b_dig = {1: (4, 4), 3: (-10, -12), 4: (-4, 6), 7: (6, 4), 8: (6, -12), 10: (5, 5)}
+    ppl = {n: randcap[n]["wiki_ppl"] / randcap["none"]["wiki_ppl"] for n, _ in b_pts}
+    for name, num in b_pts:
         rate = r1.get(name) or r2.get(name)
-        xs.append(rate["follow_rate"])
-        ys.append(randcap[name]["mmlu_acc"] / randcap["none"]["mmlu_acc"])
-        labels.append(name)
-    cols_b = ["#1f77b4", "#d62728", "#1f77b4", "#1f77b4", "#1f77b4", "#1f77b4"]
-    for x, y, c in zip(xs, ys, cols_b):
-        ax.scatter(x, y, s=36, c=c, zorder=4 if c == "#d62728" else 3)
-    # numbered markers + side key (labels collide when points cluster)
-    names = ("none", "spec1", "top-2", "top-5", "spec3", "mean5", "rand")
-    b_dig = {1: (4, 4), 2: (-2, -12), 3: (6, 3), 4: (-4, 5), 5: (5, -11), 6: (5, 4)}
-    for i, (x, y) in enumerate(zip(xs, ys), start=1):
-        ax.annotate(str(i), (x, y), fontsize=7, fontweight="bold",
-                    xytext=b_dig[i], textcoords="offset points")
-    ppl = {n: randcap[n]["wiki_ppl"] / randcap["none"]["wiki_ppl"] for n in names[:6]}
-    key = "\n".join([f"{i}: {n} (PPL x{ppl[n]:.2f})"
-                     for i, n in enumerate(names[:6], start=1)])
-    ax.text(0.97, 0.05, key, transform=ax.transAxes, fontsize=7.5,
+        y = randcap[name]["mmlu_acc"] / randcap["none"]["mmlu_acc"]
+        c = "#d62728" if name == "spec1" else "#1f77b4"
+        ax.scatter(rate["follow_rate"], y, s=36, c=c,
+                   zorder=4 if name == "spec1" else 3)
+        ax.annotate(str(num), (rate["follow_rate"], y), fontsize=7,
+                    fontweight="bold", xytext=b_dig[num], textcoords="offset points",
+                    bbox=dict(boxstyle="round,pad=0.15", fc="white", ec="none", alpha=0.85),
+                    zorder=7)
+    key = "\n".join([f"{num}: {name} (PPL x{ppl[name]:.2f})" for name, num in b_pts])
+    ax.text(0.97, 0.30, key, transform=ax.transAxes, fontsize=7.5,
             ha="right", va="bottom", linespacing=1.5)
     for i, x in enumerate(randr):
         k = ("rand-" if i < 5 else "laterand-") + x["head"].replace(".", "")
         ax.scatter(x["follow_rate"], randcap[k]["mmlu_acc"] / randcap["none"]["mmlu_acc"],
-                   c="#2ca02c", s=22, alpha=0.85)
+                   c="#2ca02c", s=22, alpha=0.85, marker="o" if i < 5 else "^")
     ax.axhline(1.0, ls="--", c="gray", lw=0.8)
     ax.set(xlabel="context-following rate (hallucination)", ylabel="MMLU retention",
            title="(b) Capability cost", xlim=(0, 0.36), ylim=(0.64, 1.03))
