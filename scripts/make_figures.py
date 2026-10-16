@@ -128,7 +128,9 @@ def fig4():
         xs.append(rate["follow_rate"])
         ys.append(randcap[name]["mmlu_acc"] / randcap["none"]["mmlu_acc"])
         labels.append(name)
-    ax.scatter(xs, ys, s=36, zorder=4)
+    cols_b = ["#1f77b4", "#d62728", "#1f77b4", "#1f77b4", "#1f77b4", "#1f77b4"]
+    for x, y, c in zip(xs, ys, cols_b):
+        ax.scatter(x, y, s=36, c=c, zorder=4 if c == "#d62728" else 3)
     # numbered markers + side key (labels collide when points cluster)
     names = ("none", "spec1", "top-2", "top-5", "spec3", "mean5", "rand")
     b_dig = {1: (4, 4), 2: (-2, -12), 3: (6, 3), 4: (-4, 5), 5: (5, -11), 6: (5, 4)}
