@@ -219,7 +219,7 @@ Figure~\ref{fig:pipeline} summarizes the protocol.
 \textbf{Models.} Primary: \emodel{}~(26 layers, 8 heads)~\cite{gemma2024}. Cross-model:
 Llama-3.2-1B (16L/32H)~\cite{llama32card,llama2024}, Qwen2.5-1.5B (28L/12H)~\cite{qwen2025}. All experiments use
 bfloat16 on a single 24GB GPU. Two separate numerical checks: (i)
-\emph{framework parity} (our hooking framework vs..\ reference
+\emph{framework parity}: our hooking framework vs.\ reference
 HuggingFace logits, both in float32 (mean KL $1.3\times10^{-5}$,
 argmax agreement 100\%); (ii) \emph{precision robustness} of the
 reported metrics themselves (Sect.~\ref{sec:results-localization}).
@@ -311,7 +311,8 @@ retained targets are single words (a verified property, not a filter)
 and no pair shares a first word, so the comparison is well-defined;
 known-fact status uses the same level.
 A greedy 8-token completion check on 300 held-out items (template
-T0, first 300 in case order (relation-clustered, hence an easier subset with a higher baseline than the intervention tables in
+T0, first 300 in case order, relation-clustered and hence an easier
+subset with a higher baseline than the intervention tables in
 Sect.~\ref{sec:results-interventions}; the check validates scoring
 coincidence, not aggregate rates) reproduces
 first-token accuracy exactly (none 82.3\%, \spec{} 83.7\%; matching
@@ -544,7 +545,7 @@ L21.H1 & $+$0.001 & $[-$0.028, $+$0.031$]$ & --- & yes/--- \\
 \end{tabular}
 \end{center}
 \end{table}
- Fig.~\ref{fig:attention} measures, from the answer position of
+ Figure~\ref{fig:attention} measures, from the answer position of
 32 misleading held-out prompts (mean$\pm$SD), where each head reads
 (the first 32 held-out T0 prompts whose distractor matches exactly
 one token; targets are single words but may tokenize into several
@@ -755,8 +756,8 @@ per-question comparison for \spec{} detects no change on this subset
 (paired difference $-0.40$ points, 95\% CI $[-1.10, +0.30]$; $b{=}22$
 gained, $c{=}30$ lost; exact $p{=}0.33$); no detected change, not
 demonstrated equivalence; whereas perplexity rises 5--20\%. Among the patching-guided configurations, the single-head specialist
-is the cheapest: a 35\% relative hallucination reduction; with an
-accuracy \emph{gain}; at MMLU retention 0.992 and a 5\% perplexity
+is the cheapest: a 35\% relative hallucination reduction, with an
+accuracy \emph{gain}, at MMLU retention 0.992 and a 5\% perplexity
 cost.
 
 \textbf{Correct-context control.} A correct-context suite (T0
@@ -774,9 +775,10 @@ reliability) is out of scope.
 conditions on the two remaining held-out templates tests whether the
 specialist's effect depends on how the context asserts the distractor. On T2 (user-hint
 template) \spec{} again reduces following (16.6\%$\to$11.1\%) while
-raising accuracy by 3.3 points, replicating T0. On T1; the extreme
-adjacent-distractor template whose baseline behavior is nearly pure
-context-following (98.4\%) consistent with, though not isolated by, a recency-copying route; \spec{} reduces following from
+raising accuracy by 3.3 points, replicating T0. On T1 (the extreme adjacent-distractor template whose baseline
+behavior is nearly pure context-following at 98.4\%, consistent with,
+though not isolated by, a recency-copying route), \spec{} reduces
+following from
 98.4\% to 89.4\% (9.0 percentage points; 9\% relative) and raises
 accuracy from 0.8\% (held-out baseline; the all-facts value in
 Table~\ref{tab:behavior} is 1.1\%) to 8.7\%, while top-5 reduces
@@ -951,8 +953,8 @@ models. Late-layer localization and single-head intervention
 effectiveness replicate across all three architectures (following
 falls 30--50\% under each model's dev-ranked head); the specialist
 characterization itself is established only in \emodel{}, where
-L22.H4; the sole head passing the neutral criterion in both
-precisions; can be knocked out individually, reducing
+L22.H4, the sole head passing the neutral criterion in both
+precisions, can be knocked out individually, reducing
 distractor-following by 35\% on the standard template (9\% on the
 extreme adjacent-distractor template),
 first-token accuracy rises for \spec{} (+5.3 points; the
