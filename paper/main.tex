@@ -38,16 +38,17 @@ Restoration effects concentrate in the final quarter of the network
 (pairwise Spearman correlation of layer profiles 0.81--1.00), dominated
 by a small set of late-layer attention heads. Bidirectional patching shows that influential heads act in
 both patching directions (head-level superposition) and separates
-dual-role heads from
-conflict-specialist heads whose neutral-control effect is minimal.
-In \emodel{}, knocking out the single specialist head L22.H4 reduces
+dual-role heads from the specialist head whose neutral-control
+effect is minimal. In \emodel{}, knocking out that specialist, L22.H4
+(the only head passing the neutral criterion in both bfloat16 and
+float32), reduces
 misleading-context distractor-following by 35\% relative (exact McNemar
 $p{=}3.4\times10^{-23}$) while
 increasing first-token accuracy by 5.3 percentage points, with
 MMLU retention 0.992, a 5\% perplexity cost, and accuracy under a
-supportive correct context nearly intact (96.1\% vs.\ 98.2\%); single-head knockouts from
-the patching ranking reduce distractor-following by 30--50\% in the other
-two models as well. Eight of ten random single-head knockouts beat the
+supportive correct context nearly intact (96.1\% vs.\ 98.2\%); in the two replication models, single-head knockouts of each
+model's own dev-ranked head reduce distractor-following by 30--50\%
+(the specialist characterization itself is \emodel{}-only). Eight of ten random single-head knockouts beat the
 specialist on both behavioral metrics at comparable capability cost;
 two carry severe costs (retention 0.70; PPL $\times$2.3). The work's
 contribution is thus causal localization, role characterization, and
@@ -161,6 +162,27 @@ structurally close to PH3-style context-head pruning; specialist
 selection removes 35\% of distractor-following with one head while
 accuracy rises, whereas aggregate pruning trades accuracy for
 compliance (Sect.~\ref{sec:results-interventions}).
+
+\begin{table*}[t]
+\caption{Comparison with the closest head-level knowledge-conflict
+studies.}
+\label{tab:related}
+\begin{center}
+\begin{tabular}{lccc}
+\toprule
+ & JuICE~\cite{li2025juice} & PH3~\cite{jin2024ph3} & this work \\
+\midrule
+models & larger LMs & 8 LMs & sub-3B SLMs (3 models) \\
+head identification & path patching & path patching & activation patching ($z$, suffix-aligned) \\
+role characterization & dual roles (superposition) & memory vs.\ context heads & $+$ neutral control, asymmetry index \\
+selection protocol & dev data & dev data, cross-format & dev relations, held-out relation split \\
+capability cost measured & not reported & not reported & MMLU $+$ PPL, all configurations \\
+random-head baseline & not reported & not reported & 10 heads, capability-checked \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{table*}
+
 
 \textbf{Inference-time intervention.} ITI steers along probe-identified
 truthful directions~\cite{li2023itti}; truth directions are linearly
@@ -475,10 +497,11 @@ $\le$0.016 for the specialists). \emph{Membership} criteria on
 $|N|$ instead change which heads qualify: 4/6/9 heads pass
 $|N|{<}0.005/0.01/0.02$, and \spec{} ($N{=}-0.006$) is selected
 under the working criterion $|N|{<}0.01$ but would be excluded at
-0.005. ``Specialist'' therefore means \emph{low signed-mean neutral
-effect under this control}, not absence of other functions; its
-behavioral value is established by the interventions, not the
-threshold. A float32 recomputation of the neutral effects (150 dev
+0.005. ``Specialist'' therefore means \emph{low neutral
+effect under the tested control} (a point estimate;
+Table~\ref{tab:neutral} gives CIs and the precision check), not
+absence of other functions; its behavioral value is established by the
+interventions, not the threshold. A float32 recomputation of the neutral effects (150 dev
 facts) confirms \spec{} ($N{=}0.006$, passes; mean $|\Delta\mathrm{LD}_N|$
 0.012 logits) and shows the bf16 exact-zero medians are rounding
 artifacts (fp32 medians 0.002--0.007 logits, still minuscule); the
@@ -486,12 +509,40 @@ fp32 values for L22.H0 and L20.H3 (0.067, 0.020), however, no longer
 pass $|N|{<}0.01$, so the \emph{additional} members of spec3 are
 precision-sensitive, while \spec{} itself is not. Read as each head's \emph{share of the
 clean--neutral gap}, L25.H4 carries the largest share under every
-denominator threshold. \spec{} is the only head whose neutral effect
-stays below the working criterion in \emph{both} precisions---the
-sole precision-robust specialist. spec3 (\spec{}, L22.H0, L20.H3) is
+denominator threshold. Among the heads checked in both precisions
+(Table~\ref{tab:neutral}), \spec{} is the only one below the working
+criterion in \emph{both}---the sole precision-robust specialist; its
+bootstrap CI also straddles zero most tightly. spec3 (\spec{}, L22.H0, L20.H3) is
 a bfloat16-selected exploratory configuration whose additional
 members are precision-sensitive; its behavioral results stand as
-reported, without resting on the classification label. Fig.~\ref{fig:attention} measures, from the answer position of
+reported, without resting on the classification label.
+
+\begin{table}[t]
+\caption{Neutral-effect check: signed mean $N$ per head (bfloat16,
+all top-10, with fact-clustered bootstrap 95\% CIs; float32
+recomputation for the four heads checked). ``Pass'' = $|N|<0.01$
+(bf16/fp32).}
+\label{tab:neutral}
+\begin{center}
+\begin{tabular}{lcccc}
+\toprule
+head & $N$ (bf16) & 95\% CI & $N$ (fp32) & pass \\
+\midrule
+L25.H4 & $+$0.062 & $[+$0.026, $+$0.103$]$ & $+$0.046 & no/no \\
+\textbf{L22.H4} & $-$0.006 & $[-$0.030, $+$0.016$]$ & $+$0.006 & \textbf{yes/yes} \\
+L22.H0 & $+$0.002 & $[-$0.031, $+$0.033$]$ & $+$0.067 & yes/no \\
+L20.H3 & $-$0.004 & $[-$0.052, $+$0.037$]$ & $+$0.020 & yes/no \\
+L23.H7 & $-$0.012 & $[-$0.038, $+$0.012$]$ & --- & no/--- \\
+L23.H4 & $-$0.013 & $[-$0.037, $+$0.011$]$ & --- & no/--- \\
+L20.H7 & $-$0.009 & $[-$0.036, $+$0.018$]$ & --- & no/--- \\
+L22.H3 & $-$0.013 & $[-$0.038, $+$0.011$]$ & --- & no/--- \\
+L25.H2 & $+$0.004 & $[-$0.013, $+$0.018$]$ & --- & yes/--- \\
+L21.H1 & $+$0.001 & $[-$0.028, $+$0.031$]$ & --- & yes/--- \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{table}
+ Fig.~\ref{fig:attention} measures, from the answer position of
 32 misleading held-out prompts (mean$\pm$SD), where each head reads
 (the first 32 held-out T0 prompts whose distractor matches exactly
 one token---targets are single words but may tokenize into several
@@ -740,9 +791,9 @@ random-1 (10 heads) & 34.6--50.3\% & 0.70--1.01 & 0.88--2.31 \\
 \end{center}
 \end{table}
 
-\begin{figure}[t]
+\begin{figure*}[t]
  \begin{center}
-  \includegraphics[width=\columnwidth]{figs/fig4_tradeoff.pdf}
+  \includegraphics[width=\textwidth]{figs/fig4_tradeoff.pdf}
  \end{center}
  \caption{Trade-offs; color coding is identical in both panels: blue =
 patching-guided configurations, red = the specialist \spec{} (7),
@@ -756,7 +807,7 @@ following, 11.7 vs.\ 12.6\%, but at 9.8 points lower accuracy, so
 neither Pareto-dominates). (b) Capability space: hallucination vs.\
 MMLU retention; keys list PPL ratios.}
  \label{fig:tradeoff}
-\end{figure}
+\end{figure*}
 
 \subsection{Cross-model replication}
 \label{sec:results-cross}
@@ -877,23 +928,29 @@ only for \emodel{}, and entity-popularity effects remain open.
 \label{sec:conclusion}
 
 We mapped and exploited the CM-conflict circuit of small language
-models: late-layer attention heads with measurable superposition, among
-which specialists (identified via bidirectional patching and a
-neutral-control analysis in \emodel{}) can be knocked out
-individually---distractor-following falls by 30--50\% relative on the
-standard templates (9\% on the extreme adjacent-distractor template),
-first-token accuracy rises for the \emodel{} specialist (+5.3
-points; replication models: $-1.3$ to $+0.8$) at MMLU retention near
-1.00, while norm-based selection backfires. Most random single heads
+models. Late-layer localization and single-head intervention
+effectiveness replicate across all three architectures (following
+falls 30--50\% under each model's dev-ranked head); the specialist
+characterization itself is established only in \emodel{}, where
+L22.H4---the sole head passing the neutral criterion in both
+precisions---can be knocked out individually, reducing
+distractor-following by 35\% on the standard template (9\% on the
+extreme adjacent-distractor template),
+first-token accuracy rises for \spec{} (+5.3 points; the
+replication models' top heads: $-1.3$ to $+0.8$) at MMLU retention
+near 1.00, while norm-based selection backfires. Most random single heads
 match or beat the specialist behaviorally at similar cost; a minority
 degrade capability severely. The contribution is the causal
 characterization and measured trade-offs, not a selection procedure
 proven superior to random ablation. All selection was
-performed on dev relations with results reported on held-out relations,
+performed on dev relations with results reported on held-out
+relations (CIs are conditional on this fixed split),
 and the core findings (late-layer concentration, single-head
 intervention effectiveness) replicated across three architectures.
-Code, per-item records, and scripts are available from the author
-upon request (a public release is planned upon publication).
+Split IDs, head lists, per-item records, analysis scripts, and
+environment details accompany this submission as supplementary
+material; the full experimental codebase will be released publicly
+upon publication.
 
 \section*{Acknowledgment}
 This research project is supported by Science Research and Innovation
@@ -930,7 +987,7 @@ DOI: 10.1145/3571730.
 \bibitem{mishima2022fake} K.~Mishima and H.~Yamana,
 ``A survey on explainable fake news detection,''
 \emph{IEICE Trans.\ Inf.\ \& Syst.}, vol.~E105-D, no.~7, pp.~1249--1257,
-Jul.~2022.
+Jul.~2022, DOI: 10.1587/transinf.2021EDR0003.
 
 \bibitem{du2024context} K.~Du, V.~Sn\ae bjarnarson, N.~Stoehr, J.~C.~White, A.~Schein, and R.~Cotterell,
 ``Context versus prior knowledge in language models,'' in \emph{Proc.\ ACL}, 2024,
