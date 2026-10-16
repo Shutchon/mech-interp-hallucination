@@ -32,8 +32,8 @@ Small language models (SLMs) are increasingly deployed in resource-constrained
 systems, yet they remain prone to factual hallucination, particularly when a
 misleading context conflicts with parametric knowledge (a context--memory
 conflict). We present a systematic activation-patching study of this conflict in
-three SLMs---\emodel{} (2{,}000 facts), Llama-3.2-1B and Qwen2.5-1.5B
-(600 facts each)---each filtered to facts the model demonstrably knows.
+three SLMs (\emodel{} with 2{,}000 facts, Llama-3.2-1B and
+Qwen2.5-1.5B with 600 facts each), each filtered to facts the model demonstrably knows.
 Restoration effects concentrate in the final quarter of the network
 (pairwise Spearman correlation of layer profiles 0.81--1.00), dominated
 by a small set of late-layer attention heads. Bidirectional patching shows that influential heads act in
@@ -52,7 +52,7 @@ model's own dev-ranked head reduce distractor-following by 30--50\%
 specialist on both behavioral metrics at comparable capability cost;
 two carry severe costs (retention 0.70; PPL $\times$2.3). The work's
 contribution is thus causal localization, role characterization, and
-measured trade-offs---not a demonstrated superiority of the selection
+measured trade-offs, not a demonstrated superiority of the selection
 procedure over random single-head ablation. We report
 quantified dose--response
 trade-offs between reduction and capability, with relation-level splits
@@ -74,9 +74,9 @@ assistants~\cite{llama32card}, retrieval-augmented
 pipelines~\cite{aromsuk2026rag}, and document-processing systems
 where latency and memory budgets preclude larger models. In such deployments the
 model must frequently integrate an external context with its parametric
-knowledge. When the context asserts a false fact---whether through a
-retrieval error, an adversarial document, or a mistaken user---one way
-misinformation reaches a model in context~\cite{mishima2022fake}---the model
+knowledge. When the context asserts a false fact (whether through a retrieval error, an adversarial
+document, or a mistaken user, one way misinformation reaches a model
+in context~\cite{mishima2022fake}), the model
 faces a \emph{context--memory (CM) conflict}~\cite{xu2024knowledge}, and
 resolving it incorrectly produces a factual hallucination, which can then cascade into further errors~\cite{zhang2024snowball}.
 
@@ -93,10 +93,9 @@ probes/directions for truthfulness~\cite{li2023itti,marks2024geometry}.
 Head-level analyses of CM conflict exist in text-only
 models~\cite{li2025juice,jin2024ph3} and multimodal
 settings~\cite{jiang2026causal}. What has been missing
-for this size class is a systematic causal account---which components,
-located how, trade hallucination against capability when intervened
-upon, and whether findings replicate across architectures---and, for
-head-level work generally, a neutral-control separation of head roles
+for this size class is a systematic causal account (which components, located how, trade hallucination
+against capability when intervened upon, and whether findings
+replicate across architectures), and, for head-level work generally, a neutral-control separation of head roles
 and quantified single-head intervention costs.
 
 This paper provides that account with a design that separates localization
@@ -108,7 +107,7 @@ Our contributions are:
 of the CM-conflict circuit in \emodel{}, replicated in two other
 architectures: restoration concentrates in late layers, and
 attention patches restore more than MLP patches under our protocol
-(positions differ across corruption regimes)---a protocol-bound
+(positions differ across corruption regimes), a protocol-bound
 contrast with the MLP-heavy picture of classical fact recall.
 \item \textbf{Characterization.} Bidirectional patching quantifies
 per-head asymmetry and separates dual-role from
@@ -137,7 +136,7 @@ corruption regime instead targets \emph{knows-but-overridden} failures.
 Mechanistic work has also examined conflicts inside parametric memory
 itself~\cite{pham2026intra} and cautioned that heads appearing to
 implement factual recall may partly implement generic
-copying~\cite{campregher2025}---a confound our neutral control
+copying~\cite{campregher2025}, a confound our neutral control
 tests for at the level of patching effects between conditions (not a
 pathway isolation).
 
@@ -220,7 +219,7 @@ Figure~\ref{fig:pipeline} summarizes the protocol.
 \textbf{Models.} Primary: \emodel{}~(26 layers, 8 heads)~\cite{gemma2024}. Cross-model:
 Llama-3.2-1B (16L/32H)~\cite{llama32card,llama2024}, Qwen2.5-1.5B (28L/12H)~\cite{qwen2025}. All experiments use
 bfloat16 on a single 24GB GPU. Two separate numerical checks: (i)
-\emph{framework parity}---our hooking framework vs.\ reference
+\emph{framework parity} (our hooking framework vs..\ reference
 HuggingFace logits, both in float32 (mean KL $1.3\times10^{-5}$,
 argmax agreement 100\%); (ii) \emph{precision robustness} of the
 reported metrics themselves (Sect.~\ref{sec:results-localization}).
@@ -275,7 +274,7 @@ means over per-fact effects; the reported neutral ratio $N/A$ is the
 ratio of these means (not a mean of per-fact ratios). Hallucination
 rate is the fraction of misleading-prompt items whose greedy completion
 equals the distractor (context-following); accuracy is the fraction
-matching the true target---both are first-token measures, so
+matching the true target; both are first-token measures, so
 ``accuracy'' means first-token accuracy throughout. We use the term
 ``misleading-context distractor-following'' for this specific,
 programmatically verifiable metric, which is a strict subset of
@@ -283,8 +282,8 @@ open-ended factual hallucination. We use ``circuit'' to mean the
 causally localized head set, not a fully traced pathway.
 
 \textbf{Protocol.} Stage~1 (coarse): patch residual-stream block
-outputs layer-by-layer under two corruptions---ROME-style embedding
-noise and the misleading context---measuring normalized restoration of
+outputs layer-by-layer under two corruptions (ROME-style embedding noise and the misleading
+context), measuring normalized restoration of
 the true-vs-distractor logit difference. Stage~2 decomposes
 attention vs.\ MLP outputs on top layers; Stage~3 patches per-head
 $z$-vectors; Stage~4 characterizes each top head bidirectionally
@@ -312,14 +311,13 @@ retained targets are single words (a verified property, not a filter)
 and no pair shares a first word, so the comparison is well-defined;
 known-fact status uses the same level.
 A greedy 8-token completion check on 300 held-out items (template
-T0, first 300 in case order---relation-clustered, hence an easier
-subset with a higher baseline than the intervention tables in
+T0, first 300 in case order (relation-clustered, hence an easier subset with a higher baseline than the intervention tables in
 Sect.~\ref{sec:results-interventions}; the check validates scoring
 coincidence, not aggregate rates) reproduces
 first-token accuracy exactly (none 82.3\%, \spec{} 83.7\%; matching
 compares the leading word of the continuation, case- and
-punctuation-stripped, with the target---a leading-word check, not
-open-ended factual accuracy). No true/distractor pair shares a first
+punctuation-stripped, with the target; this is a leading-word check, not open-ended
+factual accuracy). No true/distractor pair shares a first
 token: the argmax-plus-gap filter would score such a pair 0 and drop it. Patching positions: the noise regime patches every non-BOS position of
 the identically-lengthened runs; the misleading regime and head-level
 patching use the last three tokens, right-aligned across runs. Noise
@@ -337,7 +335,7 @@ qualifiers, \spec{} ranks first on \emph{both} restore effect ($A$,
 top specialist regardless of which metric is used for selection
 (the overall restore leader, L25.H4, is excluded by the neutral
 criterion). spec3 takes the three highest-$A$ qualifiers (\spec{},
-L22.H0, L20.H3)---rank-based choices, no further threshold. Cross-model profile correlation
+L22.H0, L20.H3); rank-based choices, no further threshold. Cross-model profile correlation
 interpolates each model's per-layer mean-effect profile at 10 evenly
 spaced depth fractions (0.05--0.95) before Spearman ranking. Head
 rankings and Stage-4 selection use template T0; random-baseline heads
@@ -352,8 +350,7 @@ to head level over records, with bootstrap resampling at the fact
 level (positions travel with their fact). The replication models apply the same filters with a 600-fact cap
 sampled from survivor pools of 3{,}860 (Llama; 28 relations, 14/14
 dev/held-out) and 3{,}151 (Qwen; 28 relations, 14/14). All sweeps
-take the first dev cases in \texttt{case\_id} order---a fixed,
-deterministic policy, though case order can correlate with relation
+take the first dev cases in \texttt{case\_id} order, a fixed deterministic policy, though case order can correlate with relation
 blocks. All runs use a single NVIDIA L4 (24\,GB). Relation and case
 IDs per split, head lists for every configuration, MMLU question IDs,
 per-item records, analysis scripts, and exact package versions are
@@ -398,7 +395,7 @@ strong recency/copy contribution that this protocol does not isolate.
 Reference benchmarks (lm-eval-harness): MMLU 49.4\%$\pm$0.4 (full
 test set), TruthfulQA MC1/MC2 24.5\%/36.3\%~\cite{lin2022truthfulqa},
 WikiText-2 PPL 65.3; the 2{,}000-question intervention subset yields
-49.8\% (unified capability run)---subset sampling, not protocol error.
+49.8\% (unified capability run); this is subset sampling, not protocol error.
 \textbf{Precision robustness.} Repeating the LD measurements and
 top-20 head-effect ranking in float32 vs.\ bfloat16 on the same 200
 dev facts: mean $|\Delta\mathrm{LD}|$ is 0.07--0.08 logits vs.\ mean
@@ -443,8 +440,7 @@ non-BOS vs.\ last three), no matched-position control has been run,
 so the contrast is protocol-bound rather than mechanistic. Head-level
 patching then identifies a compact set: \{L22.H0 (0.26), L25.H4 (0.24),
 L20.H3 (0.15), L25.H6 (0.12)\} under noise, and \{L25.H4 (0.08), L22.H4
-(0.07), L22.H0, L20.H3\} under the misleading context---note the partial
-overlap: three of four noise-top heads reappear in the conflict ranking,
+(0.07), L22.H0, L20.H3\} under the misleading context. Note the partial overlap: three of four noise-top heads reappear in the conflict ranking,
 and \spec{} emerges only under conflict.
 
 \begin{table}[t]
@@ -487,7 +483,7 @@ $N$ divides by the clean--neutral gap (Eq.\,(\ref{eq:N}); the
 absolute value enters only the near-zero guard and magnitude reports),
 which is far smaller than $D$ (median $|$gap$|$ 0.75 vs.\ 6.7 logits;
 35\% of cases below 0.5; 5.3\% with $|$gap$|{<}10^{-6}$ set to
-$N{=}0$), so $N/A$ is not a fraction of effect retained---in raw logit units, patching L25.H4's clean value
+$N{=}0$), so $N/A$ is not a fraction of effect retained; in raw logit units, patching L25.H4's clean value
 changes the neutral run by only 0.01 logits (0.50 in the misleading
 run). Near-zero signed means are not mere cancellation: for the
 \emph{median} case the patch leaves the output logits bit-identical in
@@ -517,7 +513,7 @@ precision-sensitive, while \spec{} itself is not. Read as each head's \emph{shar
 clean--neutral gap}, L25.H4 carries the largest share under every
 denominator threshold. Among the heads checked in both precisions
 (Table~\ref{tab:neutral}), \spec{} is the only one below the working
-criterion in \emph{both}---the sole precision-robust specialist; its
+criterion in \emph{both}, the sole precision-robust specialist; its
 bootstrap CI also straddles zero most tightly. spec3 (\spec{}, L22.H0, L20.H3) is
 a bfloat16-selected exploratory configuration whose additional
 members are precision-sensitive; its behavioral results stand as
@@ -551,7 +547,7 @@ L21.H1 & $+$0.001 & $[-$0.028, $+$0.031$]$ & --- & yes/--- \\
  Fig.~\ref{fig:attention} measures, from the answer position of
 32 misleading held-out prompts (mean$\pm$SD), where each head reads
 (the first 32 held-out T0 prompts whose distractor matches exactly
-one token---targets are single words but may tokenize into several
+one token; targets are single words but may tokenize into several
 tokens, and all occurrences of the matched token are counted).
 The strongest specialist, \spec{}, concentrates $68\pm9\%$ of its
 answer-position attention on $\langle$bos$\rangle$ and a further
@@ -562,26 +558,26 @@ only $3\%$/$0.5\%$. Reading-position attention to the distractor is
 modest for every head ($2$--$11\%$ averaged over positions following
 the distractor). We note that BOS precedes the misleading context in
 the causal decoder, so BOS attention limits \emph{what the head reads}
-rather than explaining \emph{how} it conveys context information---the
+rather than explaining \emph{how} it conveys context information; the
 mechanism may operate through a query-position output fed by the BOS
 value (the write happens where the head queries, not at BOS), through
 attention reallocation, or through downstream residual-stream effects;
 separating these hypotheses remains open.
 Table~\ref{tab:heads} reports the full per-head characterization for the
 ten highest-restore heads. Two structure-level observations follow. First,
-$B>A$ for \emph{every} head tested---none behaves as a pure ``memory
+$B>A$ for \emph{every} head tested; none behaves as a pure ``memory
 carrier'' under these patching directions; all respond in both
 directions. Second, the bfloat16-selected spec3 set (\spec{}, L22.H0,
 L20.H3) combines $N\approx 0$ with
 mid-range asymmetry ($S$ 0.33--0.43), whereas heads combining large
 $|N/A|$ with higher asymmetry (L20.H7, L22.H3) sit lower in the restore
-ranking---though a large $|N/A|$ can also reflect a small $A$, so
+ranking; though a large $|N/A|$ can also reflect a small $A$, so
 this reads as an association, not a causal role claim.
 
 \begin{table}[t]
 \caption{Per-head characterization (\emodel{}, top-10 by restore effect
 $A$; $S$ = directional asymmetry index; $N/A$ = neutral ratio;
-bfloat16 values---see text for the float32 check).}
+bfloat16 values; see text for the float32 check).}
 \label{tab:heads}
 \begin{center}
 \begin{tabular}{lccccr}
@@ -659,14 +655,14 @@ sign and magnitude). For \spec{}, the paired
 fact-clustered 95\% CI of the difference is $[+5.3, +8.1]$ points of
 following removed and $[+3.7, +6.9]$ points of truth gained;
 per-relation, following falls in 11 of 15 held-out relations
-(median 4.2 points, range 0--16.7)---broad but not relation-uniform;
+(median 4.2 points, range 0--16.7); broad but not relation-uniform;
 all CIs are conditional on this fixed relation split.
 
 \textbf{How special is the specialist?} A uniformly random
 \emph{single}-head knockout reduces following for every seed tested
 (5.2--12.2\%; truth 81.9--88.3\%), and layer-matched late-layer random
 heads behave the same (9.3--10.3\%): reducing distractor-following by
-one-head $z$-knockout is \emph{not} unique to the specialist---all ten randomly drawn heads
+one-head $z$-knockout is \emph{not} unique to the specialist; all ten randomly drawn heads
 tested weaken it. With capability measured for all ten random heads
 (Table~\ref{tab:rand1}), \begin{table}[t]
 \caption{Held-out interventions (\emodel{}, misleading template T0; all
@@ -732,7 +728,7 @@ the picture is sharper: eight of the ten are
 capability-clean (MMLU retention 0.996--1.01, PPL ratio
 0.99--1.05) \emph{and} behaviorally better than \spec{}; two carry large metric-specific costs (L17.H3: MMLU retention 0.70
 with slightly \emph{improved} PPL; L5.H4: PPL ratio 2.31 at retention
-0.95)---damage in one metric need not imply damage in the other. Unprincipled single-head selection is therefore high-variance: most
+0.95); damage in one metric need not imply damage in the other. Unprincipled single-head selection is therefore high-variance: most
 draws are behaviorally effective and capability-preserving, a minority
 carry large metric-specific costs. In this experiment \spec{} falls in
 the low-cost region (retention 0.992, PPL $\times$1.05); with one
@@ -747,7 +743,7 @@ so parametric memory is intact by construction. Perturbing any
 attention head in the late layers (where our localization places the
 context-conveyance pathway) weakens the in-context signal relative to
 that intact prior, tilting the competition back toward the memorized
-answer---consistent with the uniform behavioral improvement across
+answer; consistent with the uniform behavioral improvement across
 all ten random heads and with the contrast to topnorm-5, whose
 early/mid-layer heads (L2--L16) damage the recall side instead and
 \emph{increase} following to 33.0\%.
@@ -757,10 +753,10 @@ remains 0.99--1.01 for the patching-guided configurations evaluated
 there (the random-1 summary row is excluded), and a paired
 per-question comparison for \spec{} detects no change on this subset
 (paired difference $-0.40$ points, 95\% CI $[-1.10, +0.30]$; $b{=}22$
-gained, $c{=}30$ lost; exact $p{=}0.33$)---no detected change, not
-demonstrated equivalence---whereas perplexity rises 5--20\%. Among the patching-guided configurations, the single-head specialist
-is the cheapest: a 35\% relative hallucination reduction---with an
-accuracy \emph{gain}---at MMLU retention 0.992 and a 5\% perplexity
+gained, $c{=}30$ lost; exact $p{=}0.33$); no detected change, not
+demonstrated equivalence; whereas perplexity rises 5--20\%. Among the patching-guided configurations, the single-head specialist
+is the cheapest: a 35\% relative hallucination reduction; with an
+accuracy \emph{gain}; at MMLU retention 0.992 and a 5\% perplexity
 cost.
 
 \textbf{Correct-context control.} A correct-context suite (T0
@@ -778,9 +774,9 @@ reliability) is out of scope.
 conditions on the two remaining held-out templates tests whether the
 specialist's effect depends on how the context asserts the distractor. On T2 (user-hint
 template) \spec{} again reduces following (16.6\%$\to$11.1\%) while
-raising accuracy by 3.3 points, replicating T0. On T1---the extreme
+raising accuracy by 3.3 points, replicating T0. On T1; the extreme
 adjacent-distractor template whose baseline behavior is nearly pure
-context-following (98.4\%) consistent with, though not isolated by, a recency-copying route---\spec{} reduces following from
+context-following (98.4\%) consistent with, though not isolated by, a recency-copying route; \spec{} reduces following from
 98.4\% to 89.4\% (9.0 percentage points; 9\% relative) and raises
 accuracy from 0.8\% (held-out baseline; the all-facts value in
 Table~\ref{tab:behavior} is 1.1\%) to 8.7\%, while top-5 reduces
@@ -847,8 +843,8 @@ coarse layers are 20--25 of 26 (\emodel{}), 13--15 of 16 (Llama), and
 0.81 (\emodel{} vs.\ each other model) and 1.00 (Llama vs.\ Qwen).
 Second, baseline following varies across models (6.6\% and 14.9\%,
 both below \emodel{}'s 19.3\%; the splits are relation-disjoint but not
-item-identical---each model's filter retains different facts (456/416
-vs.\ 1{,}193 held-out)---so differences mix persuadability with data
+item-identical; each model's filter retains different facts (456/416
+vs.\ 1{,}193 held-out); so differences mix persuadability with data
 composition).
 Third, and most importantly, the single-head knockout from each model's
 own dev ranking reduces distractor-following by 30\% (Llama:
@@ -857,7 +853,7 @@ $p{=}0.004$) and 50\%
 (Qwen: 14.9\%$\to$7.5\%, CI 5.0--10.1, $b{=}31$, $c{=}0$,
 $p{=}9\times10^{-10}$) with small
 accuracy changes ($-1.3$ and $+0.8$ points) and MMLU retention
-1.01/1.00---the single-head effect replicates across architectures;
+1.01/1.00; the single-head effect replicates across architectures;
 whether dev-ranked selection outperforms random single heads (as it
 does not, on average, in \emodel{}) is not established for the
 replication models, where no random baseline was run. Per-head restoration effects are smaller in the
@@ -902,9 +898,9 @@ concentrates in late-layer attention outputs at the answer position,
 and the influential heads convey the misleading context at least as
 much as they carry memory ($B>A$
 throughout). ``Restoration'' by patching therefore partly works by
-displacing a head's context conveyance rather than injecting memory---the
+displacing a head's context conveyance rather than injecting memory; the
 neutral-control analysis makes this distinction measurable at the
-level of patching effects between conditions---it does not by itself
+level of patching effects between conditions; it does not by itself
 identify the underlying pathway.
 
 \textbf{Attention-sink specialists.} The most surprising finding is the
@@ -924,7 +920,7 @@ an open question. The BOS value vector itself cannot encode the
 misleading context (which follows it in the causal mask); plausible
 routes are a query-position output bias fed by the BOS value (the
 write happens where the head queries, not at BOS), attention
-redistribution, or downstream effects---and although
+redistribution, or downstream effects; and although
 Figure~\ref{fig:attention}(b) aggregates 32 prompts, mechanism-level
 claims need larger samples. What the results do establish is that
 sink-focused heads should not be excluded from behavioral circuit
@@ -940,7 +936,7 @@ the targeted behavior.
 \textbf{Limitations and future work.} (i) English-only, greedy
 completion-style evaluation; (ii) hallucination is operationalized as
 counterfactual override, not open-ended factuality; (iii) head selection
-is causal but the circuit description is coarse---path-level analysis is
+is causal but the circuit description is coarse; path-level analysis is
 the natural next step; (iv) \emodel{} is not the newest generation
 (chosen for tooling maturity and literature comparability); newer
 families and instruction-tuned variants are future work; (v) capability
@@ -955,8 +951,8 @@ models. Late-layer localization and single-head intervention
 effectiveness replicate across all three architectures (following
 falls 30--50\% under each model's dev-ranked head); the specialist
 characterization itself is established only in \emodel{}, where
-L22.H4---the sole head passing the neutral criterion in both
-precisions---can be knocked out individually, reducing
+L22.H4; the sole head passing the neutral criterion in both
+precisions; can be knocked out individually, reducing
 distractor-following by 35\% on the standard template (9\% on the
 extreme adjacent-distractor template),
 first-token accuracy rises for \spec{} (+5.3 points; the
