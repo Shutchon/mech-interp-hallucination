@@ -1,0 +1,31 @@
+{
+ "experiment": "E4b_neutral_fp32",
+ "dtype": "float32",
+ "n_facts": 150,
+ "heads": {
+  "L22.H4": {
+   "N_signed_mean": 0.006315040296210276,
+   "mean_abs_raw_dLD_N": 0.01160112804836697,
+   "median_abs_raw_dLD_N": 0.0016689300537109375,
+   "passes_|N|<0.01": true
+  },
+  "L25.H4": {
+   "N_signed_mean": 0.04624115743835954,
+   "mean_abs_raw_dLD_N": 0.0702248912387424,
+   "median_abs_raw_dLD_N": 0.0,
+   "passes_|N|<0.01": false
+  },
+  "L22.H0": {
+   "N_signed_mean": 0.0674038070871925,
+   "mean_abs_raw_dLD_N": 0.05015055974324544,
+   "median_abs_raw_dLD_N": 0.0040740966796875,
+   "passes_|N|<0.01": false
+  },
+  "L20.H3": {
+   "N_signed_mean": 0.020274856712930025,
+   "mean_abs_raw_dLD_N": 0.05541123072306315,
+   "median_abs_raw_dLD_N": 0.007183551788330078,
+   "passes_|N|<0.01": false
+  }
+ }
+}

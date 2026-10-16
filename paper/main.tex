@@ -457,10 +457,10 @@ with $|$gap$|{<}10^{-6}$ set to $N{=}0$), so $N/A$ is not a fraction of
 effect retained---in raw logit units, patching L25.H4's clean value
 changes the neutral run by only 0.01 logits (0.50 in the misleading
 run). Near-zero signed means are not mere cancellation: for the
-\emph{median} case the patch leaves the output logits bit-identical
-(consistent with the head's $z$ coinciding between the clean and
-neutral runs; median $|\Delta\mathrm{LD}_N|{=}0$ for every top head,
-95\% bootstrap CI $=[0,0]$; verified at the logit level in bfloat16), with mean
+\emph{median} case the patch leaves the output logits bit-identical in
+bfloat16 (median $|\Delta\mathrm{LD}_N|{=}0$ for every top head,
+95\% bootstrap CI $=[0,0]$; float32 medians are 0.002--0.007 logits,
+so the exact zeros partly reflect rounding), with mean
 $|\Delta\mathrm{LD}_N|$ of 0.03--0.08 logits driven by a minority of
 cases. Two distinct thresholds are involved. \emph{Denominator}
 thresholds (0.5/1/2 logits) change the $N$ estimate itself: cases
@@ -473,7 +473,13 @@ under the working criterion $|N|{<}0.01$ but would be excluded at
 0.005. ``Specialist'' therefore means \emph{low signed-mean neutral
 effect under this control}, not absence of other functions; its
 behavioral value is established by the interventions, not the
-threshold. Read as each head's \emph{share of
+threshold. A float32 recomputation of the neutral effects (150 dev
+facts) confirms \spec{} ($N{=}0.006$, passes; mean $|\Delta\mathrm{LD}_N|$
+0.012 logits) and shows the bf16 exact-zero medians are rounding
+artifacts (fp32 medians 0.002--0.007 logits, still minuscule); the
+fp32 values for L22.H0 and L20.H3 (0.067, 0.020), however, no longer
+pass $|N|{<}0.01$, so the \emph{additional} members of spec3 are
+precision-sensitive, while \spec{} itself is not. Read as each head's \emph{share of
 the clean--neutral gap}, L25.H4 carries the largest share and keeps it
 under every threshold, whereas \spec{}, L22.H0, and L20.H3 remain at
 $N\!\approx\!0$ under every threshold tested (0.005/0.01/0.02)---
