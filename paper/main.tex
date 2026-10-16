@@ -110,8 +110,8 @@ attention patches restore more than MLP patches under our protocol
 (positions differ across corruption regimes), a protocol-bound
 contrast with the MLP-heavy picture of classical fact recall.
 \item \textbf{Characterization.} Bidirectional patching quantifies
-per-head asymmetry and separates dual-role from
-conflict-specialist heads via the neutral control.
+per-head asymmetry and separates dual-role heads from the
+conflict specialist via the neutral control.
 \item \textbf{Quantified trade-offs.} Dose--response curves for knockout
 and mean-ablation with fairness baselines: patching-guided selection
 reduces hallucination significantly (exact McNemar $p{<}10^{-6}$ for
@@ -152,7 +152,8 @@ path patching and prunes them to steer conflict resolution in either
 direction, demonstrating cross-model, cross-relation, and cross-format
 transfer~\cite{jin2024ph3}. Our work differs in what is selected and how
 the cost is measured: (i) a neutral-control analysis that separates
-conflict specialists from dual-role heads, a distinction neither method
+the conflict specialist from dual-role heads, a distinction neither
+method
 draws; (ii) single-head specialist knockout selected and evaluated under
 a relation-disjoint dev/held-out split; and (iii) explicit capability
 trade-off curves (MMLU, perplexity) reported alongside hallucination
@@ -194,8 +195,8 @@ patching rather than probes, with explicit capability trade-off curves.
 allocate disproportionate attention to initial tokens
 (``attention sinks''), which stabilize generation but are usually treated
 as functionally inert no-ops~\cite{xiao2024sinks}. Our findings complicate
-this picture: the conflict-specialist heads that dominate the CM-conflict circuit
-are BOS-sink heads that are causally \emph{active} under misleading
+this picture: the strongest conflict specialist dominating the CM-conflict circuit
+is a BOS-sink head that is causally \emph{active} under misleading
 context (Sect.~\ref{sec:results-superposition}). Separately, knowledge
 editing locates and rewrites stored facts~\cite{meng2022rome,yao2023editing};
 we instead locate components involved in \emph{context override} and
@@ -556,7 +557,8 @@ tokens, and all occurrences of the matched token are counted).
 The strongest specialist, \spec{}, concentrates $68\pm9\%$ of its
 answer-position attention on $\langle$bos$\rangle$ and a further
 $18\pm8\%$ on the token asserting the distractor ($86\%$ combined);
-the other specialists split $22$--$35\%$ BOS / $10$--$12\%$ distractor,
+the bfloat16-selected candidates split $22$--$35\%$ BOS / $10$--$12\%$
+distractor,
 whereas the dual-role heads L25.H4/L25.H6 read the distractor token
 only $3\%$/$0.5\%$. Reading-position attention to the distractor is
 modest for every head ($2$--$11\%$ averaged over positions following
@@ -910,10 +912,11 @@ neutral-control analysis makes this distinction measurable at the
 level of patching effects between conditions; it does not by itself
 identify the underlying pathway.
 
-\textbf{Attention-sink specialists.} The most surprising finding is the
+\textbf{Attention-sink specialist.} The most surprising finding is the
 identity of the strongest conflict specialist: \spec{}, whose
 answer-position attention is dominated by the beginning-of-sequence
-token ($68\pm9\%$; the other specialists show only 22--35\%). In the
+token ($68\pm9\%$; the bfloat16-selected candidates show only
+22--35\%). In the
 streaming-efficiency literature such sinks are treated as stabilizing
 but semantically inert no-ops~\cite{xiao2024sinks}. Our results show
 that a sink head can be causally significant here: \spec{} conveys the
