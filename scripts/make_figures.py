@@ -162,20 +162,21 @@ def fig5():
     sc = ax.scatter(B, A, c=na, cmap="coolwarm", vmin=-1.5, vmax=1.5, s=42,
                     edgecolors="k", lw=0.4)
     lim = max(A.max(), B.max()) * 1.22
-    ax.plot([0, lim], [0, lim], "--", c="gray", lw=0.8, label="A = B (strongly superposed)")
+    ax.plot([0, lim], [0, lim], "--", c="gray", lw=0.8)
     spec1 = next(r for r in table if r["head"] == "L22_H4")
     ax.scatter([spec1["effect_B_context_push"]], [spec1["effect_A_restore"]],
                marker="*", s=200, facecolors="none", edgecolors="#d62728", lw=1.4,
-               label="spec1 (L22.H4)", zorder=6)
+               zorder=6)
     for r in table[:3]:
-        ax.annotate(r["head"], (r["effect_B_context_push"], r["effect_A_restore"]),
-                    fontsize=7, xytext=(6, -10), textcoords="offset points")
+        name = r["head"].replace("_", ".")
+        dy = -12 if r["head"] == "L22_H4" else 5
+        ax.annotate(name, (r["effect_B_context_push"], r["effect_A_restore"]),
+                    fontsize=7, xytext=(6, dy), textcoords="offset points")
     cb = fig.colorbar(sc, ax=ax, pad=0.02)
     cb.set_label("neutral ratio N/A", fontsize=7.5)
     cb.ax.tick_params(labelsize=7)
     ax.set(xlabel="context-push effect B", ylabel="restore effect A",
            title="Dual roles of influential heads (Gemma-2-2B)")
-    ax.legend(frameon=False, loc="lower right")
     fig.tight_layout()
     fig.savefig(F / "fig5_superposition.pdf", bbox_inches="tight")
     fig.savefig(F / "fig5_superposition.png", bbox_inches="tight")
