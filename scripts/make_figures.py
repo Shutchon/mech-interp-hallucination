@@ -90,9 +90,9 @@ def fig4():
     pts += [(f"top-{k}", r1[f"top-{k}"]) for k in ("1", "2", "5", "10", "20")]
     pts += [(name, r2[name]) for name in ("spec1", "spec3", "mean2", "mean5", "meanspec3")]
     pts += [("topnorm-5", r1["topnorm-5"])]
-    pair_off = {"top-2": (-14, -3), "mean2": (7, 5),
-                "top-5": (-14, -3), "mean5": (7, 5),
-                "spec3": (-14, -3), "meanspec3": (7, 5),
+    pair_off = {"top-2": (-16, -6), "mean2": (9, 8),
+                "top-5": (-16, -6), "mean5": (9, 8),
+                "spec3": (-16, -6), "meanspec3": (9, 8),
                 "topnorm-5": (-13, -10)}
     for i, (name, r) in enumerate(pts, start=1):
         col = "#d62728" if name == "spec1" else ("#7f7f7f" if name == "topnorm-5" else "#1f77b4")
@@ -124,7 +124,7 @@ def fig4():
     ax = axes[1]
     # SAME numbers as panel (a): none=1 top-2=3 top-5=4 spec1=7 spec3=8 mean5=10
     b_pts = [("none", 1), ("top-2", 3), ("top-5", 4), ("spec1", 7), ("spec3", 8), ("mean5", 10)]
-    b_dig = {1: (4, 4), 3: (-10, -12), 4: (-4, 6), 7: (6, 4), 8: (6, -12), 10: (5, 5)}
+    b_dig = {1: (6, 6), 3: (-12, -4), 4: (-4, 10), 7: (8, -6), 8: (-2, -14), 10: (10, 8)}
     ppl = {n: randcap[n]["wiki_ppl"] / randcap["none"]["wiki_ppl"] for n, _ in b_pts}
     for name, num in b_pts:
         rate = r1.get(name) or r2.get(name)
@@ -141,8 +141,13 @@ def fig4():
             ha="right", va="bottom", linespacing=1.5)
     for i, x in enumerate(randr):
         k = ("rand-" if i < 5 else "laterand-") + x["head"].replace(".", "")
-        ax.scatter(x["follow_rate"], randcap[k]["mmlu_acc"] / randcap["none"]["mmlu_acc"],
-                   c="#2ca02c", s=22, alpha=0.85, marker="o" if i < 5 else "^")
+        ry = randcap[k]["mmlu_acc"] / randcap["none"]["mmlu_acc"]
+        ax.scatter(x["follow_rate"], ry, c="#2ca02c", s=22, alpha=0.85,
+                   marker="o" if i < 5 else "^")
+        if ry < 0.97:
+            ax.annotate(x["head"].replace("_", "."),
+                        (x["follow_rate"], ry), fontsize=6.5, color="#2ca02c",
+                        xytext=(6, -4), textcoords="offset points")
     ax.axhline(1.0, ls="--", c="gray", lw=0.8)
     ax.set(xlabel="context-following rate (hallucination)", ylabel="MMLU retention",
            title="(b) Capability cost", xlim=(0, 0.36), ylim=(0.64, 1.03))
