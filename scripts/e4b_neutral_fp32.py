@@ -49,10 +49,10 @@ def main():
             neu_p = s["prompt_shown"].replace(f["target_false"], "unknown")
             tid = int(model.to_tokens(" " + f["target_true"])[0, -1])
             did = int(model.to_tokens(" " + f["target_false"])[0, -1])
-            cln = len(model.to_tokens(s["prompt_shown"])[0])
+            cln = len(model.to_tokens(f["prompt"])[0])
             nln = len(model.to_tokens(neu_p)[0])
             _, cache = model.run_with_cache(
-                s["prompt_shown"], names_filter=lambda n: n == hook)
+                f["prompt"], names_filter=lambda n: n == hook)
             acc = []
             for k in range(3):
                 cpos, npos = cln - 3 + k, nln - 3 + k
@@ -65,7 +65,7 @@ def main():
                 acc.append(((lp[tid] - lp[did]) - (lb[tid] - lb[did])).item())
             del cache
             raws.extend(acc)
-            clean_ld = model(s["prompt_shown"])[0, -1].float()
+            clean_ld = model(f["prompt"])[0, -1].float()
             neu_ld = model(neu_p)[0, -1].float()
             D_n = (clean_ld[tid] - clean_ld[did] - (neu_ld[tid] - neu_ld[did])).item()
             if abs(D_n) < 1e-6:
