@@ -331,9 +331,13 @@ prompts); the
 mean-ablation vector is each head's mean $z$ over those prompts pooled
 across token positions, substituted at all positions during
 evaluation.
-Six of the top-10 restore heads pass $|N|{<}0.01$; \spec{} is the
-highest-$B$ qualifier, spec3 the three highest-$A$ qualifiers
-(\spec{}, L22.H0, L20.H3)---rank-based choices, no further threshold. Cross-model profile correlation
+Six of the top-10 restore heads pass $|N|{<}0.01$; among these
+qualifiers, \spec{} ranks first on \emph{both} restore effect ($A$,
+0.071) and context-push effect ($B$, 0.143), making it the unambiguous
+top specialist regardless of which metric is used for selection
+(the overall restore leader, L25.H4, is excluded by the neutral
+criterion). spec3 takes the three highest-$A$ qualifiers (\spec{},
+L22.H0, L20.H3)---rank-based choices, no further threshold. Cross-model profile correlation
 interpolates each model's per-layer mean-effect profile at 10 evenly
 spaced depth fractions (0.05--0.95) before Spearman ranking. Head
 rankings and Stage-4 selection use template T0; random-baseline heads
