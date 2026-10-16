@@ -737,6 +737,17 @@ controls this variance; the dev-side patching evidence identifies
 conflict-relevant heads, but whether such screening systematically
 yields safer heads than random draws is not established here.
 
+\textbf{Why does almost any late-layer knockout help?} The dataset is
+filtered to facts the model answers with 100\% bare-prompt accuracy,
+so parametric memory is intact by construction. Perturbing any
+attention head in the late layers (where our localization places the
+context-conveyance pathway) weakens the in-context signal relative to
+that intact prior, tilting the competition back toward the memorized
+answer---consistent with the uniform behavioral improvement across
+all ten random heads and with the contrast to topnorm-5, whose
+early/mid-layer heads (L2--L16) damage the recall side instead and
+\emph{increase} following to 33.0\%.
+
 Capability costs are dissociated (Table~\ref{tab:cap}): MMLU retention
 remains 0.99--1.01 for the patching-guided configurations evaluated
 there (the random-1 summary row is excluded), and a paired
