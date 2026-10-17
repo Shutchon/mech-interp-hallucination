@@ -518,8 +518,9 @@ denominator threshold. Among the four heads checked in both precisions
 criterion in \emph{both} by point estimate; note, however, that its
 CI $[-0.030, +0.016]$ extends beyond the $\pm$0.01 criterion, so the
 classification is operationally defined rather than an equivalence
-within the threshold (L25.H2's CI is narrower but its point estimate
-does not qualify). spec3 (\spec{}, L22.H0, L20.H3) is
+within the threshold. (L25.H2's CI $[-0.013, +0.018]$ is narrower
+and its point estimate passes in bfloat16, but it was not checked in
+float32.) spec3 (\spec{}, L22.H0, L20.H3) is
 a bfloat16-selected exploratory configuration whose additional
 members are precision-sensitive; its behavioral results stand as
 reported, without resting on the classification label.
