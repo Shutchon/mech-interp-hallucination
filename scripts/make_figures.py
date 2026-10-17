@@ -92,8 +92,8 @@ def fig4():
     pts += [("topnorm-5", r1["topnorm-5"])]
     pair_off = {"top-2": (-16, -6), "mean2": (9, 8),
                 "top-5": (-16, -6), "mean5": (9, 8),
-                "spec3": (-16, -6), "meanspec3": (9, 8),
-                "topnorm-5": (-13, -10)}
+                "spec3": (-16, -6), "meanspec3": (10, 10),
+                "none": (-4, 8), "topnorm-5": (-13, -10)}
     for i, (name, r) in enumerate(pts, start=1):
         col = "#d62728" if name == "spec1" else ("#7f7f7f" if name == "topnorm-5" else "#1f77b4")
         ax.scatter(r["follow_rate"], r["truth_rate"], c=col, s=36,
@@ -129,9 +129,12 @@ def fig4():
     for name, num in b_pts:
         rate = r1.get(name) or r2.get(name)
         y = randcap[name]["mmlu_acc"] / randcap["none"]["mmlu_acc"]
-        c = "#d62728" if name == "spec1" else "#1f77b4"
-        ax.scatter(rate["follow_rate"], y, s=36, c=c,
-                   zorder=4 if name == "spec1" else 3)
+        if name == "none":
+            ax.scatter(rate["follow_rate"], y, s=120, marker="*", c="k", zorder=5)
+        else:
+            c = "#d62728" if name == "spec1" else "#1f77b4"
+            ax.scatter(rate["follow_rate"], y, s=36, c=c,
+                       zorder=4 if name == "spec1" else 3)
         ax.annotate(str(num), (rate["follow_rate"], y), fontsize=7,
                     fontweight="bold", xytext=b_dig[num], textcoords="offset points",
                     bbox=dict(boxstyle="round,pad=0.15", fc="white", ec="none", alpha=0.85),
