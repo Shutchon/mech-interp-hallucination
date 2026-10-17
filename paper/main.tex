@@ -954,7 +954,16 @@ the natural next step; (iv) \emodel{} is not the newest generation
 (chosen for tooling maturity and literature comparability); newer
 families and instruction-tuned variants are future work; (v) capability
 is proxied by MMLU/PPL subsets; (vi) the Stage-4 specialist taxonomy ran
-only for \emodel{}, and entity-popularity effects remain open.
+only for \emodel{}, and entity-popularity effects remain open; (vii)
+noise and misleading regimes are patched at different positions, so a
+matched-position control is needed before the attention-vs-MLP contrast
+can be read mechanistically; (viii) all results use a single fixed
+relation split with CIs conditional on it; re-splitting and
+relation-level hierarchical bootstrap would test generality; (ix) the
+selection procedure was evaluated on one split with one selected head;
+multi-split comparisons of selection vs random draw are needed to
+determine whether causal screening systematically reduces capability
+risk.
 
 \section{Conclusion}
 \label{sec:conclusion}
