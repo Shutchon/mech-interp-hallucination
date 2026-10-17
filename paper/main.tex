@@ -151,10 +151,11 @@ conflicts~\cite{li2025juice}; PH3 identifies memory and context heads by
 path patching and prunes them to steer conflict resolution in either
 direction, demonstrating cross-model, cross-relation, and cross-format
 transfer~\cite{jin2024ph3}. Our work differs in what is selected and how
-the cost is measured: (i) a neutral-control analysis that separates
-the conflict specialist from dual-role heads, a distinction neither
-method
-draws; (ii) single-head specialist knockout selected and evaluated under
+the cost is measured: (i) a neutral-control analysis that distinguishes (at the level of
+patching effects) a head selected by the neutral-effect criterion from
+dual-role heads, a distinction neither method draws; (ii) single-head
+knockout of the operationally defined specialist, selected and
+evaluated under
 a relation-disjoint dev/held-out split; and (iii) explicit capability
 trade-off curves (MMLU, perplexity) reported alongside hallucination
 metrics, which, to our knowledge, neither study reports. Our top-$k$ knockout is
@@ -479,8 +480,9 @@ L20 MLP       & 0.058 & $\le$0.01 \\
 Bidirectional patching (Fig.~\ref{fig:superposition}) shows every
 influential head conveys the context more strongly than it restores the
 memory ($B>A$; $S$ 0.21--0.62), consistent with head-level
-superposition~\cite{li2025juice}. The neutral
-control separates two populations, subject to a normalization caveat.
+superposition~\cite{li2025juice}. Under the neutral control, heads can be grouped by the neutral-effect
+criterion defined below (subject to a normalization caveat); this is an
+operational grouping, not a statistically demonstrated separation.
 $N$ divides by the clean--neutral gap (Eq.\,(\ref{eq:N}); the
 absolute value enters only the near-zero guard and magnitude reports),
 which is far smaller than $D$ (median $|$gap$|$ 0.75 vs.\ 6.7 logits;
