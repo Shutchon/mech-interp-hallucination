@@ -1,0 +1,71 @@
+\documentclass[11pt]{letter}
+\usepackage[margin=1in]{geometry}
+\usepackage{times}
+
+\begin{document}
+
+\begin{letter}{%
+Editor-in-Chief\\
+IEICE Transactions on Information and Systems
+}
+
+\opening{Dear Editor-in-Chief,}
+
+I am submitting the enclosed manuscript, ``Locating and Mitigating
+Factual Hallucination Circuits in Small Language Models via Activation
+Patching,'' for consideration as a Regular Paper in the IEICE
+Transactions on Information and Systems.
+
+This work presents a systematic activation-patching study of
+context--memory conflict in three small language models: Gemma-2-2B,
+Llama-3.2-1B, and Qwen2.5-1.5B. The main contributions are:
+
+\begin{enumerate}
+\item \textbf{Causal localization.} A coarse-to-fine patching map
+shows that restoration effects concentrate in late-layer attention
+outputs at the answer position, replicating across all three
+architectures (Spearman 0.81--1.00).
+
+\item \textbf{Head characterization.} Bidirectional patching with a
+neutral-control analysis identifies a single specialist head
+(L22.H4) whose neutral effect is minimal in both bfloat16 and
+float32, and separates it from dual-role heads and from a
+bfloat16-selected exploratory set.
+
+\item \textbf{Quantified intervention trade-offs.} Single-head
+knockout of the specialist reduces distractor-following by 35\%
+while increasing first-token accuracy by 5.3 points, at MMLU
+retention 0.992 and a 5\% perplexity cost. All results are
+evaluated on held-out relations, with fact-clustered bootstrap CIs
+and exact McNemar tests.
+
+\item \textbf{Transparent baselines.} Eight of ten random
+single-head knockouts outperform the specialist behaviorally at
+comparable capability cost; two carry severe metric-specific costs.
+The manuscript reports this openly rather than claiming superiority
+of the selection procedure.
+\end{enumerate}
+
+All experimental data, analysis scripts, and per-item records are
+publicly available on OSF (DOI: 10.17605/OSF.IO/53MYH). The
+supplementary material accompanying this submission contains the
+complete dataset, head lists, split assignments, and environment
+details for reproduction.
+
+I confirm that this manuscript is original, has not been published
+previously, and is not under consideration by any other journal. I
+have no conflicts of interest to disclose.
+
+Thank you for your consideration.
+
+\closing{Sincerely,\\[12pt]
+Shutchon Premchaisawatt\\
+Assistant Professor\\
+Department of Industrial Technology, Faculty of Technical Education\\
+Rajamangala University of Technology Isan, Khon Kaen Campus\\
+Khon Kaen 40000, Thailand\\
+E-mail: shutchon.pr@rmuti.ac.th\\
+IEICE Membership No.: 92617430}
+
+\end{letter}
+\end{document}
