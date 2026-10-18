@@ -124,7 +124,7 @@ def fig4():
     ax = axes[1]
     # SAME numbers as panel (a): none=1 top-2=3 top-5=4 spec1=7 spec3=8 mean5=10
     b_pts = [("none", 1), ("top-2", 3), ("top-5", 4), ("spec1", 7), ("spec3", 8), ("mean5", 10)]
-    b_dig = {1: (6, 6), 3: (-12, -4), 4: (-4, 10), 7: (8, -6), 8: (-2, -14), 10: (10, 8)}
+    b_dig = {1: (6, 6), 3: (-12, -4), 4: (-4, 4), 7: (8, -6), 8: (-2, -14), 10: (10, 2)}
     ppl = {n: randcap[n]["wiki_ppl"] / randcap["none"]["wiki_ppl"] for n, _ in b_pts}
     for name, num in b_pts:
         rate = r1.get(name) or r2.get(name)
