@@ -357,10 +357,11 @@ take the first dev cases in \texttt{case\_id} order, a fixed deterministic polic
 blocks. All runs use a single NVIDIA L4 (24\,GB). Relation and case
 IDs per split, head lists for every configuration, MMLU question IDs,
 per-item records, analysis scripts, and exact package versions are
-provided in the supplementary material archived with this submission.
-Models use
-HuggingFace checkpoints \texttt{google/gemma-2-2b},
-\texttt{meta-llama/Llama-3.2-1B}, \texttt{Qwen/Qwen2.5-1.5B}
+publicly available on OSF at \texttt{https://osf.io/53myh/}
+(DOI: 10.17605/OSF.IO/53MYH) and archived with this submission.
+Models use HuggingFace checkpoints
+\texttt{google/gemma-2-2b}, \texttt{meta-\allowbreak llama/\allowbreak Llama-3.2-1B},
+\texttt{Qwen/Qwen2.5-1.5B}
 (base, not instruct-tuned) loaded in bfloat16 via TransformerLens~2.18
 with \texttt{center\_unembed=False}, \texttt{fold\_ln=False}.
 Head ablation zeroes the head's $z$-vector at \emph{all} token
@@ -989,9 +990,8 @@ relations (CIs are conditional on this fixed split),
 and the core findings (late-layer concentration, single-head
 intervention effectiveness) replicated across three architectures.
 Split IDs, head lists, per-item records, analysis scripts, and
-environment details accompany this submission as supplementary
-material; the full experimental codebase will be released publicly
-upon publication.
+environment details are publicly available on OSF at
+\texttt{https://osf.io/53myh/} (DOI: 10.17605/OSF.IO/53MYH).
 
 \section*{Acknowledgment}
 This research project is supported by Science Research and Innovation
