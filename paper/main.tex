@@ -38,9 +38,9 @@ Qwen2.5-1.5B with 600 facts each), each filtered to facts the model demonstrably
 Restoration effects concentrate in the final quarter of the network
 (pairwise Spearman correlation of layer profiles 0.81--1.00), dominated
 by a small set of late-layer attention heads. Bidirectional patching shows that influential heads act in
-both patching directions (head-level superposition) and separates
-dual-role heads from the specialist head whose neutral-control
-effect is minimal. In \emodel{}, knocking out that specialist, L22.H4
+both patching directions (head-level superposition) and identifies,
+via the neutral control, a head meeting the operational neutral-effect
+criterion (the specialist). In \emodel{}, knocking out that specialist, L22.H4
 (the only head, of the four checked in both bfloat16 and float32,
 passing the neutral criterion), reduces
 misleading-context distractor-following by 35\% relative (exact McNemar
@@ -111,8 +111,8 @@ attention patches restore more than MLP patches under our protocol
 (positions differ across corruption regimes), a protocol-bound
 contrast with the MLP-heavy picture of classical fact recall.
 \item \textbf{Characterization.} Bidirectional patching quantifies
-per-head asymmetry and separates dual-role heads from the
-conflict specialist via the neutral control.
+per-head asymmetry and identifies a head meeting the operational
+neutral-effect criterion (the conflict specialist).
 \item \textbf{Quantified trade-offs.} Dose--response curves for knockout
 and mean-ablation with fairness baselines: patching-guided selection
 reduces hallucination significantly (exact McNemar $p{<}10^{-6}$ for
