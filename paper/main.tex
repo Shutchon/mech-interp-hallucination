@@ -6,6 +6,7 @@
 \usepackage{newtxtext}
 \usepackage[varg]{newtxmath}
 \usepackage{booktabs}
+\usepackage{url}
 
 \setcounter{page}{1}
 
@@ -360,10 +361,12 @@ per-item records, analysis scripts, and exact package versions are
 publicly available on OSF at \texttt{https://osf.io/53myh/}
 (DOI: 10.17605/OSF.IO/53MYH) and archived with this submission.
 Models use HuggingFace checkpoints
-\texttt{google/gemma-2-2b}, \texttt{meta-\allowbreak llama/\allowbreak Llama-3.2-1B},
-\texttt{Qwen/Qwen2.5-1.5B}
-(base, not instruct-tuned) loaded in bfloat16 via TransformerLens~2.18
-with \texttt{center\_unembed=False}, \texttt{fold\_ln=False}.
+\texttt{google/gemma-2-2b},
+\texttt{meta-llama/Llama-3.2-1B},
+and \texttt{Qwen/Qwen2.5-1.5B}
+(base, not instruct-tuned), loaded in bfloat16 via TransformerLens~2.18
+(with \texttt{center\_unembed=False},
+\texttt{fold\_ln=False}).
 Head ablation zeroes the head's $z$-vector at \emph{all} token
 positions. MMLU uses the \texttt{cais/mmlu} ``all'' test split, a fixed
 2{,}000-question subset (seed~0), 0-shot lm-eval format (subject
